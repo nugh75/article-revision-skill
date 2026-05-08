@@ -107,6 +107,34 @@ The first call walks through bootstrap; subsequent calls jump straight to the re
 
 ---
 
+## Multi-tool support
+
+The skill works natively with **Claude Code** through `SKILL.md` (auto-discovered in `.claude/skills/`).
+
+For other agents, two equivalent entry-point files describe the same workflow:
+
+- `AGENTS.md` — cross-tool standard, read by Claude Code, opencode, OpenAI Codex CLI, Aider, Cline, and most agentic tools.
+- `OPENCODE.md` — opencode-specific (legacy convention), kept in sync with `AGENTS.md`.
+
+To activate the skill in a project that uses opencode or codex, symlink (or copy) the relevant file to the project root:
+
+```bash
+# from the consuming project root
+ln -s .claude/skills/article-revision/AGENTS.md   AGENTS.md
+ln -s .claude/skills/article-revision/OPENCODE.md OPENCODE.md
+```
+
+If the project already has an `AGENTS.md` / `OPENCODE.md`, merge by appending a single line that delegates to the skill:
+
+```markdown
+## article-revision
+See .claude/skills/article-revision/AGENTS.md for the full workflow.
+```
+
+Both files reference the same `workflow/` and `scripts/`; the experience is identical across agents.
+
+---
+
 ## Companion skills
 
 `article-revision` is the **orchestration layer**. Two existing companion skills cover deeper concerns:
