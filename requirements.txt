@@ -1,0 +1,9 @@
+# Dependencies for article-revision skill scripts
+# Install with: pip install -r requirements.txt
+
+openpyxl>=3.1          # xlsx parsing for sample_stats.py
+pandas>=2.0            # data manipulation for sample_stats.py
+requests>=2.31         # HTTP for bib_verify_online.py
+python-dotenv>=1.0     # .env loading
+pybtex>=0.24           # .bib parsing for bib_check.py
+langdetect>=1.0.9      # optional fallback for language detection
