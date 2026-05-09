@@ -14,17 +14,17 @@ For each reviewer point (or arbitrary revision request) the skill:
 
 1. Loads the relevant section of the article, the bibliography, and the journal's editorial norms.
 2. Generates a **proposal** that respects the norms and the article's style.
-3. Shows in chat a fixed block: *Originale + Proposta + Δ chars/words + Norme rispettate + Decisione*.
-4. Waits for `Accetta / Rifiuta / Modifica`.
+3. Shows in chat a fixed block: *Original + Proposal + Δ chars/words + Norms respected + Decision*.
+4. Waits for `Accept / Reject / Modify`.
 5. On accept: applies the diff, updates the *project file* (the persistent revision plan), bumps a counter.
-6. After N accepted changes, **proposes** (never forces) a versioned snapshot of the article: `<prefix>-v(N+1)-YYYY-MM-DD-HHMM[-anonima].md`.
+6. After N accepted changes, **proposes** (never forces) a versioned snapshot of the article: `<prefix>-v(N+1)-YYYY-MM-DD-HHMM[-anonymous].md`.
 
 It also handles:
 
 - **Bibliography verification** against Crossref + OpenAlex (catching fictitious or wrong references).
 - **Sample-description statistics** generated from `.xlsx`/`.csv` data sources.
 - **Granularity**: revisions can target a single sentence, a paragraph, or the whole article.
-- **Auto language detection** (it/en) — adapts the proposal style accordingly. Italian articles get an anglicism whitelist.
+- **Auto language detection** (it/en) — adapts the proposal style accordingly. Workflow docs stay in English; article proposals are written in the article language.
 
 ---
 
@@ -59,17 +59,17 @@ session memory as `PYTHON_BIN`. It never falls back to `python3` silently.
 <project-root>/
 ├── .env                              # editorial limits, paths, Zotero, etc.
 ├── .claude/skills/article-revision/  # this skill
-├── articoli/                         # or another path; auto-detected
-│   └── articolo-vN-YYYY-MM-DD[-anonima].md
-├── bibliografia/
+├── articles/                         # or another path; auto-detected
+│   └── article-vN-YYYY-MM-DD[-anonymous].md
+├── bibliography/
 │   └── reference.bib
-├── norme-redazionali/
-│   └── norme-<journal>.md
-├── dati/                             # optional: sample-description sources
-└── revisioni/
+├── editorial-norms/
+│   └── norms-<journal>.md
+├── data/                             # optional: sample-description sources
+└── revisions/
     └── <reviewer-slug>/
-        ├── progetto-revisione-vN.md
-        └── scheda-revisione-vN.md
+        ├── revision-plan-vN.md
+        └── final-sheet-vN.md
 ```
 
 If anything is missing the skill's bootstrap step (`workflow/00-bootstrap.md`) walks the user through creating it. Nothing is created silently.
@@ -104,9 +104,9 @@ In Claude Code, invoke the skill explicitly or let it auto-trigger:
 
 Or implicitly:
 
-> *"Applichiamo i commenti di Elisa all'articolo."*
-> *"Rivediamo il paragrafo 3."*
-> *"Crea la versione 10 del file."*
+> *"Apply Elisa's comments to the article."*
+> *"Revise paragraph 3."*
+> *"Create version 10 of the file."*
 
 The first call walks through bootstrap; subsequent calls jump straight to the relevant workflow step.
 
@@ -193,7 +193,7 @@ content and enforce these layout rules:
 - Do not add blank paragraphs between body paragraphs.
 - Use style spacing before/after headings to create margins between headings and body text.
 - Avoid manual blank lines during `.docx` ↔ Markdown conversion.
-- Treat formatting changes as revision points that still require `Accetta / Rifiuta / Modifica`.
+- Treat formatting changes as revision points that still require `Accept / Reject / Modify`.
 
 ---
 
@@ -201,11 +201,11 @@ content and enforce these layout rules:
 
 | File | Used for |
 |---|---|
-| `templates/progetto-revisione.md` | Per-reviewer planning document |
-| `templates/scheda-revisione.md` | End-of-round status sheet |
-| `templates/audit-bibliografia.md` | Bibliography online-verification report |
-| `templates/stat-campione.md` | Sample-description output |
-| `templates/anglicismi-accettati-it.md` | Whitelist of accepted English terms in Italian prose |
+| `templates/revision-plan.md` | Per-reviewer planning document |
+| `templates/final-sheet.md` | End-of-round status sheet |
+| `templates/bibliography-audit.md` | Bibliography online-verification report |
+| `templates/sample-stats.md` | Sample-description output |
+| `templates/accepted-anglicisms-it.md` | Whitelist of accepted English terms in Italian prose |
 
 ---
 
@@ -213,8 +213,8 @@ content and enforce these layout rules:
 
 - **User controls git.** The skill never commits, never stages, never pushes. It writes files; you commit.
 - **Always ask before creating.** Bootstrap, version bump, file generation — every write step asks for confirmation when ambiguous.
-- **Per-point granularity.** No mass replacements, no batched approvals. Every individual change goes through *Accetta / Rifiuta / Modifica*.
-- **State lives in markdown.** The project file and the scheda are the source of truth; sessions resume cleanly after interruption.
+- **Per-point granularity.** No mass replacements, no batched approvals. Every individual change goes through *Accept / Reject / Modify*.
+- **State lives in markdown.** The project file and final sheet are the source of truth; sessions resume cleanly after interruption.
 - **Surgical edits only.** Touch what the reviewer's point requires, nothing more.
 
 ---

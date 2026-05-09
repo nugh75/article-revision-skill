@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
-# Bump article version: copy `articolo-vN-...md`
-# into `articolo-v(N+1)-YYYY-MM-DD-HHMM[-anonima].md`.
+# Bump article version: copy `article-vN-...md`
+# into `article-v(N+1)-YYYY-MM-DD-HHMM[-anonymous].md`.
 #
 # Accepts source filenames in either of these formats:
-#   articolo-vN-YYYY-MM-DD.md
-#   articolo-vN-YYYY-MM-DD-HHMM.md
-# (plus the optional `-anonima` suffix).
+#   article-vN-YYYY-MM-DD.md
+#   article-vN-YYYY-MM-DD-HHMM.md
+# (plus the optional `-anonymous` suffix).
 #
 # Usage:
-#     new_version.sh <path/to/articolo-vN-...md>
+#     new_version.sh <path/to/article-vN-...md>
 #     new_version.sh                                  # auto-find latest
-#     new_version.sh --articles-dir articoli/
+#     new_version.sh --articles-dir articles/
 
 set -euo pipefail
 
@@ -50,17 +50,17 @@ BASENAME=$(basename "$SRC")
 DIRNAME=$(dirname "$SRC")
 
 # Extract version number and the static prefix.
-# Pattern: <prefix>-vN-YYYY-MM-DD[-HHMM][-anonima].md
+# Pattern: <prefix>-vN-YYYY-MM-DD[-HHMM][-anonymous].md
 # Examples:
-#   articolo-v9-2026-05-08.md
-#   articolo-scientifico-praxis-v9-2026-05-08-anonima.md
+#   article-v9-2026-05-08.md
+#   scientific-article-praxis-v9-2026-05-08-anonymous.md
 #   draft-v3-2026-05-08-1430.md
-if [[ "$BASENAME" =~ ^(.+)-v([0-9]+)-[0-9]{4}-[0-9]{2}-[0-9]{2}(-[0-9]{4})?(-anonima)?\.md$ ]]; then
+if [[ "$BASENAME" =~ ^(.+)-v([0-9]+)-[0-9]{4}-[0-9]{2}-[0-9]{2}(-[0-9]{4})?(-anonymous)?\.md$ ]]; then
     PREFIX="${BASH_REMATCH[1]}"
     VERSION="${BASH_REMATCH[2]}"
     SUFFIX="${BASH_REMATCH[4]:-}"
 else
-    echo "ERROR: filename doesn't match <prefix>-vN-YYYY-MM-DD[-HHMM][-anonima].md: $BASENAME" >&2
+    echo "ERROR: filename doesn't match <prefix>-vN-YYYY-MM-DD[-HHMM][-anonymous].md: $BASENAME" >&2
     exit 2
 fi
 

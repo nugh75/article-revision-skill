@@ -3,9 +3,9 @@
 
 Examples:
     char_count.py article.md
-    char_count.py article.md --exclude bibliografia,glossario,appendici
+    char_count.py article.md --exclude bibliography,glossary,appendices
     char_count.py article.md --limit-from-env
-    char_count.py article.md --section "## 1 – Introduzione"
+    char_count.py article.md --section "## 1 – Introduction"
 """
 from __future__ import annotations
 

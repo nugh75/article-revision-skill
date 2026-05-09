@@ -1,32 +1,32 @@
-# 50 — Sample description
+# 50 — Sample Description
 
-Triggered when a revision point in the methodology asks to describe the sample with sociodemographic statistics, and raw data is available in `dati/`.
+Triggered when a methodology revision point asks to describe the sample with sociodemographic statistics and raw data is available in `data/`.
 
-## 1. Identify data sources
+## 1. Identify Data Sources
 
-Ask the user (or detect from `dati/`):
+Ask the user, or detect from `data/`:
 
-- Which files contain the data? (`*.xlsx`, `*.csv`)
-- Which sheets, if Excel.
-- Which column holds the cohort indicator.
-- Which columns hold age, gender, and any cohort-specific variable (school order, program area, …).
+- Which files contain the data (`*.xlsx`, `*.csv`)?
+- Which sheets, if Excel?
+- Which column holds the cohort indicator?
+- Which columns hold age, gender, and any cohort-specific variable (school order, program area, etc.)?
 
-## 2. Build the YAML mapping
+## 2. Build YAML Mapping
 
-Write `dati/sample-mapping.yaml` (or similar) following the schema in `scripts/sample_stats.py` docstring. Example:
+Write `data/sample-mapping.yaml` or similar, following the schema in `scripts/sample_stats.py` docstring. Example:
 
 ```yaml
 sources:
-  - file: "Insegnati - Questionario.xlsx"
-    sheet: "Risposte del modulo 1"
+  - file: "Teachers - Questionnaire.xlsx"
+    sheet: "Form responses 1"
     cohort_column: 3
     cohorts:
       "in-service":
-        match: "Attualmente insegno."
-        label: "Insegnanti in servizio"
+        match: "I am currently teaching."
+        label: "In-service teachers"
       "pre-service":
-        match: "PEF"
-        label: "Insegnanti in formazione"
+        match: "teacher education program"
+        label: "Pre-service teachers"
     variables:
       age: 4
       gender: 5
@@ -35,43 +35,39 @@ sources:
 
 Show the mapping to the user before running:
 
-```
-Mapping costruito (`dati/sample-mapping.yaml`):
-- 2 sorgenti
-- 4 coorti totali
-- variabili: età, genere, ordine
+```text
+Mapping built (`data/sample-mapping.yaml`):
+- 2 sources
+- 4 total cohorts
+- variables: age, gender, school order
 
-Procedo con il calcolo? (sì / modifica mapping)
-```
-
-## 3. Compute stats
-
-```
-scripts/sample_stats.py dati/sample-mapping.yaml --output revisioni/<slug>/stat-campione.md
+Proceed with the calculation? (yes / modify mapping)
 ```
 
-Open the output and present a one-shot summary in chat (table view).
+## 3. Compute Stats
 
-## 4. Generate the methodology paragraph
-
-Convert the stats into prose suitable for the article, in `ARTICLE_LANG`. Use this skeleton (it):
-
-```
-Gli **<coorte>** (n=<N>; età media <M> anni, range <min>–<max>; F <F>%, M <M>%, altro/nd <X>%) <descrizione qualitativa coorte>. <distribuzione interna se rilevante>.
+```bash
+scripts/sample_stats.py data/sample-mapping.yaml --output revisions/<slug>/sample-stats.md
 ```
 
-Or (en):
+Open the output and present a one-shot summary in chat as a table.
 
-```
+## 4. Generate Methodology Paragraph
+
+Convert the stats into prose suitable for the article, in `ARTICLE_LANG`. Use this skeleton for English:
+
+```text
 **<cohort>** (n=<N>; mean age <M> years, range <min>–<max>; F <F>%, M <M>%, other/nd <X>%) <qualitative description>. <internal distribution if relevant>.
 ```
 
-## 5. Present as a normal revision point
+For Italian articles, translate the prose to formal academic Italian while keeping the workflow labels in English.
 
-Hand the proposal back to `30-iterate-points.md` in the standard `Originale / Proposta / Decisione` shape. The user accepts, rejects or modifies as usual.
+## 5. Present As Normal Revision Point
+
+Hand the proposal back to `30-iterate-points.md` in the standard `Original / Proposal / Decision` shape. The user accepts, rejects, or modifies as usual.
 
 ## 6. Notes
 
-- Variables collected but not used as analytical variables in a qualitative design must be flagged: *"Le variabili socio-demografiche non sono state usate come variabili di analisi nel disegno qualitativo, ma orientano l'interpretazione in sede di discussione."* (it) — adjust phrasing in en.
+- Variables collected but not used as analytical variables in a qualitative design must be flagged in `ARTICLE_LANG`, for example: `Sociodemographic variables were not used as analytical variables in the qualitative design, but they support interpretation in the discussion.`
 - Never invent statistics. If `n < 30` or `response rate < 90%` for a variable, make this explicit.
-- If the user asks for a table instead of prose, use the format in `templates/stat-campione.md` directly.
+- If the user asks for a table instead of prose, use the format in `templates/sample-stats.md` directly.

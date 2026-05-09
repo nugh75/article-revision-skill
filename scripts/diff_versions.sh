@@ -2,8 +2,8 @@
 # Word-level diff between two article versions, summarized by section.
 #
 # Usage:
-#     diff_versions.sh path/to/articolo-vN.md path/to/articolo-v(N+1).md
-#     diff_versions.sh --auto path/to/articolo-v(N+1).md   # picks vN automatically
+#     diff_versions.sh path/to/article-vN.md path/to/article-v(N+1).md
+#     diff_versions.sh --auto path/to/article-v(N+1).md   # picks vN automatically
 
 set -euo pipefail
 
@@ -21,14 +21,15 @@ if [[ $AUTO -eq 1 ]]; then
     NEW="${1:-}"
     [[ -z "$NEW" ]] && { echo "ERROR: pass new version path with --auto" >&2; exit 2; }
     BASENAME=$(basename "$NEW")
-    if [[ "$BASENAME" =~ ^articolo-v([0-9]+)- ]]; then
-        N=${BASH_REMATCH[1]}
+    if [[ "$BASENAME" =~ ^(.+)-v([0-9]+)- ]]; then
+        PREFIX=${BASH_REMATCH[1]}
+        N=${BASH_REMATCH[2]}
     else
         echo "ERROR: cannot parse version from $BASENAME" >&2; exit 2
     fi
     PREV_N=$((N - 1))
     DIR=$(dirname "$NEW")
-    OLD=$(find "$DIR" -maxdepth 1 -name "articolo-v${PREV_N}-*.md" | head -1)
+    OLD=$(find "$DIR" -maxdepth 1 -name "${PREFIX}-v${PREV_N}-*.md" | head -1)
     [[ -z "$OLD" ]] && { echo "ERROR: previous version v${PREV_N} not found in $DIR" >&2; exit 2; }
 else
     OLD="${1:-}"; NEW="${2:-}"

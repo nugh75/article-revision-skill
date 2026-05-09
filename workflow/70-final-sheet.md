@@ -1,77 +1,77 @@
-# 70 — Final sheet
+# 70 — Final Sheet
 
-Generates `revisioni/<slug>/scheda-revisione-vN.md` summarizing the round's outcome.
+Generates `revisions/<slug>/final-sheet-vN.md`, summarizing the round's outcome.
 
-## 1. Source material
+## 1. Source Material
 
 Read:
 
-- the project file (`progetto-revisione-vN.md`) to extract decisions per point;
-- `git log` filtered to commits matching `revision(<slug>):` since the start of the round;
-- `audit-bibliografia-vN.md` if any bib check happened;
+- the project file (`revision-plan-vN.md`) to extract decisions per point;
+- `git log` filtered to commits matching `revision(<slug>):` since the start of the round, if commits exist;
+- `bibliography-audit-vN.md` if any bibliography check happened;
 - the current char/word count.
 
-## 2. Fill the template
+## 2. Fill Template
 
-Use `templates/scheda-revisione.md` and substitute placeholders. The summary table at the top should report, per point:
+Use `templates/final-sheet.md` and substitute placeholders. The summary table at the top should report, per point:
 
-| Stato | Significato |
+| Status | Meaning |
 |---|---|
-| ✅ Accettato | proposta applicata |
-| 🔄 Modificato | proposta riformulata e poi applicata |
-| ❌ Scartato | nessuna modifica al testo |
-| ⏸️ Rimandato | richiede dato esterno o decisione successiva |
+| Accepted | Proposal applied |
+| Modified | Proposal reformulated and then applied |
+| Rejected | No text modification |
+| Deferred | Requires external data or a later decision |
 
-## 3. Recovery suggestions
+## 3. Recovery Suggestions
 
-If the article is over the editorial limit, populate the *"Recuperi pendenti"* section with concrete suggestions (e.g. duplicate prose, redundant section openings). Run:
+If the article is over the editorial limit, populate the *Pending recoveries* section with concrete suggestions, such as duplicate prose or redundant section openings. Run:
 
-```
+```bash
 scripts/char_count.py <article> --limit-from-env
 ```
 
-and propose 3–5 candidate cuts with estimated savings.
+Then propose 3–5 candidate cuts with estimated savings.
 
-## 4. Outstanding tasks
+## 4. Outstanding Tasks
 
-In the *"Punti residui prima del submit"* checklist, list:
+In the *Outstanding tasks before submission* checklist, list:
 
-- entries `Rimandato` from the project file;
-- bibliography entries still flagged (from the audit);
-- char overshoot to recover;
-- anonymisation pass (if `-anonima` suffix is present and there are remaining `XXX` placeholders the user wants resolved before submission);
-- any external check the user mentioned (e.g. *"GPT-5 model name to verify"*).
+- `Deferred` entries from the project file;
+- bibliography entries still flagged from the audit;
+- character overshoot to recover;
+- anonymisation pass, if `-anonymous` suffix is present and there are remaining placeholders the user wants resolved before submission;
+- any external check the user mentioned.
 
-## 5. Cronologia
+## 5. Change History
 
-Pull from `git log`:
+Pull from `git log` if commits exist:
 
-```
+```bash
 git log --oneline --grep "revision(<slug>):" --since "<date round started>"
 ```
 
-Format as bulleted list under the *"Cronologia interventi"* heading.
+Format as a bulleted list under the *Change history* heading.
 
-## 6. Suggested commit
+## 6. Suggested Commit
 
-The skill writes the scheda but **does not commit**. Suggested commit message for the user:
+The skill writes the final sheet but **does not commit**. Suggested commit message for the user:
 
+```text
+revision(<slug>): final sheet — round closed
 ```
-revision(<slug>): scheda finale — round closed
-```
 
-## 7. Hand off
+## 7. Hand Off
 
 Final chat message:
 
-```
-✅ Scheda finale: revisioni/<slug>/scheda-revisione-vN.md
+```text
+Final sheet: revisions/<slug>/final-sheet-vN.md
 
-Round chiuso. Sintesi:
-- <X> punti accettati, <Y> modificati, <Z> scartati, <W> rimandati
-- conteggio: <M> {chars|words} (<over|under> di <N>)
-- bibliografia: <stato>
-- task residui: <lista breve>
+Round closed. Summary:
+- <X> accepted, <Y> modified, <Z> rejected, <W> deferred
+- count: <M> {chars|words} (<over|under> by <N>)
+- bibliography: <status>
+- outstanding tasks: <short list>
 ```
 
-The skill ends here. The next round will start a new project file with version vN+1 (or the same N+1 if the user prefers continuing).
+The skill ends here. The next round starts a new project file with version vN+1, or the same N+1 if the user prefers continuing.

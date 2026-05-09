@@ -8,37 +8,37 @@ Outputs a markdown summary table + per-cohort detail.
 Example mapping (mapping.yaml):
 
     sources:
-      - file: "Insegnati.xlsx"
-        sheet: "Risposte del modulo 1"
+      - file: "Teachers.xlsx"
+        sheet: "Form responses 1"
         cohort_column: 3
         cohorts:
           "in-service":
-            match: "Attualmente insegno."
-            label: "Insegnanti in servizio"
+            match: "I currently teach."
+            label: "In-service teachers"
           "pre-service":
             match: "PEF"
-            label: "Insegnanti in formazione"
+            label: "Pre-service teachers"
         variables:
           age: 4
           gender: 5
           order: 7
-      - file: "Studenti.xlsx"
-        sheet: "Risposte del modulo 1"
+      - file: "Students.xlsx"
+        sheet: "Form responses 1"
         cohort_column: 5
         cohorts:
           "univ":
-            match_any: ["Università - magistrale", "Università triennale"]
-            label: "Studenti universitari"
+            match_any: ["University - master's", "University - bachelor's"]
+            label: "University students"
           "sec_ii":
-            match: "Secondaria di secondo grado"
-            label: "Studenti scuola secondaria"
+            match: "Upper-secondary school"
+            label: "Upper-secondary students"
         variables:
           age: 3
           gender: 4
           program: 7
 
 Examples:
-    sample_stats.py mapping.yaml --output stat-campione.md
+    sample_stats.py mapping.yaml --output sample-stats.md
 """
 from __future__ import annotations
 
@@ -119,11 +119,11 @@ def categorical_dist(values: list, top_n: int = 8) -> dict:
 
 def render_md(all_results: list[dict], mapping_path: Path) -> str:
     lines = [
-        f"# Statistiche campione (auto)\n",
+        f"# Sample Statistics (auto)\n",
         f"- Mapping: `{mapping_path}`\n",
-        f"- Coorti: {len(all_results)}\n\n",
-        "## Tabella riassuntiva\n\n",
-        "| Coorte | n | Età: media (range) | Genere F / M / altro-nd |\n",
+        f"- Cohorts: {len(all_results)}\n\n",
+        "## Summary Table\n\n",
+        "| Cohort | n | Age: mean (range) | Gender F / M / other-nd |\n",
         "|---|---|---|---|\n",
     ]
     for r in all_results:
@@ -137,16 +137,16 @@ def render_md(all_results: list[dict], mapping_path: Path) -> str:
         other_pct = round(other_total / r["n"] * 100, 1) if r["n"] else 0
         lines.append(f"| {r['label']} | {r['n']} | {age_str} | {f[1]}% / {m[1]}% / {other_pct}% |\n")
 
-    lines.append("\n## Per coorte\n\n")
+    lines.append("\n## By Cohort\n\n")
     for r in all_results:
         age = r["age"]
         lines.append(f"### {r['label']} (n={r['n']})\n\n")
         if age["n"]:
             lines.append(
-                f"- **Età**: media {age['mean']} anni · range {age['min']}–{age['max']} · "
-                f"mediana {age['median']}\n"
+                f"- **Age**: mean {age['mean']} years · range {age['min']}–{age['max']} · "
+                f"median {age['median']}\n"
             )
-        lines.append("- **Genere**: " + ", ".join(f"{k} {p[0]} ({p[1]}%)" for k, p in r["gender"].items()) + "\n")
+        lines.append("- **Gender**: " + ", ".join(f"{k} {p[0]} ({p[1]}%)" for k, p in r["gender"].items()) + "\n")
         for var_name, dist in r["other_vars"].items():
             lines.append(f"- **{var_name.capitalize()}**: " + ", ".join(
                 f"{k} {p[0]} ({p[1]}%)" for k, p in dist.items()

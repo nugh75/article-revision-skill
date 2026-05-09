@@ -1,61 +1,61 @@
-# 20 — Plan revision
+# 20 — Plan Revision
 
-When the user provides reviewer feedback (textual letter, list of comments, or a markdown file with the review), generate the project file.
+When the user provides reviewer feedback (textual letter, list of comments, or a Markdown file with the review), generate the project file.
 
-## 1. Acquire reviewer identity
+## 1. Acquire Reviewer Identity
 
-Ask the user — unless already supplied:
+Ask the user unless already supplied:
 
-> Come si chiama il/la reviewer? (Userò un *slug* per il filename e i commit, es. `elisa`, `peer-1`, `editor`.)
+> What should I call this reviewer? I will use a slug for filenames and suggested commit messages, for example `peer-1`, `editor`, or `reviewer-a`.
 
-## 2. Parse the feedback into discrete points
+## 2. Parse Feedback Into Discrete Points
 
-Split the reviewer's letter into atomic points. One point = one actionable observation, even if the reviewer wraps several together. Each point should map to:
+Split the reviewer's letter into atomic points. One point equals one actionable observation, even if the reviewer wraps several together. Each point should map to:
 
-- a section of the article (e.g. *"Introduzione"*, *"Metodologia – Campione"*);
-- a level of priority (`alta`, `media`, `bassa`);
+- an article section, such as *Introduction* or *Methodology — Sample*;
+- a priority level (`high`, `medium`, `low`);
 - a verbatim quote of the reviewer's words.
 
-Number them progressively. If a single sentence from the reviewer covers multiple sections, split into multiple points.
+Number points progressively. If one reviewer sentence covers multiple sections, split it into multiple points.
 
-## 3. Generate `revisioni/<reviewer-slug>/progetto-revisione-vN.md`
+## 3. Generate `revisions/<reviewer-slug>/revision-plan-vN.md`
 
-Use `templates/progetto-revisione.md` and substitute:
+Use `templates/revision-plan.md` and substitute:
 
 - `{{REVIEWER}}` — full name or slug;
-- `{{VERSION}}` — the article version (e.g. `9`);
+- `{{VERSION}}` — article version, such as `9`;
 - `{{ARTICLE_PATH}}` — relative path;
 - `{{EDITORIAL_LIMIT}}`, `{{LIMIT_UNIT}}` — from `.env`;
 - `{{INITIAL_COUNT}}` — output of `scripts/char_count.py --limit-from-env`;
 - `{{ARTICLE_LANG}}` — from setup;
 - `{{NORMS_PATH}}` — from `.env`.
 
-Then for each point, write a section under `## Revisione punto per punto` with all subfields populated **except** `Decisione` (which stays `Da decidere`) and the actual proposal text (filled later in `20-iterate-points.md`).
+Then for each point, write a section under `## Point-by-Point Revision` with all subfields populated **except** `Decision`, which stays `To decide`, and the actual proposal text, which is filled later in `30-iterate-points.md`.
 
 Populate the checklist at the bottom:
 
-```
-| # | Punto | Sezione | Stato in v<N> | Priorità | Decisione |
+```text
+| # | Point | Section | Status in v<N> | Priority | Decision |
 ```
 
-## 4. Confirm in chat
+## 4. Confirm In Chat
 
-The skill writes the project file to disk. **The user controls git** — no auto-commit. If asked, the suggested commit message is:
+The skill writes the project file to disk. **The user controls git**; no auto-commit. If asked, the suggested commit message is:
 
-```
+```text
 revision(<slug>): start — N points planned
 ```
 
 Then in chat:
 
-```
-✅ Progetto revisione creato: <path>
+```text
+Revision plan created: <path>
 
-N punti pianificati:
-1. <titolo> — <sezione> (priorità <alta|media|bassa>)
+N points planned:
+1. <title> — <section> (priority <high|medium|low>)
 2. ...
 
-Iniziamo dal punto 1? (sì / scegli punto N / posticipa)
+Start from point 1? (yes / choose point N / postpone)
 ```
 
 Wait for the user.
