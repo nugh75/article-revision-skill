@@ -1,19 +1,17 @@
 ---
 name: article-revision
 description: |
-  Coordinate iterative revision of a scientific article in markdown. Trigger
-  when the user asks to apply reviewer feedback ("revisiona articolo",
-  "applichiamo i commenti di X", "let's process the reviewer comments"),
-  to bump the article to a new version, or invokes `/article-revision`
-  explicitly. Skill assumes a project layout with `articoli/`, `bibliografia/
+  Coordinate iterative revision of a scientific article in markdown.
+  Supports two modes: (1) granular point-by-point revision triggered by
+  reviewer feedback ("revisiona articolo", "applichiamo i commenti di X",
+  "let's process the reviewer comments"), and (2) top-down chapter-by-chapter
+  revision focused on connectors and logical flow ("revisione dall'alto",
+  "rivediamo capitolo per capitolo", "passiamo al §2"). Also handles version
+  bumps. Skill assumes a project layout with `articoli/`, `bibliografia/
   reference.bib`, `norme-redazionali/`, `revisioni/`, and an `.env` file.
-  For each reviewer point: shows original text + proposed change in chat,
-  asks Accept / Reject / Modify, applies on Accept, then auto-commits with
-  a structured message. Auto-detects article language (it/en) and adapts
-  the proposal style accordingly. Out of scope: writing the article from
-  scratch (use the journal-specific style skill, e.g. `praxis-article-style`),
-  managing the `.bib` directly (use `praxis-bibliography-citations` or its
-  equivalent).
+  Auto-detects article language (it/en) and adapts the proposal style
+  accordingly. Out of scope: writing the article from scratch, editing
+  `.bib` independently, anonymisation, git operations.
 ---
 
 # Article Revision Skill
@@ -102,6 +100,10 @@ Optional:
 4. `workflow/30-iterate-points.md` — for each point, propose, ask
    `Accetta / Rifiuta / Modifica`, apply on Accept. **Never commit
    automatically** — the user controls git.
+4b. `workflow/35-chapter-revision.md` — alternative to step 4 for
+   top-down chapter-by-chapter revision. Focus: connectors, paragraph
+   ordering, logical flow. Changes are proposed per chapter, applied,
+   then the full chapter text is shown for acceptance before moving on.
 5. `workflow/40-bibliography-check.md` — when a citation is touched or new
    keys are introduced.
 6. `workflow/50-sample-description.md` — when the methodology asks for a
@@ -194,6 +196,11 @@ editorial layout:
   stages, never pushes. Modifications to the article, the `.bib`, the
   project file, the scheda, are written to disk and remain there until
   the user decides to commit them.
+- **Backup before edit.** Before modifying the article file in any revision
+  pass, the skill **must** create a timestamped backup copy in the same
+  directory. Use the versioning convention:
+  `<prefix>-v<CURRENT>-<YYYY-MM-DD-HHMM>[-anonima].bak.md`. This ensures
+  the previous version is never lost.
 - After each accepted change, the skill briefly notes that there are
   pending changes — without performing any git action.
 - Suggested commit message format (when the user asks): `revision(<reviewer-slug>): <point-id> — <summary>`. The skill can supply the message text in chat for the user to paste.
@@ -209,6 +216,7 @@ point in the workflow:
 |---|---|---|
 | **Frammento** (sentence-level / inline) | *"correggi questa frase"*, *"questa virgolettatura"*, *"sostituisci X con Y"* | Smallest possible diff. Touches a single sentence, citation, term, formatting fix. Goes through the same `Originale / Proposta / Decisione` pattern with surgical context. |
 | **Paragrafo** (default during reviewer revision) | *"rivedi questo paragrafo"*, *"il §3 sulla discussione"* | Operates on a coherent block (one paragraph or one numbered subsection). Standard mode for processing reviewer points. |
+| **Capitolo** (chapter-by-chapter pass) | *"rivediamo l'articolo capitolo per capitolo"*, *"revisione dall'alto"*, *"connettori e filo logico"*, *"passiamo al §2"* | Top-down pass through each article section. Focus: paragraph ordering, connectors, logical flow between paragraphs and sections. Changes are proposed as a batch per chapter, applied together, then the full changed chapter is shown for final acceptance before moving on. |
 | **Articolo intero** (full pass) | *"rivedi tutto l'articolo"*, *"controlla coerenza dall'inizio alla fine"* | Sequential walk through every section, point by point. Each candidate change is still presented individually for `Accetta / Rifiuta / Modifica` — the user is not asked to approve a single mass-replacement. |
 
 For paragrafo and articolo intero, breakable into more granular points
@@ -219,6 +227,66 @@ decisions, two micro-changes).
 Never collapse multiple semantic changes into a single proposal just to
 save chat tokens — the user must be able to accept one and reject the
 other.
+
+## Chapter revision (top-down)
+
+Alongside the granular point-by-point revision, the skill offers a
+chapter-by-chapter mode focused on macro-level textual refinement:
+
+- **Connectors**: replace missing or weak transitions with appropriate
+  connectives (see `reference/connettori-italiani.md` for Italian or
+  `reference/english-connectors.md` for English articles).
+- **Paragraph ordering**: reorder paragraphs within a chapter so the
+  argument flows logically (e.g. context → problem → evidence → implication).
+- **Logical flow**: ensure each paragraph picks up the thread from the
+  previous one and hands it off to the next.
+- **Active voice**: prefer active constructions over passive where they
+  improve readability (applies to the chapter under revision, not globally).
+- **Structural consistency**: verify that the chapter opening hooks into
+  the preceding section and the closing leads into the next.
+
+This mode works **one chapter at a time** and is triggered by phrases like
+"rivediamo l'introduzione", "passiamo alla metodologia", or "facciamo una
+revisione dall'alto capitolo per capitolo".
+
+### Interaction pattern for chapter revision
+
+```
+## Capitolo N — <title> · revisione strutturale
+
+**Analisi**
+> <brief diagnosis: connectors found, ordering issues, logical gaps>
+
+**Interventi proposti**
+1. <change 1 — rationale>
+2. <change 2 — rationale>
+...
+
+**Applica?** Si / Rivediamo / Salta
+```
+
+- `Si` → apply all proposed changes, then **show the full changed chapter
+  text** and ask `**Accetti il capitolo così modificato?** Si / Ancora modifiche`.
+- `Rivediamo` → user requests changes to the proposal; iterate the proposal.
+- `Salta` → skip to the next chapter without changes.
+
+The full-text review at the end of each chapter is **mandatory**: the user
+must see the complete changed text before approving the chapter.
+
+### After a chapter is accepted
+
+Once a chapter is accepted, the skill moves to the next one and repeats the
+same pattern. All changes across the chapter revision pass are tracked in
+the project file as a single batch under a `Revisione strutturale` heading.
+
+### Limits
+
+- This mode does **not** verify bibliography entries (use step 5,
+  `workflow/40-bibliography-check.md`).
+- This mode does **not** handle sample-description updates from raw data
+  (use step 6, `workflow/50-sample-description.md`).
+- For fine-grained fixes on a single sentence or citation, switch back to
+  **Frammento** scope.
 
 ## Skill is **not** for
 

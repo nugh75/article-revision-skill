@@ -4,6 +4,20 @@ Elenco di connettori linguistici per la scrittura accademica in italiano, organi
 
 ---
 
+## Nota preliminare: l'anafora zero
+
+In italiano, **l'anafora zero** (ellissi del soggetto) è un meccanismo coesivo naturale e spesso preferibile a un connettore esplicito. Quando il topic è continuo tra due frasi — ossia il soggetto/tema resta lo stesso — la lingua italiana omette il soggetto nella frase successiva, e questa omissione è di per sé un segnale di continuità tematica.
+
+Esempio:
+> Il *framework* PRAXIS organizza l'esperienza educativa in sei dimensioni. *(soggetto: PRAXIS)*
+> *(Ø)* Articola *Practice patterns*, *Readiness beliefs*… *(soggetto sottinteso: PRAXIS)*
+
+L'anafora zero va distinta dal **salto tematico ingiustificato**: quando il topic implicito non è recuperabile dal contesto precedente, l'ellissi genera ambiguità e va sostituita con un connettore esplicito o una ripresa lessicale.
+
+Regola pratica: se il lettore può chiedersi "chi/cosa fa questa azione?" e la risposta non è evidente dalla frase precedente, serve un connettore o una ripresa del soggetto.
+
+---
+
 ## 1. CAUSA — EFFETTO
 
 Per introdurre una relazione causale o una conseguenza diretta.

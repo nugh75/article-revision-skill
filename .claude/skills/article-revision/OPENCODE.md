@@ -1,8 +1,8 @@
-# AGENTS.md — article-revision
+# OPENCODE.md — article-revision
 
-This file activates the **article-revision** workflow for any AI coding agent that reads `AGENTS.md` (Claude Code, opencode, OpenAI Codex CLI, Aider, Cline, …). It mirrors the Claude Code skill defined in `SKILL.md` and the workflow files in `workflow/`.
+This file activates the **article-revision** workflow for [opencode](https://github.com/sst/opencode) and other agents that read `OPENCODE.md`. It is kept in sync with `AGENTS.md` (the cross-tool standard) and mirrors the Claude Code skill defined in `SKILL.md` plus the workflow files in `workflow/`.
 
-If your tool also reads `OPENCODE.md`, that file contains the same content.
+The two files (`AGENTS.md` and `OPENCODE.md`) carry identical content: edit one and propagate to the other to avoid drift.
 
 ---
 
@@ -141,8 +141,6 @@ On `Rifiuta`: annotate `Scartato` + reason in the project file. No file edits.
 
 On `Modifica`: ask for direction, regenerate the proposal, repeat. After the eventual `Accetta`, label the point `Modificato` (not `Accettato`).
 
-**Evidenziazione visiva**: nella `**Proposta**`, marcate le parole cambiate rispetto all'originale con `<mark>...</mark>` attorno al segmento modificato. L'utente deve vedere a colpo d'occhio cosa cambia senza confrontare manualmente.
-
 ---
 
 ## Chapter revision (top-down)
@@ -213,7 +211,7 @@ In `workflow/10-setup.md`:
 3. Score language by function words: `il, la, di, e, è, che, in, per` (it) vs `the, and, of, is, to, in, that, for` (en).
 4. Highest score wins. Ties → ask the user. `.env` `ARTICLE_LANG` always wins.
 
-If `ARTICLE_LANG=it`, anglicisms in proposals must come from `templates/anglicismi-accettati-it.md`. Surface any new anglicism in the proposal block under "Eventuali deroghe". Evitare costruzioni oppositive del tipo "non ... ma ...". Preferire formulazioni positive o coordinate che chiariscano il rapporto logico.
+If `ARTICLE_LANG=it`, anglicisms in proposals must come from `templates/anglicismi-accettati-it.md`. Surface any new anglicism in the proposal block under "Eventuali deroghe".
 
 ---
 
@@ -270,17 +268,21 @@ For these, defer to the appropriate companion skill or to the user.
 
 ---
 
-## Hooking this file into your tool
+## Hooking this file into opencode
 
-This file lives inside the skill repo (`.claude/skills/article-revision/AGENTS.md`). To make your AI agent aware of it from a consuming project, link or copy it to the project root, or merge its contents into the project's existing `AGENTS.md`:
+This file lives inside the skill repo (`.claude/skills/article-revision/OPENCODE.md`). opencode looks for `AGENTS.md` and `OPENCODE.md` at the project root. To activate the skill in a consuming project, link or merge it:
 
 ```bash
-# from the consuming project root
-ln -s .claude/skills/article-revision/AGENTS.md AGENTS.md
-# or, if you already have an AGENTS.md, append a section pointing to the skill:
-cat >> AGENTS.md <<'EOF'
+# from the consuming project root — symlink approach (recommended)
+ln -s .claude/skills/article-revision/OPENCODE.md OPENCODE.md
+ln -s .claude/skills/article-revision/AGENTS.md   AGENTS.md
+
+# or merge into an existing OPENCODE.md / AGENTS.md:
+cat >> OPENCODE.md <<'EOF'
 
 ## article-revision
-See .claude/skills/article-revision/AGENTS.md for the full workflow.
+See .claude/skills/article-revision/OPENCODE.md for the full workflow.
 EOF
 ```
+
+Both files describe the same workflow. opencode and codex will pick up either one; Claude Code will pick up the SKILL.md natively. No further configuration is needed.

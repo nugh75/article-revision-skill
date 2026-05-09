@@ -55,7 +55,7 @@ DIRNAME=$(dirname "$SRC")
 #   article-v9-2026-05-08.md
 #   scientific-article-praxis-v9-2026-05-08-anonymous.md
 #   draft-v3-2026-05-08-1430.md
-if [[ "$BASENAME" =~ ^(.+)-v([0-9]+)-[0-9]{4}-[0-9]{2}-[0-9]{2}(-[0-9]{4})?(-anonymous)?\.md$ ]]; then
+if [[ "$BASENAME" =~ ^(.+)-v([0-9]+)-[0-9]{4}-[0-9]{2}-[0-9]{2}(-[0-9]{4})?(-anonymous|-anonima)?\.md$ ]]; then
     PREFIX="${BASH_REMATCH[1]}"
     VERSION="${BASH_REMATCH[2]}"
     SUFFIX="${BASH_REMATCH[4]:-}"
