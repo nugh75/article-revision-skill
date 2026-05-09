@@ -181,6 +181,22 @@ The skill is driven by the markdown files in `workflow/`, executed in order:
 
 ---
 
+## Word documents
+
+The skill is Markdown-first, but projects may contain `.docx` sources or need a
+Word export at the end of a revision round. In that case, preserve the article
+content and enforce these layout rules:
+
+- Use real Word heading styles for titles and section headings.
+- Keep all body text black.
+- Keep headings black unless journal norms specify otherwise.
+- Do not add blank paragraphs between body paragraphs.
+- Use style spacing before/after headings to create margins between headings and body text.
+- Avoid manual blank lines during `.docx` ↔ Markdown conversion.
+- Treat formatting changes as revision points that still require `Accetta / Rifiuta / Modifica`.
+
+---
+
 ## Templates
 
 | File | Used for |

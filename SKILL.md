@@ -164,6 +164,26 @@ Override via `.env` `ARTICLE_LANG=...` always wins over auto-detection.
 Workflow files and skill chat scaffolding stay in English regardless of
 `ARTICLE_LANG`.
 
+## Word document handling
+
+When the project contains Word files (`.docx`) or the revised Markdown article
+must be rendered back to Word, preserve content first and enforce a clean
+editorial layout:
+
+- Headings must remain explicit headings, not body paragraphs styled manually.
+- Body text must be black.
+- Headings must be black unless the journal norms explicitly require another
+  color.
+- Body paragraphs must not have blank-line spacing between consecutive
+  paragraphs; use paragraph spacing values instead of inserting empty
+  paragraphs.
+- Keep visible spacing between headings and the following body text through
+  heading style spacing before/after, not through manual blank lines.
+- Do not introduce extra paragraph breaks while converting `.docx` to Markdown
+  or Markdown back to `.docx`.
+- If a Word formatting change is proposed, present it as a revision point and
+  ask `Accetta / Rifiuta / Modifica` before applying.
+
 ## Git contract
 
 - **The user controls all git operations.** The skill never commits, never
