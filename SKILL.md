@@ -68,9 +68,25 @@ Optional:
 - `EDITORIAL_LIMIT_WORDS` — alternative to chars, if the journal uses words.
 - `ARTICLE_LANG` — forces language detection (`it`, `en`, …).
 - `ARTICLE_STYLE_NOTES` — extra style notes to load.
+- `PYTHON_BIN` — Python interpreter for skill scripts. Defaults to
+  `<project-root>/.venv/bin/python` after bootstrap. If no venv exists, ask the
+  user before creating one or falling back to system Python.
 - `CROSSREF_USER_AGENT` — for `bib_verify_online.py`.
 - `OPENALEX_USER_AGENT` — same.
 - `ZOTERO_USER_ID`, `ZOTERO_API_KEY`, `ZOTERO_GROUP_ID` — Zotero integration.
+
+## Python execution contract
+
+- All Python scripts must run through the project virtual environment:
+  `<project-root>/.venv/bin/python`.
+- On first invocation, if `.venv/` is missing, ask whether to create it and
+  install `.claude/skills/article-revision/requirements.txt`.
+- If the user refuses venv creation, ask whether system Python may be used for
+  this session. Never fall back to `python3` silently.
+- Remember the selected interpreter as `PYTHON_BIN` for the session; append it
+  to `.env` only with explicit user confirmation.
+- Shell scripts may run directly, but any Python they invoke must use
+  `PYTHON_BIN` or the venv interpreter.
 
 ## Workflow files (must be followed in order on first invocation)
 

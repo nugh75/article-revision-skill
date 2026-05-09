@@ -16,19 +16,36 @@ The bootstrap establishes the **revision environment**: Python venv with the req
 
    ```bash
    python3 -m venv .venv
-   source .venv/bin/activate
-   pip install --upgrade pip
-   pip install -r .claude/skills/article-revision/requirements.txt
+   .venv/bin/python -m pip install --upgrade pip
+   .venv/bin/python -m pip install -r .claude/skills/article-revision/requirements.txt
    ```
 
-4. If a venv already exists, verify the packages match `requirements.txt`:
+4. If the user refuses venv creation, ask before falling back:
+
+   > Vuoi usare Python di sistema solo per questa sessione? Alcuni script potrebbero non funzionare se mancano pacchetti.
+   > (sì / no)
+
+   If the answer is `no`, skip Python-based checks and note that scripts are unavailable until a venv or interpreter is configured.
+
+5. If a venv already exists, verify the packages match `requirements.txt`:
 
    ```bash
-   .venv/bin/pip check
-   .venv/bin/pip install -r .claude/skills/article-revision/requirements.txt --upgrade-strategy only-if-needed
+   .venv/bin/python -m pip check
+   .venv/bin/python -m pip install -r .claude/skills/article-revision/requirements.txt --upgrade-strategy only-if-needed
    ```
 
-5. Remember the venv path for the session.
+6. Remember the interpreter for the session:
+
+   - venv accepted/found: `PYTHON_BIN=.venv/bin/python`
+   - alternative path accepted: `PYTHON_BIN=<custom-path>/bin/python` or the explicit interpreter path
+   - system Python accepted: `PYTHON_BIN=$(command -v python3)`
+
+7. Ask before persisting `PYTHON_BIN` to `.env`:
+
+   > Vuoi salvare `PYTHON_BIN=<path>` in `.env` per le prossime sessioni?
+   > (sì / no)
+
+8. All subsequent Python scripts in this workflow must be run with `PYTHON_BIN`; never call `python3 scripts/...` directly unless the user explicitly chose system Python.
 
 ## Step B — `.bib` file
 
@@ -64,6 +81,7 @@ The bootstrap establishes the **revision environment**: Python venv with the req
    - `ZOTERO_USER_ID`, `ZOTERO_API_KEY`, `ZOTERO_GROUP_ID` (per la sincronizzazione bibliografica). Ask explicitly:
      > Vuoi configurare la sincronizzazione Zotero? Servono `user_id`, `api_key` e `group_id`. Posso saltare e lo configurerai in seguito.
    - `ARTICLE_LANG` — di solito vuoto (auto-detection).
+   - `PYTHON_BIN` — interprete Python per gli script della skill; di solito `.venv/bin/python`.
    - `AUTO_BUMP_THRESHOLD` — quante modifiche accettate consecutive prima che la skill proponga un bump di versione (default `5`).
 
 3. Append the new keys to `.env` (or create the file). Never overwrite existing values without asking.
@@ -81,7 +99,8 @@ Per completare l'ambiente mi servono questi dati. Rispondi numerando, oppure las
 3) Path file bibliografia (default bibliografia/reference.bib):
 4) Crossref/OpenAlex User-Agent (formato `Project/1.0 (mailto:you@host)`):
 5) Zotero — user_id, api_key, group_id (separati da virgola):
-6) Soglia auto-bump versione (default 5):
+6) Python interpreter (default `.venv/bin/python`):
+7) Soglia auto-bump versione (default 5):
 ```
 
 ## Step D — Editorial norms file
@@ -128,6 +147,7 @@ After all bootstrap steps, output one chat block:
 ✅ Bootstrap completo
 
 - venv: <.venv/ | system>
+- python: <PYTHON_BIN | unavailable>
 - bibliografia: <path> (X voci)
 - norme redazionali: <path>
 - .env: <path> (M chiavi configurate)

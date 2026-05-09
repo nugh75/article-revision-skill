@@ -39,13 +39,17 @@ cd .claude/skills
 git clone https://github.com/nugh75/article-revision.git
 ```
 
-Then create the Python virtual environment for the scripts (the skill will offer to do it for you on first run):
+Then create the project Python virtual environment for the scripts, or let the skill ask to create it on first run:
 
 ```bash
-cd .claude/skills/article-revision
 python3 -m venv .venv
-.venv/bin/pip install -r requirements.txt
+.venv/bin/python -m pip install --upgrade pip
+.venv/bin/python -m pip install -r .claude/skills/article-revision/requirements.txt
 ```
+
+If `.venv/` is missing, the bootstrap asks whether to create it. If you refuse,
+the skill asks before using system Python and stores the selected interpreter in
+session memory as `PYTHON_BIN`. It never falls back to `python3` silently.
 
 ---
 
@@ -85,6 +89,7 @@ Recommended:
 - `CROSSREF_USER_AGENT`, `OPENALEX_USER_AGENT` — for the bibliography online verification scripts.
 - `ZOTERO_USER_ID`, `ZOTERO_API_KEY`, `ZOTERO_GROUP_ID` — for Zotero sync.
 - `ARTICLE_LANG` — force language detection (default: auto).
+- `PYTHON_BIN` — Python interpreter for skill scripts (default: `.venv/bin/python`).
 - `AUTO_BUMP_THRESHOLD` — how many accepted changes before the skill proposes a version bump (default: 5).
 
 ---

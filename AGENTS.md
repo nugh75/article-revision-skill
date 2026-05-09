@@ -68,6 +68,7 @@ Recommended:
 - `CROSSREF_USER_AGENT`, `OPENALEX_USER_AGENT` (bibliography online verification)
 - `ZOTERO_USER_ID`, `ZOTERO_API_KEY`, `ZOTERO_GROUP_ID` (Zotero sync)
 - `ARTICLE_LANG` (force language detection)
+- `PYTHON_BIN` (Python interpreter for skill scripts; default `.venv/bin/python`)
 - `AUTO_BUMP_THRESHOLD` (default 5)
 
 See `.env.example` for the complete template.
@@ -159,7 +160,10 @@ Multiple bumps in the same day stay distinct because of the time. The bump scrip
 
 ## Scripts
 
-Run with the project's Python venv (the bootstrap creates `.venv/`).
+Run Python scripts with the project's Python venv. The bootstrap asks before
+creating `.venv/`; if the user refuses, ask before using system Python and
+remember the selected interpreter as `PYTHON_BIN`. Never fall back to `python3`
+silently.
 
 | Script | Purpose |
 |---|---|
