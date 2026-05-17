@@ -2,6 +2,7 @@
 
 Triggered:
 
+- **mandatory session-start bump** — every new revision session MUST bump before any edits. Handed off from `10-setup.md` step 5. Do not skip, do not defer.
 - when the user signals the end of a revision round, such as *"close this version"*;
 - when the *accepted-since-last-bump* counter in the project file reaches `AUTO_BUMP_THRESHOLD` (default 5), and the skill proposes the bump in chat;
 - when the user explicitly asks, such as *"create v(N+1) now"*.

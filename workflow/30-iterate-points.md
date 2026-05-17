@@ -43,55 +43,78 @@ Never collapse multiple separate concerns into a single proposal. If the same pa
 **Original** (`<article>:<line-range>`)
 > <verbatim text>
 
-**Proposal**
-> <proposed text>
+**Proposta**
+> <proposed full text>
 
-**Δ**: chars <signed> / words <signed> · bibliography: <signed> entries · risk: <low|medium|high>
+**Modifiche:**
+1. `<old>` → `<new>` [(motivazione)]
+2. `<old>` → `<new>` [(motivazione)]
+...
+
+**Δ**: chars <signed> / words <signed> · risk: <low|medium|high>
 
 **Norms respected**: <list>
 **Possible exceptions**: <list, with reason>
 
-**Decision?** Accept / Reject / Modify
+**A/R/M?** (indicare i numeri delle modifiche, es. "A 2,4" oppure "M 3: sostituire X con Y")
 ```
 
 Wait for the user. Do **not** apply pre-emptively.
 
+Each modification is numbered. The user responds with:
+- `A 1,3` → accept modifications 1 and 3 only.
+- `R 2` → reject modification 2.
+- `M 4: <direction>` → modify modification 4 as directed.
+- `A` (no numbers) → accept all modifications.
+- `R` (no numbers) → reject the entire point.
+
 ## 4. Handle Response
 
-### Accept
+### Accept (selected numbers or all)
 
-1. Apply via Edit on the article, and on `.bib` or other files if relevant.
-2. Update the project file: `Decision` = `Accepted`.
-3. Increment the *accepted-since-last-bump* counter, stored as an HTML comment in the project file: `<!-- accepted_since_bump: N -->`.
-4. Run `scripts/char_count.py --limit-from-env` and report the new count plus delta.
-5. **Do not commit.** Acknowledge:
-
-   ```text
-   Applied. Pending uncommitted changes: N files.
-   Count: M chars (<over|under> by X). Accepted since bump: <K>/<AUTO_BUMP_THRESHOLD>.
-   ```
-
-6. If the counter has reached `AUTO_BUMP_THRESHOLD`, propose a bump:
+1. Apply via Edit on the article only the modifications accepted by the user. If some modifications were rejected or left pending, apply only the accepted ones.
+2. Update the project file: each accepted modification → `Accepted`.
+3. Increment the *accepted-since-last-bump* counter.
+4. **Do not commit.**
+5. **Do not advance automatically.** Output:
 
    ```text
-   You accepted <AUTO_BUMP_THRESHOLD> changes since the last bump.
-   Create a new file version now? (yes / continue)
+   Applicate modifiche <numbers>. [Restano in sospeso le modifiche <numbers>.] Ci sono altri cambiamenti da fare in questo paragrafo?
    ```
 
-   On `yes`, hand off to `60-bump-version.md`.
-7. Move to the next point.
+   Wait for an explicit command from the user.
 
-### Reject
+6. If the counter has reached `AUTO_BUMP_THRESHOLD`, after the user signals to advance, propose a bump (hand off to `60-bump-version.md`).
 
-1. Update the project file: `Decision` = `Rejected`, with the reason supplied by the user or `author choice` if none.
+### Reject (selected numbers)
+
+1. Mark rejected modifications as `Rejected` in the project file + reason.
+2. No file edits for those modifications.
+3. **Do not advance automatically.** Output:
+
+   ```text
+   Modifiche <numbers> respinte. [Restano in sospeso le modifiche <numbers>.] Ci sono altri cambiamenti da fare in questo paragrafo?
+   ```
+
+### Reject (entire point)
+
+1. Mark the entire point `Rejected` + reason.
 2. No file modifications.
-3. Move on.
+3. Advance to next point.
 
-### Modify
+### Modify <N>: <direction>
 
-1. Ask the user: `How should I modify the proposal?`
-2. Regenerate the proposal in light of the new direction.
-3. Return to step 3 of this workflow. After eventual `Accept`, label the point as `Modified` (not `Accepted`).
+1. Regenerate modification N according to the user's direction.
+2. Re-present the updated modification in context, keeping the same numbering.
+3. Return to step 3. After eventual `Accept`, label the modification as `Modified` (not `Accepted`).
+
+### Advance to next point
+
+Only advance when the user gives an explicit command:
+- "no, prossimo paragrafo"
+- "passa al prossimo"
+- "next"
+- "prossimo"
 
 ## 5. Edge Cases
 
