@@ -473,15 +473,17 @@ editorial layout:
 
 ## Git contract
 
-- **The user controls all git operations.** The skill never commits, never
-  stages, never pushes. Modifications to the article, the `.bib`, the
-  project file, the final sheet, are written to disk and remain there until
-  the user decides to commit them.
+- **The user controls all git operations.** The skill never commits, stages,
+  or pushes on its own initiative. Modifications to the article, the `.bib`,
+  the project file, and the final sheet are written to disk and remain there
+  until the user gives an explicit git instruction.
 - After each accepted change, the skill briefly notes that there are
-  pending changes — without performing any git action.
+  pending changes — without performing any git action unless explicitly asked.
 - Suggested commit message format (when the user asks): `revision(<reviewer-slug>): <point-id> — <summary>`. The skill can supply the message text in chat for the user to paste.
 - If the user explicitly asks the skill to commit on their behalf, do so
-  with `git commit` (no `--no-verify`, no `git push`).
+  with `git commit` and without `--no-verify`.
+- If the user explicitly authorizes a push, confirm the target remote/branch
+  when ambiguous, then run `git push`.
 
 ## Revision scope (granularity)
 
@@ -532,4 +534,4 @@ bump: vN → v(N+1) (start revision session)
 - Editing `.bib` independently — defer to the bibliography skill (e.g.
   `praxis-bibliography-citations`).
 - Anonymisation (XXX placeholders) — handle in a dedicated pass.
-- Committing, pushing to remote, opening PRs, sending email.
+- Opening PRs or sending email. Committing and pushing are allowed only on explicit user instruction, following the Git contract.

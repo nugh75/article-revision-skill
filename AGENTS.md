@@ -36,7 +36,7 @@ If the user is doing something else (writing the article from scratch, generatin
 
 ## Hard rules
 
-1. **The user controls all git operations.** This skill never runs `git add`, `git commit`, `git push`, or `git stage`. It only writes files. After each accepted change, briefly note that there are pending changes and stop. If the user explicitly asks the skill to commit, do so without `--no-verify` and without `git push`.
+1. **The user controls all git operations.** This skill never runs `git add`, `git commit`, `git push`, or `git stage` on its own initiative. It only writes files unless the user gives an explicit git instruction. After each accepted change, briefly note that there are pending changes and stop. If the user explicitly asks the skill to commit, do so without `--no-verify`. If the user explicitly authorizes a push, the skill may run `git push` after confirming the target branch/remote.
 2. **Per-point granularity.** Every revision proposal goes through the user as one atomic decision: `Accept / Reject / Modify`. Never collapse multiple unrelated changes into one proposal.
 3. **Always ask before creating.** Bootstrap, version bump, new files: every write step that creates something requires explicit confirmation. Idempotent re-checks of already-existing artifacts need no confirmation.
 4. **No silent behavior.** Whenever the skill takes a non-trivial action, output a one-line acknowledgement in chat.
@@ -241,7 +241,7 @@ Run Python scripts with the project's Python venv. The bootstrap asks before cre
 - Writing an article from scratch.
 - Editing `.bib` independently of a revision flow.
 - Anonymisation pass (handle separately).
-- Committing, pushing to remote, opening PRs, sending email.
+- Opening PRs or sending email. Committing and pushing are allowed only on explicit user instruction, following the Git contract.
 
 For these, defer to the appropriate companion skill or to the user.
 
