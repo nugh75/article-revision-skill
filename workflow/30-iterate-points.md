@@ -24,6 +24,8 @@ If the change involves a citation, run `40-bibliography-check.md` for the releva
 
 If the change requires sample-description data, run `50-sample-description.md` first.
 
+If the original or proposed text contains a numeric claim — a percentage, count, mean, index, correlation, rank, or a qualitative claim that holds only if a figure holds — run `51-data-verification.md` **before** generating the proposal. Never inherit the figure from the previous version or from the reviewer's wording. This is binding, not optional.
+
 ## 2. Generate Proposal
 
 Apply:

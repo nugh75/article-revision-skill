@@ -2,6 +2,8 @@
 
 Triggered by `/r-pr-2`. Simulates two independent peer reviewers with distinct personas and writes their reports as standalone Markdown documents. **No interactive A/R/M loop** — the documents feed subsequent revision passes (`/r-pp-a`, `/r-pp`, `/r-global`, `/r-conn`).
 
+**Provenance:** every document generated here carries `source: simulated` in its frontmatter. This is internal QA, not external review. It must never be cited to the journal as if it were a real reviewer round, and the final sheet (`70-final-sheet.md`) keeps it out of any response letter. Real journal feedback enters through `20-plan-revision.md` with `source: journal`.
+
 ## 0. Entry Point
 
 Invoked by `/r-pr-2` or phrases like:
@@ -80,6 +82,7 @@ Write `revisions/<article-slug>/reviewer-a-vN.md` with this structure:
 ```markdown
 ---
 reviewer: "A — Il Metodologo"
+source: simulated
 article: <article-path>
 version: v<N>
 created: YYYY-MM-DD
@@ -137,6 +140,7 @@ Write `revisions/<article-slug>/reviewer-b-vN.md` with this structure:
 ```markdown
 ---
 reviewer: "B — Il Teorico"
+source: simulated
 article: <article-path>
 version: v<N>
 created: YYYY-MM-DD
@@ -199,6 +203,7 @@ Write `revisions/<article-slug>/peer-review-synthesis-vN.md` with this structure
 ```markdown
 ---
 reviewers: "A (Metodologo) + B (Teorico)"
+source: simulated
 article: <article-path>
 version: v<N>
 created: YYYY-MM-DD

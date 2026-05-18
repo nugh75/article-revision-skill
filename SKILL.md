@@ -279,6 +279,34 @@ Editorial rules in priority order:
 When norms and user preference conflict, **norms win**. Surface the
 conflict explicitly in chat.
 
+## Feedback provenance
+
+Every revision round carries a `Feedback source`, set in `20-plan-revision.md`
+and stored in the project file and final sheet:
+
+- `journal` — a real reviewer/editor round. Its points feed the response
+  letter; corrected figures must be disclosed there.
+- `simulated` — produced internally (`/r-pr-2`, self-review). Internal QA
+  only. `/r-pr-2` documents carry `source: simulated` in frontmatter and are
+  read, not re-asked. Never present simulated feedback to the journal as
+  external review. `70-final-sheet.md` keeps it out of the response letter.
+
+Mixed rounds (a self-review layered on a real round) are split by tag: only
+`journal` points become response-letter material.
+
+## Data verification (binding)
+
+A numeric claim is never inherited. Whenever a proposal adds, changes, or
+relies on a percentage, count, mean, index, correlation, rank, or a
+qualitative claim that holds only if a figure holds, `30-iterate-points.md`
+must run `51-data-verification.md` **before** proposing: re-derive the figure
+from the authoritative source (`DATA_VERIFY_PATH` / `DATA_VERIFY_NOTES`, or a
+data-source section in the project's `AGENTS.md`), with an explicit criterion
+(column, filter, denominator, regex with word boundaries). If no source
+reproduces the value, the point is `Deferred` — never replaced with a
+plausible number. Skipping this when a figure is in scope is a binding
+violation, same severity as auto-committing.
+
 ## Project layout (required)
 
 ```
@@ -319,6 +347,11 @@ Optional:
 - `CROSSREF_USER_AGENT` — for `bib_verify_online.py`.
 - `OPENALEX_USER_AGENT` — same.
 - `ZOTERO_USER_ID`, `ZOTERO_API_KEY`, `ZOTERO_GROUP_ID` — Zotero integration.
+- `DATA_VERIFY_PATH` — root of the authoritative dataset/platform for the
+  article's empirical figures. Enables `workflow/51-data-verification.md` to
+  re-derive numeric claims instead of inheriting them.
+- `DATA_VERIFY_NOTES` — free-text pointer to the master file, key column, and
+  formula location within `DATA_VERIFY_PATH`.
 
 ## Python execution contract
 
@@ -365,6 +398,11 @@ Optional:
    keys are introduced.
 6. `workflow/50-sample-description.md` — when the methodology asks for a
    sample-description update from raw data.
+6a. `workflow/51-data-verification.md` — when a proposal adds, changes, or
+   relies on a numeric claim (percentage, count, mean, index, correlation,
+   rank, or a qualitative claim contingent on a figure). Re-derive from the
+   authoritative source; never inherit from a prior version or a reviewer's
+   wording. Binding, not optional.
 7. `workflow/60-bump-version.md` — when the user signals end of revision
    round, or when accepted modifications since the last version exceed
    `AUTO_BUMP_THRESHOLD` (default 5); the skill **proposes** a bump,

@@ -4,6 +4,7 @@
 
 - **Reference article**: `{{ARTICLE_PATH}}`
 - **Reviewer**: {{REVIEWER}}
+- **Feedback source**: {{FEEDBACK_SOURCE}} <!-- journal = feeds response letter; simulated = internal QA only -->
 - **Editorial limit**: max {{EDITORIAL_LIMIT}} {{LIMIT_UNIT}}
 - **Initial article count**: {{INITIAL_COUNT}} {{LIMIT_UNIT}}
 - **Article language (auto)**: {{ARTICLE_LANG}}
@@ -81,4 +82,5 @@ Modified:
 - Tone is consistent with the journal style skill or editorial norms.
 - Bibliography: each new citation exists and has an online match (`scripts/bib_verify_online.py`).
 - Text proposals do not introduce data or quantitative inferences absent from the study.
+- Every numeric claim added, changed, or relied upon is re-derived from the authoritative source, never inherited from a prior version or a reviewer comment (`workflow/51-data-verification.md`).
 - Anglicisms (if `ARTICLE_LANG=it`): allowed only when present in `templates/accepted-anglicisms-it.md`.

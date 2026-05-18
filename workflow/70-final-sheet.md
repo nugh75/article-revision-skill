@@ -11,6 +11,17 @@ Read:
 - `bibliography-audit-vN.md` if any bibliography check happened;
 - the current char/word count.
 
+## 1a. Read Feedback Provenance
+
+Read `{{FEEDBACK_SOURCE}}` from the project file's *Summary Status* (`journal` or `simulated`). It governs how the sheet is split:
+
+- `journal` — these points are answerable to the journal. The sheet's *Response-letter material* section is populated and is the basis for the reply to reviewers.
+- `simulated` — internal QA. The *Response-letter material* section stays empty with the note `Internal simulation — not for the journal.` Simulated points must never appear in a response letter.
+
+If the round mixed sources (some points journal, some simulated — possible when a self-review was layered on a real round), separate them: only `journal`-tagged points go into response-letter material; `simulated` ones are listed under *Internal QA carried this round*.
+
+Carry forward any data-verification verdicts (`51-data-verification.md` §5): for `journal` feedback, every **Corrected / Unreproducible / Inconsistent** figure that also existed in a prior submitted version is listed in *Outstanding tasks* as a disclosure the response letter must make explicit.
+
 ## 2. Fill Template
 
 Use `templates/final-sheet.md` and substitute placeholders. The summary table at the top should report, per point:

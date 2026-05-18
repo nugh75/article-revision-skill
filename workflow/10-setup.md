@@ -14,7 +14,9 @@ Required keys:
 - `BIBLIOGRAPHY_BIB_PATH`
 - `EDITORIAL_NORMS_PATH`
 
-Optional: `ARTICLE_LANG`, `ARTICLE_STYLE_NOTES`, `CROSSREF_USER_AGENT`, `OPENALEX_USER_AGENT`, Zotero keys, `PYTHON_BIN`.
+Optional: `ARTICLE_LANG`, `ARTICLE_STYLE_NOTES`, `CROSSREF_USER_AGENT`, `OPENALEX_USER_AGENT`, Zotero keys, `PYTHON_BIN`, `DATA_VERIFY_PATH`, `DATA_VERIFY_NOTES`.
+
+If `DATA_VERIFY_PATH` is set (root of the authoritative dataset/platform for the article's empirical figures), hold it and `DATA_VERIFY_NOTES` in working memory: `workflow/51-data-verification.md` uses them to re-derive any numeric claim instead of inheriting it.
 
 ## 2. Read Editorial Norms
 
