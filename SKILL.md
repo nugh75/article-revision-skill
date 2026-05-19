@@ -33,6 +33,9 @@ bibliography skills around a structured revision workflow.
 | `/r-global` | **Revisione Globale** — high-level, non-granular revision: overall structure, argument coherence, section proportionality, redundancy, terminology consistency |
 | `/r-bump` | Bump article version (hand off to `workflow/60-bump-version.md`) |
 | `/r-sheet` | Generate final revision sheet (hand off to `workflow/70-final-sheet.md`) |
+| `/r-gdrive` | **Google Drive Collaboration** — create/sync a shared Drive folder for colleagues; pull their feedback back as a revision source (`workflow/80-gdrive-collab.md`) |
+| `/r-approve` | **Colleague Approval** — gate accepted modifications behind colleague sign-off (Google Doc suggestions or `approvals.md`) before they count as final (`workflow/35-colleague-approval.md`) |
+| `/r-redline` | **Redline Export** — colored old-vs-new manuscript for the journal reviewer (insert = green/underline, delete = red/strikethrough) + response-to-reviewers letter (`workflow/90-redline-export.md`) |
 
 ### Paragraph-by-Paragraph Modes (`/r-pp`, `/r-pp-a`)
 
@@ -352,6 +355,10 @@ Optional:
   re-derive numeric claims instead of inheriting them.
 - `DATA_VERIFY_NOTES` — free-text pointer to the master file, key column, and
   formula location within `DATA_VERIFY_PATH`.
+- `GDRIVE_REVIEW_FOLDER_ID` — shared Drive folder id for `/r-gdrive`
+  (written back after `create`; reused to avoid duplicate folders).
+- `RCLONE_REMOTE`, `GDRIVE_PATH` — only for the rclone fallback of
+  `/r-gdrive` when the MCP Drive connector is unavailable.
 
 ## Python execution contract
 
@@ -410,6 +417,20 @@ Optional:
    (date + 24h time, so multiple bumps in the same day stay distinct).
 8. `workflow/70-final-sheet.md` — produce `revisions/<reviewer>/
    final-sheet-vN.md` with the post-revision status.
+
+Collaboration / delivery steps (run on demand, not in fixed order):
+
+- `workflow/35-colleague-approval.md` — triggered by `/r-approve`. Gates
+  `Accepted` points behind colleague sign-off (Google Doc suggestions or
+  structured `approvals.md`) before they count as final.
+- `workflow/80-gdrive-collab.md` — triggered by `/r-gdrive`. Create/sync a
+  shared Drive folder (MCP connector, rclone fallback); pull colleague
+  feedback into `revisions/<slug>/sources/` as a revision source. The skill
+  never adds collaborators — the user shares the folder in the Drive UI.
+- `workflow/90-redline-export.md` — triggered by `/r-redline`. Colored
+  old-vs-new manuscript for the reviewer (`scripts/make_redline.py`) plus
+  the point-by-point response letter. The redline is a **separate**
+  deliverable; the clean submission file carries no revision marks.
 
 Skipping is allowed if a step is not applicable; never silently skip a
 step that *should* run.
@@ -538,6 +559,9 @@ point in the workflow:
 | **Dual peer review** (`/r-pr-2`) | `/r-pr-2` | Generate two standalone reviewer reports (method-focused + theory-focused) + synthesis document in `revisions/<article-slug>/`. No interactive A/R/M — output files feed subsequent revision commands (`/r-pp-a`, `/r-global`, etc.). |
 | **Connector revision** (`/r-conn`) | `/r-conn` | Non-content pass: examine logical connectors, inter-paragraph transitions, inter-section transitions, signposting. Diagnostic table + selective fix with A/R/M. |
 | **Global revision** (`/r-global`) | `/r-global` | High-level, non-granular pass through seven lenses (thesis, architecture, proportionality, narrative, redundancy, terminology, norms). Diagnostic report → user selects lenses → structural A/R/M points. |
+| **Drive collaboration** (`/r-gdrive`) | `/r-gdrive [create\|push\|sync]` | Create/sync a shared Drive folder; push the revised article + redline; pull colleague feedback into `revisions/<slug>/sources/`. No A/R/M — output is a source for later passes. User shares the folder. |
+| **Colleague approval** (`/r-approve`) | `/r-approve` | Gate `Accepted` points behind colleague sign-off (Doc suggestions or `approvals.md`). `approve` → mark approved; `changes` → re-propose via A/R/M; `reject` → ask user (no auto-revert). |
+| **Redline export** (`/r-redline`) | `/r-redline` | Colored old-vs-new `.docx`/`.html` for the reviewer + response-to-reviewers letter. Separate from the clean submission file. No A/R/M. |
 
 For paragraph and whole-article scopes, break into more granular points
 when the change touches separate concerns (e.g. a citation correction
