@@ -16,7 +16,7 @@ description: |
   equivalent).
 ---
 
-# Article Revision Skill
+# Article Revision Skill `artr`
 
 Operational layer that orchestrates the existing article-style and
 bibliography skills around a structured revision workflow.
