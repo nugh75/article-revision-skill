@@ -468,6 +468,35 @@ Each modification within a paragraph is numbered, so the user can accept or reje
 If the user responds with `A` without numbers, all modifications are accepted.
 If the user responds with `R` without numbers, the entire point is rejected.
 
+### Auto-mode
+
+Auto-mode must be **explicitly requested** by the user (e.g. "attiva auto-mode", "automatico", "continua senza chiedere"). It is **never** the default.
+
+When auto-mode is active:
+
+1. The skill runs the same diagnostic and proposal cycle for each paragraph.
+2. Each modification is **presented in chat** using the standard format above.
+3. After presenting, the skill **automatically applies** the modification (implicit `A`) and advances to the next.
+4. The skill **never waits** for user input between paragraphs.
+5. Only the following cases require pausing and asking the user:
+   - Ambiguous or conflicting information that cannot be resolved from context
+   - A modification with `risk: high` (structural change, potential loss of content)
+   - A modification that requires a decision between two valid alternatives
+   - End of section or end of article (report summary, then stop or continue)
+6. At the end of each section, output a brief summary:
+
+```
+[Auto-mode] §<N> completato: X modifiche applicate, Y saltate.
+```
+
+7. At the end of the full revision, output a final summary:
+
+```
+[Auto-mode] Revisione completata: N sezioni, M modifiche applicate, K saltate.
+```
+
+To **deactivate** auto-mode, the user says "ferma", "stop", "manual", or similar. The skill resumes the standard interactive A/R/M pattern from the current paragraph.
+
 ### After applying changes
 
 Once modifications are applied, **do not advance** to the next point automatically. Instead, output:
