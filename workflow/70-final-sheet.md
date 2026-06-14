@@ -73,6 +73,14 @@ revision(<slug>): final sheet — round closed
 
 ## 7. Hand Off
 
+After writing the final sheet, the workflow must always hand off to
+`workflow/95-decision-log.md`. This handoff is mandatory even when:
+
+- the round produced no accepted changes;
+- the user stopped after a partial pass;
+- the outcome is rejected or deferred;
+- no git commit exists.
+
 Final chat message:
 
 ```text

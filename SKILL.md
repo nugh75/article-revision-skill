@@ -325,6 +325,7 @@ violation, same severity as auto-committing.
 └── revisions/
     └── <reviewer-name>/
         ├── revision-plan-vN.md
+        ├── proposal-revision-YYYY-MM-DD-HHMM.md
         └── final-sheet-vN.md
 ```
 
@@ -417,6 +418,9 @@ Optional:
    (date + 24h time, so multiple bumps in the same day stay distinct).
 8. `workflow/70-final-sheet.md` — produce `revisions/<reviewer>/
    final-sheet-vN.md` with the post-revision status.
+9. `workflow/95-decision-log.md` — mandatory closure step. Record the round in
+   `revisions/decision-log/` and update `index.md`, even if no git commit is
+   created.
 
 Collaboration / delivery steps (run on demand, not in fixed order):
 
@@ -468,6 +472,22 @@ For every revision point, output exactly this shape in chat:
 
 Then **wait** for the user. Do not pre-emptively apply.
 
+If a single point contains **more than one numbered modification**, the skill
+must also write a companion file to disk before waiting for the user:
+
+`revisions/<reviewer>/proposal-revision-YYYY-MM-DD-HHMM.md`
+
+The file mirrors the exact proposal shown in chat and acts as the proposal to
+follow during the subsequent A/R/M loop. It must include:
+
+- the reference article path and current version;
+- timestamp;
+- point title and scope;
+- original text;
+- full proposed text;
+- numbered modifications;
+- current status: `proposed`.
+
 Each modification within a paragraph is numbered, so the user can accept or reject individual changes with precision:
 - `A 1,3` → accept modifications 1 and 3 only.
 - `R 2` → reject modification 2.
@@ -518,6 +538,10 @@ And **wait** for an explicit command from the user (e.g. "A 1,3", "M 5: ...", "n
 ### Handling responses
 
 - `Accept` (with selected numbers) → apply via Edit only the numbered modifications. Mark applied modifications as `Accepted` in the project file. Increment the *accepted-since-last-bump* counter. **Do not commit.** When the counter reaches `AUTO_BUMP_THRESHOLD`, suggest a version bump (see step 7). Ask for further changes on the same paragraph.
+- Every A/R/M interaction must be compatible with the project's
+  `decision-log` skill. At the end of the revision round, `95-decision-log.md`
+  is mandatory: the round must always be logged, even if the final outcome is
+  partial, rejected, or deferred.
 - `Reject` (with selected numbers) → annotate those modifications as `Rejected` + reason. No file edits for them. Ask for further changes on the same paragraph.
 - `Reject` (entire point) → annotate entire point `Rejected` + reason. Advance to next point.
 - `Modify <N>: <direzione>` → regenerate modification N according to the user's direction. Re-present the updated modification with the same numbering. Repeat until accepted or rejected.

@@ -37,6 +37,17 @@ Apply:
 
 Never collapse multiple separate concerns into a single proposal. If the same paragraph needs both citation correction and phrasing change, present two consecutive proposals, each with its own decision.
 
+If a single proposal still contains **more than one numbered modification**
+(for example, several refusi in the same paragraph or multiple tightly related
+surface edits), write a sidecar proposal file before presenting it in chat:
+
+`revisions/<reviewer>/proposal-revision-YYYY-MM-DD-HHMM.md`
+
+Use `templates/proposal-revision.md`. The file must mirror the exact chat
+proposal and act as the persisted proposal to follow during the A/R/M loop.
+Each subsequent `Accept` / `Reject` / `Modify` updates the same file's
+`Decision Trail` and status.
+
 ## 3. Present In Chat
 
 ```text
@@ -76,9 +87,12 @@ Each modification is numbered. The user responds with:
 
 1. Apply via Edit on the article only the modifications accepted by the user. If some modifications were rejected or left pending, apply only the accepted ones.
 2. Update the project file: each accepted modification → `Accepted`.
-3. Increment the *accepted-since-last-bump* counter.
-4. **Do not commit.**
-5. **Do not advance automatically.** Output:
+3. If a sidecar proposal file exists for this point, update it: accepted item
+   numbers, pending items, and status (`accepted` if all accepted, `partial`
+   otherwise).
+4. Increment the *accepted-since-last-bump* counter.
+5. **Do not commit.**
+6. **Do not advance automatically.** Output:
 
    ```text
    Applicate modifiche <numbers>. [Restano in sospeso le modifiche <numbers>.] Ci sono altri cambiamenti da fare in questo paragrafo?
@@ -86,13 +100,16 @@ Each modification is numbered. The user responds with:
 
    Wait for an explicit command from the user.
 
-6. If the counter has reached `AUTO_BUMP_THRESHOLD`, after the user signals to advance, propose a bump (hand off to `60-bump-version.md`).
+7. If the counter has reached `AUTO_BUMP_THRESHOLD`, after the user signals to advance, propose a bump (hand off to `60-bump-version.md`).
 
 ### Reject (selected numbers)
 
 1. Mark rejected modifications as `Rejected` in the project file + reason.
-2. No file edits for those modifications.
-3. **Do not advance automatically.** Output:
+2. If a sidecar proposal file exists for this point, update the rejected item
+   numbers and keep status `partial` unless all items were rejected, in which
+   case set `rejected`.
+3. No file edits for those modifications.
+4. **Do not advance automatically.** Output:
 
    ```text
    Modifiche <numbers> respinte. [Restano in sospeso le modifiche <numbers>.] Ci sono altri cambiamenti da fare in questo paragrafo?
@@ -101,14 +118,18 @@ Each modification is numbered. The user responds with:
 ### Reject (entire point)
 
 1. Mark the entire point `Rejected` + reason.
-2. No file modifications.
-3. Advance to next point.
+2. If a sidecar proposal file exists for this point, mark the file status as
+   `rejected` and record the human rationale.
+3. No file modifications.
+4. Advance to next point.
 
 ### Modify <N>: <direction>
 
 1. Regenerate modification N according to the user's direction.
-2. Re-present the updated modification in context, keeping the same numbering.
-3. Return to step 3. After eventual `Accept`, label the modification as `Modified` (not `Accepted`).
+2. If a sidecar proposal file exists for this point, overwrite the relevant
+   modification entry and append the human direction in `Decision Trail`.
+3. Re-present the updated modification in context, keeping the same numbering.
+4. Return to step 3. After eventual `Accept`, label the modification as `Modified` (not `Accepted`).
 
 ### Advance to next point
 
