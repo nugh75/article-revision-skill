@@ -5,7 +5,9 @@
 # Accepts source filenames in either of these formats:
 #   article-vN-YYYY-MM-DD.md
 #   article-vN-YYYY-MM-DD-HHMM.md
-# (plus the optional `-anonymous` suffix).
+# plus the optional `-anonymous` suffix.
+# If the source filename ends with `-drive`, that marker is treated as a
+# Google Drive download artifact and is dropped in the bumped filename.
 #
 # Usage:
 #     new_version.sh <path/to/article-vN-...md>
@@ -50,17 +52,18 @@ BASENAME=$(basename "$SRC")
 DIRNAME=$(dirname "$SRC")
 
 # Extract version number and the static prefix.
-# Pattern: <prefix>-vN-YYYY-MM-DD[-HHMM][-anonymous].md
+# Pattern: <prefix>-vN-YYYY-MM-DD[-HHMM][-drive][-anonymous].md
 # Examples:
 #   article-v9-2026-05-08.md
 #   scientific-article-praxis-v9-2026-05-08-anonymous.md
 #   draft-v3-2026-05-08-1430.md
-if [[ "$BASENAME" =~ ^(.+)-v([0-9]+)-[0-9]{4}-[0-9]{2}-[0-9]{2}(-[0-9]{4})?(-anonymous|-anonima)?\.md$ ]]; then
+#   article-v17-2026-06-14-1616-drive.md
+if [[ "$BASENAME" =~ ^(.+)-v([0-9]+)-[0-9]{4}-[0-9]{2}-[0-9]{2}(-[0-9]{4})?(-drive)?(-anonymous|-anonima)?\.md$ ]]; then
     PREFIX="${BASH_REMATCH[1]}"
     VERSION="${BASH_REMATCH[2]}"
-    SUFFIX="${BASH_REMATCH[4]:-}"
+    SUFFIX="${BASH_REMATCH[5]:-}"
 else
-    echo "ERROR: filename doesn't match <prefix>-vN-YYYY-MM-DD[-HHMM][-anonymous].md: $BASENAME" >&2
+    echo "ERROR: filename doesn't match <prefix>-vN-YYYY-MM-DD[-HHMM][-drive][-anonymous].md: $BASENAME" >&2
     exit 2
 fi
 

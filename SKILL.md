@@ -435,6 +435,14 @@ Collaboration / delivery steps (run on demand, not in fixed order):
 Skipping is allowed if a step is not applicable; never silently skip a
 step that *should* run.
 
+## Filename provenance rule
+
+When the active article filename contains `-drive` before `.md`, that token
+marks a file downloaded from Google Drive. It is provenance metadata, not part
+of the canonical version name. The revision workflow may use that file as the
+source, but any version bump must remove `-drive` and generate the canonical
+filename `article-v(N+1)-YYYY-MM-DD-HHMM[-anonymous].md`.
+
 ## Interaction pattern (binding)
 
 For every revision point, output exactly this shape in chat:

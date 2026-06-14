@@ -35,6 +35,8 @@ Hold this in working memory for the session.
 
 Look for `articles/article-v*-*.md`. If multiple versions exist, pick the one with the highest `vN`.
 
+If the chosen filename contains `-drive`, treat that marker as provenance only: it means the file was downloaded from Google Drive. Keep the file as the active source, but do not propagate `-drive` when creating the bumped version.
+
 If `articles/` does not exist, search the project root and likely directories (`docs/`, `drafts/`, `revisions/`) for files matching `article-v*-*.md`. Report the candidate to the user before continuing.
 
 ## 4. Detect Article Language

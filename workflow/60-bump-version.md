@@ -37,6 +37,7 @@ NEW_PATH=$(scripts/new_version.sh <current-article-path>)
 The script:
 
 - copies the current file with incremented `vN+1` and current timestamp `YYYY-MM-DD-HHMM`;
+- if the source filename contains `-drive`, treats it as a Google Drive download marker and removes it from the bumped filename;
 - preserves the `-anonymous` suffix if present;
 - prints the new path on stdout.
 
