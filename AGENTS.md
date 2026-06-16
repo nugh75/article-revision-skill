@@ -27,6 +27,9 @@ Trigger phrases:
 | `/r-global` | **Revisione Globale** — high-level, non-granular revision across seven structural lenses |
 | `/r-bump` | Bump article version (hand off to `workflow/60-bump-version.md`) |
 | `/r-sheet` | Generate final revision sheet (hand off to `workflow/70-final-sheet.md`) |
+| `/r-gdrive` | **Google Drive Collaboration** — create/sync a shared Drive folder; pull colleague feedback as a revision source (`workflow/80-gdrive-collab.md`) |
+| `/r-approve` | **Colleague Approval** — gate accepted modifications behind colleague sign-off before they count as final (`workflow/35-colleague-approval.md`) |
+| `/r-redline` | **Redline Export** — colored old-vs-new manuscript for the reviewer + response-to-reviewers letter (`workflow/90-redline-export.md`) |
 
 See `SKILL.md` for the full description of each mode.
 
@@ -80,8 +83,13 @@ Recommended:
 - `CROSSREF_USER_AGENT`, `OPENALEX_USER_AGENT` (bibliography online verification)
 - `ZOTERO_USER_ID`, `ZOTERO_API_KEY`, `ZOTERO_GROUP_ID` (Zotero sync)
 - `ARTICLE_LANG` (force language detection)
+- `ARTICLE_STYLE_NOTES` (extra style notes loaded at setup)
 - `PYTHON_BIN` (Python interpreter for skill scripts; default `.venv/bin/python`)
 - `AUTO_BUMP_THRESHOLD` (default 5)
+- `DATA_VERIFY_PATH` (root of the authoritative dataset/platform for empirical figures; enables `workflow/51-data-verification.md`)
+- `DATA_VERIFY_NOTES` (free-text pointer to master file, key column, and formula location within `DATA_VERIFY_PATH`)
+- `GDRIVE_REVIEW_FOLDER_ID` (shared Drive folder id for `/r-gdrive`; written back after `create`, reused to avoid duplicates)
+- `RCLONE_REMOTE`, `GDRIVE_PATH` (rclone fallback for `/r-gdrive` when the MCP Drive connector is unavailable)
 
 See `.env.example` for the complete template.
 
@@ -122,6 +130,9 @@ The user can pick one of three scopes:
 | **Dual peer review** (`/r-pr-2`) | `/r-pr-2` | Generate two standalone reviewer reports (method + theory) + synthesis in `revisions/`. No interactive A/R/M. |
 | **Connector revision** (`/r-conn`) | `/r-conn` | Non-content pass: logical connectors, transitions, signposting. Diagnostic table + selective fix with A/R/M |
 | **Global revision** (`/r-global`) | `/r-global` | High-level, non-granular: seven lenses (thesis, architecture, proportionality, narrative, redundancy, terminology, norms) |
+| **Drive collaboration** (`/r-gdrive`) | `/r-gdrive [create\|push\|sync]` | Create/sync a shared Drive folder; pull colleague feedback into `revisions/<slug>/sources/`. No A/R/M — output is a source for later passes. User shares the folder. |
+| **Colleague approval** (`/r-approve`) | `/r-approve` | Gate `Accepted` points behind colleague sign-off (Doc suggestions or `approvals.md`). `approve` → mark approved; `changes` → re-propose via A/R/M; `reject` → ask user (no auto-revert). |
+| **Redline export** (`/r-redline`) | `/r-redline` | Colored old-vs-new `.docx`/`.html` for the reviewer + response-to-reviewers letter. Separate from the clean submission file. No A/R/M. |
 
 Never collapse heterogeneous changes (citation + phrasing + structure) into one proposal. Split them into separate decisions.
 
@@ -196,6 +207,23 @@ In `workflow/10-setup.md`:
 Workflow documentation, prompts, and templates stay in English. Article proposals are written in `ARTICLE_LANG`.
 
 If `ARTICLE_LANG=it`, anglicisms in proposals must come from `templates/accepted-anglicisms-it.md`. Surface any new anglicism in the proposal block under "Possible exceptions".
+
+---
+
+## Feedback provenance
+
+Every revision round carries a `Feedback source`, set in `20-plan-revision.md` and stored in the project file and final sheet:
+
+- `journal` — a real reviewer/editor round. Its points feed the response letter; corrected figures must be disclosed there.
+- `simulated` — produced internally (`/r-pr-2`, self-review). Internal QA only. `/r-pr-2` documents carry `source: simulated` in frontmatter and are read, not re-asked. Never present simulated feedback to the journal as external review. `70-final-sheet.md` keeps it out of the response letter.
+
+Mixed rounds (a self-review layered on a real round) are split by tag: only `journal` points become response-letter material.
+
+---
+
+## Data verification (binding)
+
+A numeric claim is never inherited. Whenever a proposal adds, changes, or relies on a percentage, count, mean, index, correlation, rank, or a qualitative claim contingent on a figure, `workflow/51-data-verification.md` must run **before** proposing: re-derive the figure from the authoritative source (`DATA_VERIFY_PATH` / `DATA_VERIFY_NOTES`, or a data-source section in the project's `AGENTS.md`), with an explicit criterion (column, filter, denominator, regex with word boundaries). If no source reproduces the value, the point is `Deferred` — never replaced with a plausible number. Skipping this when a figure is in scope is a binding violation, same severity as auto-committing.
 
 ---
 

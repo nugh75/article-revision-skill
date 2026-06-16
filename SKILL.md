@@ -360,6 +360,8 @@ Optional:
   (written back after `create`; reused to avoid duplicate folders).
 - `RCLONE_REMOTE`, `GDRIVE_PATH` — only for the rclone fallback of
   `/r-gdrive` when the MCP Drive connector is unavailable.
+- `AUTO_BUMP_THRESHOLD` — number of accepted changes that triggers a mid-session
+  bump proposal. Default: `5`.
 
 ## Python execution contract
 
@@ -454,7 +456,7 @@ For every revision point, output exactly this shape in chat:
 ```
 ## Point N — <short title> · scope: <fragment|paragraph|whole article>
 
-**Original** (`<file>:<line-range>`)
+**Original** (`<article>:<line-range>`)
 > <verbatim text>
 
 **Proposta**
@@ -465,7 +467,10 @@ For every revision point, output exactly this shape in chat:
 2. `<old>` → `<new>` [(motivazione)]
 ...
 
-**Δ**: chars +X / words +Y · risk: <low|medium|high>
+**Δ**: chars <signed> / words <signed> · risk: <low|medium|high>
+
+**Norms respected**: <list>
+**Possible exceptions**: <list, with reason>
 
 **A/R/M?** (indicare i numeri delle modifiche, es. "A 2,4" oppure "M 3: sostituire X con Y")
 ```
@@ -551,15 +556,17 @@ If the proposal involves multiple separate edits (e.g. an inline citation + a bi
 
 ## Language auto-detection
 
-In `00-setup.md`:
+In `workflow/10-setup.md`:
 
 1. Skip frontmatter (lines between leading `---`).
-2. Read up to 1.000 chars of body text.
+2. Read up to 1,000 chars of body text.
 3. Score language by function words for the candidate languages.
 4. Highest score wins; ties → fallback to `langdetect` if installed, else ask the user.
 5. Persist to memory for the session as `ARTICLE_LANG`.
 
 Override via `.env` `ARTICLE_LANG=...` always wins over auto-detection.
+
+If `ARTICLE_LANG=it`, anglicisms in proposals must come from `templates/accepted-anglicisms-it.md`. Surface any new anglicism in the proposal block under "Possible exceptions".
 
 ## Style of generated proposals
 
@@ -650,6 +657,25 @@ other.
 ```
 bump: vN → v(N+1) (start revision session)
 ```
+
+## Versioning convention
+
+`<prefix>-vN-YYYY-MM-DD-HHMM[-anonymous].md`
+
+Multiple bumps in the same day stay distinct because of the time component. The bump script (`scripts/new_version.sh`) accepts both legacy `vN-YYYY-MM-DD` and new `vN-YYYY-MM-DD-HHMM` source filenames.
+
+## Scripts
+
+Run Python scripts with the project's Python venv (`PYTHON_BIN`). Bootstrap asks before creating `.venv/`; if the user refuses, ask before using system Python and remember the selection. Never fall back to `python3` silently.
+
+| Script | Purpose |
+|---|---|
+| `scripts/char_count.py` | Char/word counter with budget check |
+| `scripts/bib_check.py` | Static cross-check between citations and `.bib` |
+| `scripts/bib_verify_online.py` | Crossref + OpenAlex similarity scoring |
+| `scripts/sample_stats.py` | Per-cohort stats from `.xlsx`/`.csv` via YAML mapping |
+| `scripts/new_version.sh` | Bump filename to `<prefix>-v(N+1)-YYYY-MM-DD-HHMM` |
+| `scripts/diff_versions.sh` | Word-level diff between two versions |
 
 ## Skill is **not** for
 
