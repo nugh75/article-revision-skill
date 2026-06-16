@@ -153,20 +153,36 @@ Follow the standard response handling from `30-iterate-points.md`, section 4:
 - **Bibliography check.** If citations are touched, run `40-bibliography-check.md` before applying.
 - **Character budget.** After each accepted change, check against `EDITORIAL_LIMIT_CHARS`. If over, warn immediately (see `30-iterate-points.md`, edge case "Character overshoot").
 
-## 7. Completion
+## 7. Revision Closure
 
-When all paragraphs have been processed, output:
+**Trigger — either of:**
 
-```
-Revisione paragrafo per paragrafo completata.
-Paragrafi processati: N
-Modifiche accettate: X
-Modifiche respinte: Y
-Paragrafi saltati: Z
-Bilancio caratteri: +Δ (limite: EDITORIAL_LIMIT_CHARS)
+1. **Perimetro naturale esaurito**: l'ultimo paragrafo dell'articolo è stato processato.
+2. **Chiusura esplicita**: l'utente invia una frase di chiusura —
+   IT: `chiudi`, `fine`, `ho finito`, `concludi`, `stop`, `basta così`, `chiudiamo` /
+   EN: `close`, `done`, `finish`, `end`, `I'm done`.
 
-Vuoi generare il final sheet? (/r-sheet)
-Vuoi fare il bump di versione? (/r-bump)
-```
+**Sequenza obbligatoria:**
 
-Wait for the user. Do not auto-advance.
+1. Presentare il riepilogo:
+
+   ```
+   Revisione paragrafo per paragrafo completata.
+   Paragrafi processati: N  |  Accettati: A  |  Rifiutati: R  |  Saltati: S
+   Bilancio caratteri: +Δ (limite: EDITORIAL_LIMIT_CHARS)
+   Versione articolo attiva: <path>
+   ```
+
+2. Chiedere conferma:
+
+   ```
+   Procedo con la chiusura?
+     1. Final sheet (/r-sheet)  — facoltativo
+     2. Decision log            — obbligatorio
+     3. Sync current files      — obbligatorio
+   (sì / sì senza final sheet / annulla)
+   ```
+
+3. Su conferma:
+   - Se richiesto: `workflow/70-final-sheet.md`
+   - `workflow/95-decision-log.md`  ← chiude il task file e sincronizza i file correnti

@@ -30,15 +30,15 @@ and provides the input summary for `95-decision-log.md`.
 
 | Command | Steps (in order) |
 |---|---|
-| `/article-revision` | Plan revision · Iterate points · Bibliography check · Final sheet · Decision log |
-| `/r-pp` | Parse paragraphs · Walk P1..PN · Bibliography check · Final sheet · Decision log |
-| `/r-pp-a` | Parse paragraphs · Walk P1..PN (deep) · Bibliography check · Final sheet · Decision log |
-| `/r-pr-2` | Generate Reviewer A · Generate Reviewer B · Synthesize · Decision log |
-| `/r-conn` | Parse transitions · Diagnose · Fix selected · Decision log |
-| `/r-global` | Read article · Seven lenses · Fix selected · Decision log |
-| `/r-chapter` | Select section · Load article · Cross-article analysis · Fix selected · Decision log |
-| `/r-redline` | Generate redline · Response letter · Decision log |
-| `/r-approve` | Load approvals · Apply outcomes · Decision log |
+| `/article-revision` | Plan revision · Iterate points · Bibliography check · Final sheet · Decision log · Sync current files |
+| `/r-pp` | Parse paragraphs · Walk P1..PN · Bibliography check · Final sheet · Decision log · Sync current files |
+| `/r-pp-a` | Parse paragraphs · Walk P1..PN (deep) · Bibliography check · Final sheet · Decision log · Sync current files |
+| `/r-pr-2` | Generate Reviewer A · Generate Reviewer B · Synthesize · Decision log · Sync current files |
+| `/r-conn` | Parse transitions · Diagnose · Fix selected · Decision log · Sync current files |
+| `/r-global` | Read article · Seven lenses · Fix selected · Decision log · Sync current files |
+| `/r-chapter` | Select section · Load article · Cross-article analysis · Fix selected · Decision log · Sync current files |
+| `/r-redline` | Generate redline · Response letter · Decision log · Sync current files |
+| `/r-approve` | Load approvals · Apply outcomes · Decision log · Sync current files |
 
 All initial step statuses: `pending`. Steps 1 and 2 are pre-filled as `done`.
 

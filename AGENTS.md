@@ -47,6 +47,8 @@ If the user is doing something else (writing the article from scratch, generatin
 5. **Surgical edits.** Touch only what the current point requires. Do not clean up adjacent prose, formatting, or unrelated bibliography.
 6. **Mandatory bump at session start.** Every new revision session MUST start with a version bump (vN → vN+1) before any edits. The bump is enforced by `10-setup.md` step 5. Never skip it. The `AUTO_BUMP_THRESHOLD` handles additional mid-session bumps separately.
 7. **Task file per session.** Immediately after the bump, create `revisions/<article-slug>/task-<command-slug>-<bumped-version>.md` via `workflow/05-task.md`. Update it at each major step. Close it via `95-decision-log.md` at the end of the round. Never skip task file creation.
+8. **Sync current files.** At the end of every revision round, `workflow/95-decision-log.md` must call `workflow/96-sync-current.md`, which overwrites `articles/current.md`, `articles/current.docx`, and `bibliography/bibliography.docx`. This step is mandatory and runs even when no changes were accepted. Never close a round without it.
+9. **Revision closure triggers.** A round closes either when its natural perimeter is exhausted (last paragraph, last lens, last dimension, all reviewer points decided) OR when the user sends an explicit closure phrase (`chiudi`, `fine`, `ho finito`, `stop` / `close`, `done`, `finish`, `end`). In both cases, present a summary, ask for confirmation, then run the mandatory closure sequence.
 
 ---
 
@@ -114,7 +116,8 @@ See `.env.example` for the complete template.
 | 5 | `workflow/40-bibliography-check.md` | When a citation is touched or a reviewer flags one |
 | 6 | `workflow/50-sample-description.md` | When methodology asks for sample stats from raw data |
 | 7 | `workflow/60-bump-version.md` | Mandatory session-start bump + end of round, or after `AUTO_BUMP_THRESHOLD` accepted changes |
-| 8 | `workflow/70-final-sheet.md` | End of round |
+| 8 | `workflow/70-final-sheet.md` | End of round (optional) |
+| 9 | `workflow/95-decision-log.md` + `96-sync-current.md` | Mandatory closure: decision log, task file close, sync current files |
 
 Each workflow file contains the full step-by-step instructions. **Read the relevant workflow file before acting.**
 

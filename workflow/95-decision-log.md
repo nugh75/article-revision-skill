@@ -82,5 +82,21 @@ decision, and the short suggestion text.
 ## 5. Binding Rule
 
 This workflow is mandatory at the end of every revision round. The round is not
-considered closed until the decision log session and the index are both
-updated.
+considered closed until the decision log session, the index, and the current
+files (step 6) are all updated.
+
+## 6. Sync Current Files (mandatory)
+
+Immediately after writing the session entry and updating `index.md`, run
+`workflow/96-sync-current.md`.
+
+This step is **not optional**. It overwrites:
+- `articles/current.md` — copy of the active article version
+- `articles/current.docx` — pandoc conversion of `current.md`
+- `bibliography/bibliography.docx` — formatted reference list from `reference.bib`
+
+If pandoc is not available, `96-sync-current.md` warns and skips `.docx`
+generation without aborting the closure.
+
+Add the sync result to the task file step `Sync current files` via
+`workflow/05-task.md#update-step`.

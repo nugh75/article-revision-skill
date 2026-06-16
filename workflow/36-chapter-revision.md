@@ -208,10 +208,38 @@ Handle A/R/M responses as in `workflow/30-iterate-points.md`.
 - If any citation was touched → hand off to `workflow/40-bibliography-check.md`.
 - If any numeric claim was touched → hand off to `workflow/51-data-verification.md`.
 
-## 7. Closure
+## 7. Revision Closure
 
-1. If the user requests a final sheet → run `workflow/70-final-sheet.md`.
-2. Close the task file: `workflow/05-task.md` — action `close`.
-3. Run `workflow/95-decision-log.md` with `type: revision-chapter`.
+**Trigger — either of:**
+
+1. **Perimetro naturale esaurito**: tutte le dimensioni selezionate dall'utente hanno ricevuto una decisione A/R/M.
+2. **Chiusura esplicita**: l'utente invia una frase di chiusura —
+   IT: `chiudi`, `fine`, `ho finito`, `concludi`, `stop`, `basta così`, `chiudiamo` /
+   EN: `close`, `done`, `finish`, `end`, `I'm done`.
+
+**Sequenza obbligatoria:**
+
+1. Presentare il riepilogo:
+
+   ```
+   Revisione capitolo §N completata.
+   Dimensioni analizzate: D  |  Modifiche accettate: A  |  Rifiutate: R
+   Bilancio caratteri: +Δ (limite: EDITORIAL_LIMIT_CHARS)
+   Versione articolo attiva: <path>
+   ```
+
+2. Chiedere conferma:
+
+   ```
+   Procedo con la chiusura?
+     1. Final sheet (/r-sheet)  — facoltativo
+     2. Decision log            — obbligatorio
+     3. Sync current files      — obbligatorio
+   (sì / sì senza final sheet / annulla)
+   ```
+
+3. Su conferma:
+   - Se richiesto: `workflow/70-final-sheet.md`
+   - `workflow/95-decision-log.md` con `type: revision-chapter` ← chiude il task file e sincronizza i file correnti
 
 `05-task.md#update-step`: `Decision log` → `done` once `95-decision-log.md` completes.

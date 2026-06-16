@@ -187,16 +187,37 @@ Follow standard `30-iterate-points.md`, section 4. After applying, ask: *"Ci son
 - **Bibliography check.** Not applicable — this mode does not touch citations.
 - **Character budget.** Connector edits are minor. Warn only if adding signposting sentences causes significant change.
 
-## 11. Completion
+## 11. Revision Closure
 
-```
-Revisione connettori completata.
-Transizioni sistemate: N
-Connettori riformulati: K
-Segnaletica aggiornata: J
-Modifiche accettate: X
-Modifiche respinte: Y
+**Trigger — either of:**
 
-Vuoi procedere con un'altra modalità? (/r-pp, /r-pr-2, /r-global)
-Vuoi fare il bump di versione? (/r-bump)
-```
+1. **Perimetro naturale esaurito**: tutte le transizioni e i connettori selezionati dall'utente sono stati sistemati.
+2. **Chiusura esplicita**: l'utente invia una frase di chiusura —
+   IT: `chiudi`, `fine`, `ho finito`, `concludi`, `stop`, `basta così`, `chiudiamo` /
+   EN: `close`, `done`, `finish`, `end`, `I'm done`.
+
+**Sequenza obbligatoria:**
+
+1. Presentare il riepilogo:
+
+   ```
+   Revisione connettori completata.
+   Transizioni sistemate: N  |  Connettori riformulati: K  |  Segnaletica aggiornata: J
+   Modifiche accettate: X  |  Rifiutate: Y
+   Bilancio caratteri: +Δ (limite: EDITORIAL_LIMIT_CHARS)
+   Versione articolo attiva: <path>
+   ```
+
+2. Chiedere conferma:
+
+   ```
+   Procedo con la chiusura?
+     1. Final sheet (/r-sheet)  — facoltativo
+     2. Decision log            — obbligatorio
+     3. Sync current files      — obbligatorio
+   (sì / sì senza final sheet / annulla)
+   ```
+
+3. Su conferma:
+   - Se richiesto: `workflow/70-final-sheet.md`
+   - `workflow/95-decision-log.md`  ← chiude il task file e sincronizza i file correnti

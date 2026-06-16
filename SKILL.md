@@ -317,17 +317,26 @@ violation, same severity as auto-committing.
 <project-root>/
 ├── .env
 ├── articles/                         # or any directory; auto-detected
-│   └── article-vN-YYYY-MM-DD[-anonymous].md
+│   ├── article-vN-YYYY-MM-DD[-anonymous].md
+│   ├── current.md                    # always the active version (synced by 96-sync-current)
+│   └── current.docx                  # Word export of current.md
 ├── bibliography/
-│   └── reference.bib
+│   ├── reference.bib
+│   └── bibliography.docx             # formatted reference list (synced by 96-sync-current)
 ├── editorial-norms/
-│   └── <journal-norms>.md
+│   ├── <journal-norms>.md
+│   ├── reference.docx                # optional: pandoc reference doc for journal layout
+│   └── <style>.csl                   # optional: CSL file for citation formatting
 ├── data/                             # optional, for sample stats
 └── revisions/
-    └── <reviewer-name>/
-        ├── revision-plan-vN.md
-        ├── proposal-revision-YYYY-MM-DD-HHMM.md
-        └── final-sheet-vN.md
+    ├── <reviewer-name>/
+    │   ├── revision-plan-vN.md
+    │   ├── proposal-revision-YYYY-MM-DD-HHMM.md
+    │   ├── final-sheet-vN.md
+    │   └── task-<cmd>-<version>.md   # per-session task file
+    └── decision-log/
+        ├── index.md
+        └── session-NNN.md
 ```
 
 If any of these is missing, the skill asks the user to confirm an
@@ -430,8 +439,12 @@ Optional:
 8. `workflow/70-final-sheet.md` — produce `revisions/<reviewer>/
    final-sheet-vN.md` with the post-revision status.
 9. `workflow/95-decision-log.md` — mandatory closure step. Record the round in
-   `revisions/decision-log/` and update `index.md`, even if no git commit is
-   created.
+   `revisions/decision-log/` and update `index.md`, close the task file, then
+   call `96-sync-current.md`. The round is not closed until all three complete.
+10. `workflow/96-sync-current.md` — mandatory sync step (called by 95). Overwrites
+   `articles/current.md`, `articles/current.docx`, and
+   `bibliography/bibliography.docx`. Requires pandoc; warns and skips `.docx`
+   if pandoc is absent.
 
 Collaboration / delivery steps (run on demand, not in fixed order):
 
@@ -621,6 +634,31 @@ editorial layout:
 - If the user explicitly authorizes a push, confirm the target remote/branch
   when ambiguous, then run `git push`.
 
+## Revision closure triggers
+
+A revision session closes in **two cases**:
+
+1. **Perimetro naturale esaurito** — all items in the revision scope have been processed:
+   - `/article-revision`, `/r-pp`, `/r-pp-a`: last reviewer point or last paragraph reached.
+   - `/r-conn`: all selected transitions and overused connectors fixed.
+   - `/r-global`: all selected lenses have produced and received A/R/M decisions.
+   - `/r-chapter`: all selected cross-article dimensions fixed.
+
+2. **Chiusura esplicita** — user sends a closure phrase:
+   - IT: `chiudi`, `fine`, `ho finito`, `concludi`, `stop`, `basta così`, `chiudiamo`
+   - EN: `close`, `done`, `finish`, `end`, `I'm done`
+
+**Mandatory closure sequence (always the same):**
+
+1. Present session summary (items processed, accepted/rejected/modified, Δ chars, active version).
+2. Ask: *"Procedo con la chiusura? (sì / sì senza final sheet / annulla)"*
+3. On confirm:
+   - `workflow/70-final-sheet.md` — if user requests it
+   - `workflow/95-decision-log.md` — mandatory (closes task file + calls `96-sync-current.md`)
+
+Never advance to the closure sequence without user confirmation. Never skip
+`95-decision-log.md` or `96-sync-current.md` once closure is confirmed.
+
 ## Revision scope (granularity)
 
 The skill can operate on three levels. The user picks the scope at any
@@ -705,6 +743,7 @@ Run Python scripts with the project's Python venv (`PYTHON_BIN`). Bootstrap asks
 | `scripts/sample_stats.py` | Per-cohort stats from `.xlsx`/`.csv` via YAML mapping |
 | `scripts/new_version.sh` | Bump filename to `<prefix>-v(N+1)-YYYY-MM-DD-HHMM` |
 | `scripts/diff_versions.sh` | Word-level diff between two versions |
+| `scripts/sync_current.sh` | Sync `current.md`, `current.docx`, `bibliography.docx` after each revision round |
 
 ## Skill is **not** for
 

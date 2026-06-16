@@ -150,3 +150,37 @@ Only advance when the user gives an explicit command:
 ## 6. State Persistence
 
 The accepted-since-bump counter and per-point decision state live entirely inside the `revision-plan-vN.md` file. On every Accept/Reject/Modify, rewrite the relevant section of that file. This way, an interrupted session resumes cleanly: when the skill is re-invoked, it reads the project file and continues from the first point still in `To decide` state.
+
+## 7. Revision Closure
+
+**Trigger — either of:**
+
+1. **Perimetro naturale esaurito**: tutti i punti del piano di revisione sono in stato `Accepted`, `Rejected`, o `Deferred`.
+2. **Chiusura esplicita**: l'utente invia una frase di chiusura —
+   IT: `chiudi`, `fine`, `ho finito`, `concludi`, `stop`, `basta così`, `chiudiamo` /
+   EN: `close`, `done`, `finish`, `end`, `I'm done`.
+
+**Sequenza obbligatoria:**
+
+1. Presentare il riepilogo:
+
+   ```
+   Revisione punti completata.
+   Punti totali: N  |  Accettati: A  |  Rifiutati: R  |  Modificati: M  |  Rinviati: D
+   Bilancio caratteri: +Δ (limite: EDITORIAL_LIMIT_CHARS)
+   Versione articolo attiva: <path>
+   ```
+
+2. Chiedere conferma:
+
+   ```
+   Procedo con la chiusura?
+     1. Final sheet (/r-sheet)  — facoltativo
+     2. Decision log            — obbligatorio
+     3. Sync current files      — obbligatorio
+   (sì / sì senza final sheet / annulla)
+   ```
+
+3. Su conferma:
+   - Se richiesto: `workflow/70-final-sheet.md`
+   - `workflow/95-decision-log.md`  ← chiude il task file e sincronizza i file correnti

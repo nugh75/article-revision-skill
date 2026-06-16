@@ -235,21 +235,37 @@ Follow standard `30-iterate-points.md`, section 4, with one addition:
 - **Contradiction with reviewer feedback.** If reviewer feedback was previously processed via `/article-revision` and the global revision identifies a contradictory recommendation, surface the conflict explicitly: *"⚠️ Il Reviewer A ha chiesto di espandere §2, ma la lente 3 (proporzionalità) suggerisce di ridurlo. Quale direzione preferisci?"*
 - **Character budget.** Structural changes (cuts, moves, adds) have large character impact. Track the cumulative Δ after each accept and compare against `EDITORIAL_LIMIT_CHARS`.
 
-## 8. Completion
+## 8. Revision Closure
 
-```
-Revisione globale completata.
-Lenti analizzate: 7
-Lenti con modifiche: N
-Modifiche strutturali accettate: X
-Modifiche terminologiche accettate: Y
-Modifiche di proporzione accettate: Z
-Modifiche respinte: R
-Bilancio caratteri: +Δ (limite: EDITORIAL_LIMIT_CHARS)
+**Trigger — either of:**
 
-L'architettura è ora solida. Vuoi procedere con la revisione granulare?
-- /r-pp per revisione paragrafo per paragrafo
-- /r-pp-a per revisione approfondita
-- /r-conn per la revisione dei connettori
-- /r-bump per il bump di versione
-```
+1. **Perimetro naturale esaurito**: tutte le lenti selezionate dall'utente hanno prodotto le loro proposte e ricevuto una decisione A/R/M.
+2. **Chiusura esplicita**: l'utente invia una frase di chiusura —
+   IT: `chiudi`, `fine`, `ho finito`, `concludi`, `stop`, `basta così`, `chiudiamo` /
+   EN: `close`, `done`, `finish`, `end`, `I'm done`.
+
+**Sequenza obbligatoria:**
+
+1. Presentare il riepilogo:
+
+   ```
+   Revisione globale completata.
+   Lenti analizzate: 7  |  Lenti con modifiche: N
+   Strutturali: X  |  Terminologiche: Y  |  Proporzione: Z  |  Rifiutate: R
+   Bilancio caratteri: +Δ (limite: EDITORIAL_LIMIT_CHARS)
+   Versione articolo attiva: <path>
+   ```
+
+2. Chiedere conferma:
+
+   ```
+   Procedo con la chiusura?
+     1. Final sheet (/r-sheet)  — facoltativo
+     2. Decision log            — obbligatorio
+     3. Sync current files      — obbligatorio
+   (sì / sì senza final sheet / annulla)
+   ```
+
+3. Su conferma:
+   - Se richiesto: `workflow/70-final-sheet.md`
+   - `workflow/95-decision-log.md`  ← chiude il task file e sincronizza i file correnti
