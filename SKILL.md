@@ -33,6 +33,7 @@ bibliography skills around a structured revision workflow.
 | `/r-global` | **Revisione Globale** — high-level, non-granular revision: overall structure, argument coherence, section proportionality, redundancy, terminology consistency |
 | `/r-bump` | Bump article version (hand off to `workflow/60-bump-version.md`) |
 | `/r-sheet` | Generate final revision sheet (hand off to `workflow/70-final-sheet.md`) |
+| `/r-chapter` | **Revisione Capitolo** — revisiona una singola sezione in relazione al resto dell'articolo: terminologia, cross-riferimenti, filo argomentativo, ridondanze, interfacce di sezione (`workflow/36-chapter-revision.md`) |
 | `/r-gdrive` | **Google Drive Collaboration** — create/sync a shared Drive folder for colleagues; pull their feedback back as a revision source (`workflow/80-gdrive-collab.md`) |
 | `/r-approve` | **Colleague Approval** — gate accepted modifications behind colleague sign-off (Google Doc suggestions or `approvals.md`) before they count as final (`workflow/35-colleague-approval.md`) |
 | `/r-redline` | **Redline Export** — colored old-vs-new manuscript for the journal reviewer (insert = green/underline, delete = red/strikethrough) + response-to-reviewers letter (`workflow/90-redline-export.md`) |
@@ -378,6 +379,10 @@ Optional:
 
 ## Workflow files (must be followed in order on first invocation)
 
+0. `workflow/05-task.md` — per-session task file lifecycle (create, update-step,
+   close). Called by `10-setup.md` (create) and `95-decision-log.md` (close).
+   Stores the running step list and produces the session summary for the
+   decision log.
 1. `workflow/00-bootstrap.md` — set up the revision environment if missing
    (venv with Python deps, `.bib` file, `.env` with editorial parameters
    and Zotero credentials, editorial norms file). Idempotent: skips
@@ -404,6 +409,10 @@ Optional:
    High-level, non-granular revision across seven lenses: thesis clarity,
    argument architecture, section proportionality, narrative arc,
    redundancy, terminology consistency, norm alignment.
+4e. `workflow/36-chapter-revision.md` — triggered by `/r-chapter`. Revises a
+   single section at paragraph depth while checking it against the rest of the
+   article across six cross-article dimensions: terminology, cross-references,
+   section interfaces, redundancy, argument thread, norms compliance.
 5. `workflow/40-bibliography-check.md` — when a citation is touched or new
    keys are introduced.
 6. `workflow/50-sample-description.md` — when the methodology asks for a
@@ -627,6 +636,7 @@ point in the workflow:
 | **Dual peer review** (`/r-pr-2`) | `/r-pr-2` | Generate two standalone reviewer reports (method-focused + theory-focused) + synthesis document in `revisions/<article-slug>/`. No interactive A/R/M — output files feed subsequent revision commands (`/r-pp-a`, `/r-global`, etc.). |
 | **Connector revision** (`/r-conn`) | `/r-conn` | Non-content pass: examine logical connectors, inter-paragraph transitions, inter-section transitions, signposting. Diagnostic table + selective fix with A/R/M. |
 | **Global revision** (`/r-global`) | `/r-global` | High-level, non-granular pass through seven lenses (thesis, architecture, proportionality, narrative, redundancy, terminology, norms). Diagnostic report → user selects lenses → structural A/R/M points. |
+| **Chapter revision** (`/r-chapter`) | `/r-chapter [§N]` | Paragraph-depth revision of a single section in full cross-article context. Six diagnostic dimensions: terminology, cross-references, section interfaces, redundancy, argument thread, norms compliance. A/R/M per point. |
 | **Drive collaboration** (`/r-gdrive`) | `/r-gdrive [create\|push\|sync]` | Create/sync a shared Drive folder; push the revised article + redline; pull colleague feedback into `revisions/<slug>/sources/`. No A/R/M — output is a source for later passes. User shares the folder. |
 | **Colleague approval** (`/r-approve`) | `/r-approve` | Gate `Accepted` points behind colleague sign-off (Doc suggestions or `approvals.md`). `approve` → mark approved; `changes` → re-propose via A/R/M; `reject` → ask user (no auto-revert). |
 | **Redline export** (`/r-redline`) | `/r-redline` | Colored old-vs-new `.docx`/`.html` for the reviewer + response-to-reviewers letter. Separate from the clean submission file. No A/R/M. |
@@ -639,6 +649,25 @@ decisions, two micro-changes).
 Never collapse multiple semantic changes into a single proposal just to
 save chat tokens — the user must be able to accept one and reject the
 other.
+
+## Revision session task file
+
+Every revision session creates one task file at:
+`revisions/<article-slug>/task-<command-slug>-<bumped-version>.md`
+
+The task file is:
+- **Created** by `workflow/05-task.md` immediately after the mandatory bump (`10-setup.md` step 7).
+- **Updated** step by step as each workflow phase completes (`05-task.md#update-step`).
+- **Closed** by `workflow/95-decision-log.md` before writing the session entry (`05-task.md#close`).
+
+The closed task file contains:
+- The article path, version, command, and reviewer lane.
+- A step-by-step status table (`done` / `skipped` / `failed`).
+- Accepted / rejected / modified / deferred counts.
+- Final article char count vs limit.
+- The decision-log session identifier.
+
+Never skip task file creation. If `TASK_FILE_PATH` is not set when `95-decision-log.md` runs, it means setup was incomplete — warn the user.
 
 ## Mandatory Bump at Session Start
 

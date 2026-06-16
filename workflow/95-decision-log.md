@@ -3,6 +3,16 @@
 Mandatory end-of-round closure step. Record the revision round in the project's
 `revisions/decision-log/` structure, compatible with the `decision-log` skill.
 
+## 0. Close Task File
+
+Before reading any inputs, call `workflow/05-task.md` — action `close`.
+
+This fills in the task file's `## Riepilogo` and `## Stato articolo alla chiusura`
+sections. The returned summary is used in step 3 (§ Note) of the session body below.
+
+If `TASK_FILE_PATH` is not set in working memory (e.g. the session predates the
+task file feature), skip this step silently.
+
 ## 1. Inputs
 
 Read:
@@ -27,6 +37,7 @@ Frontmatter rules:
   - `revision-style`
   - `revision-global`
   - `revision-connector`
+  - `revision-chapter`
   - `version-bump`
 - `decision`:
   - `accepted` if all logged points were accepted
@@ -56,6 +67,7 @@ Write these sections:
 
 ## Note
 <open items, deferred issues, next step>
+<if a task file was closed in step 0: include its Riepilogo and Stato articolo alla chiusura here>
 ```
 
 ## 4. Update Index

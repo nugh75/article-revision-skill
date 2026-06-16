@@ -27,6 +27,7 @@ Trigger phrases:
 | `/r-global` | **Revisione Globale** — high-level, non-granular revision across seven structural lenses |
 | `/r-bump` | Bump article version (hand off to `workflow/60-bump-version.md`) |
 | `/r-sheet` | Generate final revision sheet (hand off to `workflow/70-final-sheet.md`) |
+| `/r-chapter` | **Revisione Capitolo** — paragraph-depth revision of one section in cross-article context: terminology, cross-references, interfaces, redundancy, argument thread, norms compliance (`workflow/36-chapter-revision.md`) |
 | `/r-gdrive` | **Google Drive Collaboration** — create/sync a shared Drive folder; pull colleague feedback as a revision source (`workflow/80-gdrive-collab.md`) |
 | `/r-approve` | **Colleague Approval** — gate accepted modifications behind colleague sign-off before they count as final (`workflow/35-colleague-approval.md`) |
 | `/r-redline` | **Redline Export** — colored old-vs-new manuscript for the reviewer + response-to-reviewers letter (`workflow/90-redline-export.md`) |
@@ -45,6 +46,7 @@ If the user is doing something else (writing the article from scratch, generatin
 4. **No silent behavior.** Whenever the skill takes a non-trivial action, output a one-line acknowledgement in chat.
 5. **Surgical edits.** Touch only what the current point requires. Do not clean up adjacent prose, formatting, or unrelated bibliography.
 6. **Mandatory bump at session start.** Every new revision session MUST start with a version bump (vN → vN+1) before any edits. The bump is enforced by `10-setup.md` step 5. Never skip it. The `AUTO_BUMP_THRESHOLD` handles additional mid-session bumps separately.
+7. **Task file per session.** Immediately after the bump, create `revisions/<article-slug>/task-<command-slug>-<bumped-version>.md` via `workflow/05-task.md`. Update it at each major step. Close it via `95-decision-log.md` at the end of the round. Never skip task file creation.
 
 ---
 
@@ -99,14 +101,16 @@ See `.env.example` for the complete template.
 
 | Step | File | When |
 |---|---|---|
+| 0 | `workflow/05-task.md` | Called by `10-setup.md` (create) and `95-decision-log.md` (close); tracks steps and produces session summary |
 | 1 | `workflow/00-bootstrap.md` | First invocation in a new project, or whenever an artifact is missing |
-| 2 | `workflow/10-setup.md` | After bootstrap; loads `.env`, norms, bibliography, active article, detects language |
+| 2 | `workflow/10-setup.md` | After bootstrap; loads `.env`, norms, bibliography, active article, detects language, creates task file |
 | 3 | `workflow/20-plan-revision.md` | When user provides reviewer feedback |
 | 4 | `workflow/30-iterate-points.md` | Core loop: propose, ask, apply (no commit) |
 | 4a | `workflow/31-paragraph-by-paragraph.md` | Triggered by `/r-pp` or `/r-pp-a`. Per-paragraph diagnostic walk. |
 | 4b | `workflow/32-peer-review-simulation.md` | Triggered by `/r-pr-2`. Generates three standalone documents in `revisions/<article-slug>/`. No interactive A/R/M. |
 | 4c | `workflow/33-connector-revision.md` | Triggered by `/r-conn`. Connector and transition polish. |
 | 4d | `workflow/34-global-revision.md` | Triggered by `/r-global`. Seven-lens structural review. |
+| 4e | `workflow/36-chapter-revision.md` | Triggered by `/r-chapter`. Paragraph-depth revision of one section with full cross-article context across six dimensions. |
 | 5 | `workflow/40-bibliography-check.md` | When a citation is touched or a reviewer flags one |
 | 6 | `workflow/50-sample-description.md` | When methodology asks for sample stats from raw data |
 | 7 | `workflow/60-bump-version.md` | Mandatory session-start bump + end of round, or after `AUTO_BUMP_THRESHOLD` accepted changes |
@@ -130,6 +134,7 @@ The user can pick one of three scopes:
 | **Dual peer review** (`/r-pr-2`) | `/r-pr-2` | Generate two standalone reviewer reports (method + theory) + synthesis in `revisions/`. No interactive A/R/M. |
 | **Connector revision** (`/r-conn`) | `/r-conn` | Non-content pass: logical connectors, transitions, signposting. Diagnostic table + selective fix with A/R/M |
 | **Global revision** (`/r-global`) | `/r-global` | High-level, non-granular: seven lenses (thesis, architecture, proportionality, narrative, redundancy, terminology, norms) |
+| **Chapter revision** (`/r-chapter`) | `/r-chapter [§N]` | Paragraph-depth revision of one section with full cross-article context: terminology, cross-references, section interfaces, redundancy, argument thread, norms compliance |
 | **Drive collaboration** (`/r-gdrive`) | `/r-gdrive [create\|push\|sync]` | Create/sync a shared Drive folder; pull colleague feedback into `revisions/<slug>/sources/`. No A/R/M — output is a source for later passes. User shares the folder. |
 | **Colleague approval** (`/r-approve`) | `/r-approve` | Gate `Accepted` points behind colleague sign-off (Doc suggestions or `approvals.md`). `approve` → mark approved; `changes` → re-propose via A/R/M; `reject` → ask user (no auto-revert). |
 | **Redline export** (`/r-redline`) | `/r-redline` | Colored old-vs-new `.docx`/`.html` for the reviewer + response-to-reviewers letter. Separate from the clean submission file. No A/R/M. |

@@ -82,4 +82,15 @@ Setup complete
 Ready. Proceed?
 ```
 
-After confirmation, wait for the next instruction (reviewer feedback, `/r-pp`, `/r-pr-2`, `/r-conn`, `/r-global`).
+## 7. Create Task File
+
+Immediately after the bump is confirmed, call `workflow/05-task.md` — action
+`create` — passing:
+
+- `COMMAND` from the slash command or trigger phrase used this session.
+- `ARTICLE_PATH`, `ARTICLE_SLUG`, `ARTICLE_VERSION`, `BUMPED_VERSION` from working memory.
+- `REVIEWER_LANE` from the revision plan or `self` for proactive modes.
+
+The task file path is stored as `TASK_FILE_PATH` in working memory.
+
+After creation, wait for the next instruction (reviewer feedback, `/r-pp`, `/r-pr-2`, `/r-conn`, `/r-global`, `/r-chapter`).
