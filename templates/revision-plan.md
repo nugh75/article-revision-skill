@@ -16,17 +16,17 @@
 Each reviewer point is evaluated separately. For each point:
 
 1. The `article-revision` skill shows the original text and the proposed change in chat.
-2. The user decides: `Accept` / `Reject` / `Modify`.
-3. On `Accept`: the change is applied to the article file. The skill does not commit.
-4. On `Reject`: the point remains in the project file with a reason. No file edit is made.
-5. On `Modify`: the skill regenerates the proposal according to the user's direction and repeats from step 1.
+2. The user decides: `Accetta` / `Modifica` / `Rivedi completamente` / `Tieni in considerazione`.
+3. On `Accetta`: the change is applied to the article file. The skill does not commit.
+4. On `Modifica`: the skill regenerates the selected modification according to the user's direction and repeats from step 1.
+5. On `Rivedi completamente`: the skill regenerates the whole proposal from the original text.
+6. On `Tieni in considerazione`: the point remains in the project file as deferred/context. No file edit is made.
 
 Allowed decision states:
 
 - `To decide`
 - `Accepted`
 - `Modified` (proposal reformulated and then accepted)
-- `Rejected`
 - `Deferred` (requires external data or later decision)
 
 ## Point-by-Point Revision
@@ -61,7 +61,7 @@ Modified:
 
 **Decision**
 
-[To decide | Accepted | Modified | Rejected | Deferred]
+[To decide | Accepted | Modified | Deferred]
 
 **Notes**
 

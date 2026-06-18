@@ -15,7 +15,7 @@ For each reviewer point (or arbitrary revision request) the skill:
 1. Loads the relevant section of the article, the bibliography, and the journal's editorial norms.
 2. Generates a **proposal** that respects the norms and the article's style.
 3. Shows in chat a fixed block: *Original + Proposal + Δ chars/words + Norms respected + Decision*.
-4. Waits for `Accept / Reject / Modify`.
+4. Waits for `Accetta / Modifica / Rivedi completamente / Tieni in considerazione`.
 5. On accept: applies the diff, updates the *project file* (the persistent revision plan), bumps a counter.
 6. After N accepted changes, **proposes** (never forces) a versioned snapshot of the article: `<prefix>-v(N+1)-YYYY-MM-DD-HHMM[-anonymous].md`.
 
@@ -193,7 +193,7 @@ content and enforce these layout rules:
 - Do not add blank paragraphs between body paragraphs.
 - Use style spacing before/after headings to create margins between headings and body text.
 - Avoid manual blank lines during `.docx` ↔ Markdown conversion.
-- Treat formatting changes as revision points that still require `Accept / Reject / Modify`.
+- Treat formatting changes as revision points that still require `Accetta / Modifica / Rivedi completamente / Tieni in considerazione`.
 
 ---
 
@@ -213,7 +213,7 @@ content and enforce these layout rules:
 
 - **User controls git.** The skill never commits, never stages, never pushes. It writes files; you commit.
 - **Always ask before creating.** Bootstrap, version bump, file generation — every write step asks for confirmation when ambiguous.
-- **Per-point granularity.** No mass replacements, no batched approvals. Every individual change goes through *Accept / Reject / Modify*.
+- **Per-point granularity.** No mass replacements, no batched approvals. Every individual change goes through *Accetta / Modifica / Rivedi completamente / Tieni in considerazione*.
 - **State lives in markdown.** The project file and final sheet are the source of truth; sessions resume cleanly after interruption.
 - **Surgical edits only.** Touch what the reviewer's point requires, nothing more.
 

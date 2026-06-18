@@ -42,7 +42,6 @@ Frontmatter rules:
 - `decision`:
   - `accepted` if all logged points were accepted
   - `partial` if mixed outcomes occurred
-  - `rejected` if all points were rejected
   - `modified` if the round mainly accepted user-modified proposals
   - `deferred` if nothing was applied and work was postponed
 - `suggestion`: one-line summary of the round
@@ -60,7 +59,7 @@ Write these sections:
 <brief synthesis of the proposals made this round; if multi-mod files exist, cite them by filename>
 
 ## Decisione umana
-<A/R/M outcomes and explicit rationale>
+<Accetta / Modifica / Rivedi completamente / Tieni in considerazione outcomes and explicit rationale>
 
 ## Modifiche applicate
 <flat bullet list of actual edits written to the article, or "Nessuna modifica applicata">

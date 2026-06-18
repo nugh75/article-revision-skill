@@ -41,10 +41,10 @@ The script writes a Markdown audit listing entries below the similarity threshol
 **Likely correct reference** (Crossref/OpenAlex, similarity X.YZ)
 > <matched-author> — *<matched-title>* (<matched-year>) — <DOI>
 
-**Decision?** Accept correction / Reject / Modify metadata / Keep unchanged with comment
+**Decisione sulla proposta?** Accetta correzione / Modifica metadata / Rivedi completamente / Tieni invariato con commento
 ```
 
-If the user accepts, modify `.bib` and any inline occurrences in the article. Suggested commit message, if the user asks:
+If the user chooses `Accetta correzione`, modify `.bib` and any inline occurrences in the article. Suggested commit message, if the user asks:
 
 ```text
 revision(<slug>): bib check — <bib_key> corrected

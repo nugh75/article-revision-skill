@@ -1,6 +1,6 @@
 # 32 — Standalone Dual Peer Review (Document Generation)
 
-Triggered by `/r-pr-2`. Simulates two independent peer reviewers with distinct personas and writes their reports as standalone Markdown documents. **No interactive A/R/M loop** — the documents feed subsequent revision passes (`/r-pp-a`, `/r-pp`, `/r-global`, `/r-conn`).
+Triggered by `/r-pr-2`. Simulates two independent peer reviewers with distinct personas and writes their reports as standalone Markdown documents. **No interactive decision loop** — the documents feed subsequent revision passes (`/r-pp-a`, `/r-pp`, `/r-global`, `/r-conn`).
 
 **Provenance:** every document generated here carries `source: simulated` in its frontmatter. This is internal QA, not external review. It must never be cited to the journal as if it were a real reviewer round, and the final sheet (`70-final-sheet.md`) keeps it out of any response letter. Real journal feedback enters through `20-plan-revision.md` with `source: journal`.
 
@@ -356,6 +356,6 @@ The user reviews the three documents and then invokes a revision command to appl
 - **`/r-pp`** — if light paragraph-level changes are sufficient
 - **`/r-conn`** — if transition/connector issues dominate
 
-The revision command reads the synthesis document (`peer-review-synthesis-vN.md`) and uses the priority-ordered action list and modification tags to guide the interactive A/R/M workflow. Each modification is presented with the standard `Point N` interaction pattern.
+The revision command reads the synthesis document (`peer-review-synthesis-vN.md`) and uses the priority-ordered action list and modification tags to guide the interactive decision workflow. Each modification is presented with the standard `Point N` interaction pattern.
 
 The user can also choose to process reviewer comments selectively (e.g. "applica solo i punti [A+B] convergenti della §3" or "parti dai punti critici di Reviewer A").

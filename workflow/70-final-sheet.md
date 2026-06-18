@@ -30,8 +30,7 @@ Use `templates/final-sheet.md` and substitute placeholders. The summary table at
 |---|---|
 | Accepted | Proposal applied |
 | Modified | Proposal reformulated and then applied |
-| Rejected | No text modification |
-| Deferred | Requires external data or a later decision |
+| Deferred | Kept as context, requires external data, or needs a later decision |
 
 ## 3. Recovery Suggestions
 
@@ -78,7 +77,7 @@ After writing the final sheet, the workflow must always hand off to
 
 - the round produced no accepted changes;
 - the user stopped after a partial pass;
-- the outcome is rejected or deferred;
+- the outcome is deferred;
 - no git commit exists.
 
 Final chat message:
@@ -87,7 +86,7 @@ Final chat message:
 Final sheet: revisions/<slug>/final-sheet-vN.md
 
 Round closed. Summary:
-- <X> accepted, <Y> modified, <Z> rejected, <W> deferred
+- <X> accepted, <Y> modified, <Z> deferred
 - count: <M> {chars|words} (<over|under> by <N>)
 - bibliography: <status>
 - outstanding tasks: <short list>

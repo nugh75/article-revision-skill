@@ -194,7 +194,7 @@ touch; if a paragraph is 🟢 `frozen`, apply the advisory warning flow (§5) be
 proposing.
 
 For each selected dimension, generate revision points following the standard
-A/R/M interaction pattern from `SKILL.md` § "Interaction pattern (binding)".
+decision interaction pattern from `SKILL.md` § "Interaction pattern (binding)".
 
 Each point must:
 - Identify the specific paragraph(s) in TARGET to change.
@@ -202,7 +202,8 @@ Each point must:
   (e.g. «termine "X" definito come Y in §2, usato come Z qui»).
 - Apply changes using `Edit` (surgical) or `replace_all` for global renames.
 
-Handle A/R/M responses as in `workflow/30-iterate-points.md`.
+Handle `Accetta`, `Modifica`, `Rivedi completamente`, and
+`Tieni in considerazione` responses as in `workflow/30-iterate-points.md`.
 
 `05-task.md#update-step`: `Fix selected` → `in-progress` (at start).
 `05-task.md#update-step`: `Fix selected` → `done` (when user signals all done or all dimensions exhausted).
@@ -216,7 +217,7 @@ Handle A/R/M responses as in `workflow/30-iterate-points.md`.
 
 **Trigger — either of:**
 
-1. **Perimetro naturale esaurito**: tutte le dimensioni selezionate dall'utente hanno ricevuto una decisione A/R/M.
+1. **Perimetro naturale esaurito**: tutte le dimensioni selezionate dall'utente hanno ricevuto una decisione esplicita.
 2. **Chiusura esplicita**: l'utente invia una frase di chiusura —
    IT: `chiudi`, `fine`, `ho finito`, `concludi`, `stop`, `basta così`, `chiudiamo` /
    EN: `close`, `done`, `finish`, `end`, `I'm done`.

@@ -29,7 +29,7 @@ status: in-progress
 ## Riepilogo
 
 - **Accettati**: —
-- **Rifiutati**: —
+- **Da considerare**: —
 - **Modificati**: —
 - **Rinviati**: —
 

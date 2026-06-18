@@ -31,7 +31,7 @@ generating the proposal:
 
 - 🟢 `frozen` → apply the advisory warning flow (`15-freeze-ledger.md` §5):
   prepend `⚠ Questa parte è CONGELATA …`, and require an explicit `sì, procedi`
-  before running A/R/M. If the user declines, skip the unit and advance.
+	  before running the decision loop. If the user declines, skip the unit and advance.
 - 🟡 `open` → if the row carries an intention, fold it into the diagnosis so the
   proposal addresses what was already noted.
 - 🔵 `wip` / untracked → proceed; mark the unit `wip` while working.
@@ -54,8 +54,9 @@ surface edits), write a sidecar proposal file before presenting it in chat:
 `revisions/<reviewer>/proposal-revision-YYYY-MM-DD-HHMM.md`
 
 Use `templates/proposal-revision.md`. The file must mirror the exact chat
-proposal and act as the persisted proposal to follow during the A/R/M loop.
-Each subsequent `Accept` / `Reject` / `Modify` updates the same file's
+proposal and act as the persisted proposal to follow during the decision loop.
+Each subsequent `Accetta` / `Modifica` / `Rivedi completamente` /
+`Tieni in considerazione` updates the same file's
 `Decision Trail` and status.
 
 ## 3. Present In Chat
@@ -79,23 +80,32 @@ Each subsequent `Accept` / `Reject` / `Modify` updates the same file's
 **Norms respected**: <list>
 **Possible exceptions**: <list, with reason>
 
-**A/R/M?** (indicare i numeri delle modifiche, es. "A 2,4" oppure "M 3: sostituire X con Y")
+**Decisione sulla proposta?**
+- `Accetta` — applica la proposta così com'è.
+- `Modifica <N>: <direzione>` — mantieni l'idea, ma cambia la modifica indicata.
+- `Rivedi completamente: <direzione>` — rigenera la proposta da capo.
+- `Tieni in considerazione: <nota>` — non applicare ora; registra come promemoria/traccia.
+
+Puoi indicare numeri specifici, es. `Accetta 2,4` oppure `Modifica 3: sostituire X con Y`.
 ```
 
 Wait for the user. Do **not** apply pre-emptively.
 
 Each modification is numbered. The user responds with:
-- `A 1,3` → accept modifications 1 and 3 only.
-- `R 2` → reject modification 2.
-- `M 4: <direction>` → modify modification 4 as directed.
-- `A` (no numbers) → accept all modifications.
-- `R` (no numbers) → reject the entire point.
+- `Accetta 1,3` → apply modifications 1 and 3 only.
+- `Modifica 4: <direction>` → regenerate modification 4 as directed.
+- `Rivedi completamente: <direction>` → regenerate the whole proposal.
+- `Tieni in considerazione 2: <note>` → do not apply modification 2 now; record it as deferred/context.
+- `Accetta` (no numbers) → apply all modifications.
+
+Optional shortcuts remain accepted for speed:
+`A = Accetta`, `M = Modifica`, `R = Rivedi completamente`, `T = Tieni in considerazione`.
 
 ## 4. Handle Response
 
-### Accept (selected numbers or all)
+### Accetta (selected numbers or all)
 
-1. Apply via Edit on the article only the modifications accepted by the user. If some modifications were rejected or left pending, apply only the accepted ones.
+1. Apply via Edit on the article only the modifications accepted by the user. If some modifications were deferred or left pending, apply only the accepted ones.
 2. Update the project file: each accepted modification → `Accepted`.
 3. If a sidecar proposal file exists for this point, update it: accepted item
    numbers, pending items, and status (`accepted` if all accepted, `partial`
@@ -112,34 +122,40 @@ Each modification is numbered. The user responds with:
 
 7. If the counter has reached `AUTO_BUMP_THRESHOLD`, after the user signals to advance, propose a bump (hand off to `60-bump-version.md`).
 
-### Reject (selected numbers)
+### Tieni in considerazione (selected numbers or all)
 
-1. Mark rejected modifications as `Rejected` in the project file + reason.
-2. If a sidecar proposal file exists for this point, update the rejected item
-   numbers and keep status `partial` unless all items were rejected, in which
-   case set `rejected`.
+1. Mark the selected modifications as `Deferred` in the project file with the
+   user's note/reason. If no numbers are provided, mark the whole point
+   `Deferred`.
+2. If a sidecar proposal file exists for this point, update the deferred item
+   numbers and keep status `partial` unless all items were deferred, in which
+   case set `deferred`.
 3. No file edits for those modifications.
-4. **Do not advance automatically.** Output:
+4. If the note describes an intention for the current unit, record it in the
+   freeze ledger via `log-comment` so the reminder survives outside chat.
+5. **Do not advance automatically.** Output:
 
    ```text
-   Modifiche <numbers> respinte. [Restano in sospeso le modifiche <numbers>.] Ci sono altri cambiamenti da fare in questo paragrafo?
+   Modifiche <numbers> tenute in considerazione. [Restano in sospeso le modifiche <numbers>.] Ci sono altri cambiamenti da fare in questo paragrafo?
    ```
 
-### Reject (entire point)
+### Rivedi completamente
 
-1. Mark the entire point `Rejected` + reason.
-2. If a sidecar proposal file exists for this point, mark the file status as
-   `rejected` and record the human rationale.
-3. No file modifications.
-4. Advance to next point.
+1. Regenerate the entire proposal from the original text and the user's new
+   direction, if provided.
+2. If a sidecar proposal file exists for this point, mark the previous proposal
+   as `superseded`, append the human direction in `Decision Trail`, and write the
+   new proposal in the same file.
+3. Re-present the full proposal in the standard format.
+4. Return to step 3. No file modifications happen until `Accetta`.
 
-### Modify <N>: <direction>
+### Modifica <N>: <direction>
 
 1. Regenerate modification N according to the user's direction.
 2. If a sidecar proposal file exists for this point, overwrite the relevant
    modification entry and append the human direction in `Decision Trail`.
 3. Re-present the updated modification in context, keeping the same numbering.
-4. Return to step 3. After eventual `Accept`, label the modification as `Modified` (not `Accepted`).
+4. Return to step 3. After eventual `Accetta`, label the modification as `Modified` (not merely `Accepted`).
 
 ### Advance to next point
 
@@ -152,7 +168,7 @@ Only advance when the user gives an explicit command:
 **Before advancing, run the freeze auto-offer** (`15-freeze-ledger.md` §7):
 
 - If the unit's work concluded cleanly, offer to freeze it:
-  `Lavoro su <unit> concluso: <X> accettate, <Y> respinte. Congelo questa parte come conclusa? (sì / no / più tardi)`.
+  `Lavoro su <unit> concluso: <X> accettate, <Y> tenute in considerazione. Congelo questa parte come conclusa? (sì / no / più tardi)`.
   `sì` → `freeze`; `più tardi` → leave 🔵 `wip`.
 - If the user named something still to do on the unit (or chose `no` with a
   reason), record it via `log-comment` (`15-freeze-ledger.md` §9): the unit
@@ -163,21 +179,21 @@ Then advance.
 
 ## 5. Edge Cases
 
-- **Multiple decisions in one user message** (for example, *"Accept all except point 3"*). Process them sequentially with the per-point logic above. Still no auto-commit.
-- **Character overshoot after Accept.** Report and ask: `The overrun is now +X. Do you prefer to proceed and handle it in the final sweep, or look for a compensating cut now?`
+- **Multiple decisions in one user message** (for example, *"Accetta tutto tranne punto 3: tienilo in considerazione"*). Process them sequentially with the per-point logic above. Still no auto-commit.
+- **Character overshoot after Accetta.** Report and ask: `The overrun is now +X. Do you prefer to proceed and handle it in the final sweep, or look for a compensating cut now?`
 - **Bibliography conflict.** If the user wants a key that does not exist or has dubious metadata, defer to `40-bibliography-check.md` and do not apply until cleared.
 - **Anglicism not in whitelist** (`ARTICLE_LANG=it` only). Surface in the proposal block under `Possible exceptions`; the user decides whether to add it to the whitelist or rephrase.
 - **Whole article scope.** Walk the article section by section. The user can pause at any moment with `pause` or `stop`, and resume later from the same point.
 
 ## 6. State Persistence
 
-The accepted-since-bump counter and per-point decision state live entirely inside the `revision-plan-vN.md` file. On every Accept/Reject/Modify, rewrite the relevant section of that file. This way, an interrupted session resumes cleanly: when the skill is re-invoked, it reads the project file and continues from the first point still in `To decide` state.
+The accepted-since-bump counter and per-point decision state live entirely inside the `revision-plan-vN.md` file. On every `Accetta`, `Modifica`, `Rivedi completamente`, or `Tieni in considerazione`, rewrite the relevant section of that file. This way, an interrupted session resumes cleanly: when the skill is re-invoked, it reads the project file and continues from the first point still in `To decide` state.
 
 ## 7. Revision Closure
 
 **Trigger — either of:**
 
-1. **Perimetro naturale esaurito**: tutti i punti del piano di revisione sono in stato `Accepted`, `Rejected`, o `Deferred`.
+1. **Perimetro naturale esaurito**: tutti i punti del piano di revisione sono in stato `Accepted`, `Modified`, o `Deferred`.
 2. **Chiusura esplicita**: l'utente invia una frase di chiusura —
    IT: `chiudi`, `fine`, `ho finito`, `concludi`, `stop`, `basta così`, `chiudiamo` /
    EN: `close`, `done`, `finish`, `end`, `I'm done`.
@@ -188,7 +204,7 @@ The accepted-since-bump counter and per-point decision state live entirely insid
 
    ```
    Revisione punti completata.
-   Punti totali: N  |  Accettati: A  |  Rifiutati: R  |  Modificati: M  |  Rinviati: D
+   Punti totali: N  |  Accettati: A  |  Modificati: M  |  Rivisti completamente: R  |  Da considerare: T
    Bilancio caratteri: +Δ (limite: EDITORIAL_LIMIT_CHARS)
    Versione articolo attiva: <path>
    ```

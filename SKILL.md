@@ -8,7 +8,8 @@ description: |
   explicitly. Skill assumes a project layout with `articles/`, `bibliography/
   reference.bib`, `editorial-norms/`, `revisions/`, and an `.env` file.
   For each reviewer point: shows original text + proposed change in chat,
-  asks Accept / Reject / Modify, and applies on Accept without committing.
+  asks Accetta / Modifica / Rivedi completamente / Tieni in considerazione,
+  and applies on Accetta without committing.
   Auto-detects article language (it/en) and adapts
   the proposal style accordingly. Out of scope: writing the article from
   scratch (use the journal-specific style skill, e.g. `praxis-article-style`),
@@ -28,9 +29,9 @@ bibliography skills around a structured revision workflow.
 | `/article-revision` | Full revision workflow from reviewer feedback |
 | `/r-pp` | **Revisione Paragrafo per Paragrafo** — walk every paragraph sequentially; for each, the AI checks paragraph unity, clarity, connection, style/citations, then proposes modifications; at chapter boundaries it recaps coherence and organization |
 | `/r-pp-a` | **Revisione Paragrafo per Paragrafo Approfondita** — as `/r-pp` but with deep AI analysis (unitary concept, logic, structure, style, citations, norms) before proposing |
-| `/r-pr-2` | **Revisione Due Peer Reviewer** — simulate two independent peer reviewers; generate Standalone reviewer documents in `revisions/<article-slug>/` without interactive A/R/M; the documents feed subsequent revision passes |
+| `/r-pr-2` | **Revisione Due Peer Reviewer** — simulate two independent peer reviewers; generate Standalone reviewer documents in `revisions/<article-slug>/` without interactive decision loop; the documents feed subsequent revision passes |
 | `/r-conn` | **Revisione Connettori** — analyse and polish logical connectors, transitions, and signposting between paragraphs and sections |
-| `/r-global` | **Revisione Globale** — high-level, non-granular revision: overall structure, argument coherence, section proportionality, redundancy, terminology consistency |
+| `/r-global` | **Revisione Globale** — high-level, non-granular revision: overall structure, argument coherence, section proportionality, redundancy, terminology consistency; can also save a global trace for `/r-pp` |
 | `/r-freeze` | **Congela** una parte conclusa (paragrafo/sezione/frammento) nel freeze ledger; in seguito la skill avvisa prima di toccarla (`workflow/15-freeze-ledger.md`) |
 | `/r-thaw` | **Scongela** una parte congelata: torna modificabile senza avviso (`workflow/15-freeze-ledger.md`) |
 | `/r-status` | **Stato revisione** — mappa di cosa è concluso (🟢 frozen) e cosa richiede intervento (🟡 open), dal freeze ledger (`workflow/15-freeze-ledger.md`) |
@@ -40,7 +41,7 @@ bibliography skills around a structured revision workflow.
 | `/r-gdrive` | **Google Drive Collaboration** — create/sync a shared Drive folder for colleagues; pull their feedback back as a revision source (`workflow/80-gdrive-collab.md`) |
 | `/r-approve` | **Colleague Approval** — gate accepted modifications behind colleague sign-off (Google Doc suggestions or `approvals.md`) before they count as final (`workflow/35-colleague-approval.md`) |
 | `/r-redline` | **Redline Export** — colored old-vs-new manuscript for the journal reviewer (insert = green/underline, delete = red/strikethrough) + response-to-reviewers letter (`workflow/90-redline-export.md`) |
-| `/r-help` | **Aiuto** — scheda di riferimento con tutti i comandi e le scorciatoie A/R/M; read-only, nessun setup o bump (`workflow/99-help.md`) |
+| `/r-help` | **Aiuto** — scheda di riferimento con tutti i comandi e le scorciatoie decisionali; read-only, nessun setup o bump (`workflow/99-help.md`) |
 
 ### Paragraph-by-Paragraph Modes (`/r-pp`, `/r-pp-a`)
 
@@ -60,7 +61,7 @@ For each paragraph in sequence:
     | Q3 | Il paragrafo si collega bene al precedente? | Does it connect well to the previous paragraph? |
     | Q4 | Ci sono problemi di stile, registro o citazioni? | Any issues with style, register, or citations? |
 
-3. **Propose** modifications based on the AI's analysis, using the standard A/R/M pattern.
+3. **Propose** modifications based on the AI's analysis, using the standard decision pattern.
 4. After decision on each proposal, ask: *"Ci sono altri cambiamenti in questo paragrafo?"* before advancing.
 5. At the end of each chapter/section, recap the section's unitary-concept map, paragraph progression, transitions, redundancies, and overall coherence before moving on.
 6. **Advance** only on explicit command (`prossimo`, `next`, `passa al prossimo`).
@@ -80,11 +81,11 @@ As `/r-pp`, but with an **extended AI analysis** before proposing. For each para
 | Q5 | Ogni affermazione è supportata da una citazione? Le citazioni sono formattate correttamente? | Is every claim backed by a citation? Are citations correctly formatted? |
 | Q6 | Il paragrafo rispetta le norme editoriali? (limiti, stile, terminologia) | Does the paragraph respect the editorial norms? (limits, style, terminology) |
 
-After the AI completes its analysis, it synthesises the findings into a unified proposal block, numbering each modification by diagnostic category. The user may accept/reject by category (e.g. `A struttura` or `R citazioni`).
+After the AI completes its analysis, it synthesises the findings into a unified proposal block, numbering each modification by diagnostic category. The user may decide by category (e.g. `Accetta struttura`, `Modifica citazioni: <direzione>`, `Tieni in considerazione tono: <nota>`).
 
 ### `/r-pr-2` — Standalone Dual Peer Review (Document Generation)
 
-This mode simulates two independent peer reviewers with distinct personas and writes their reports as standalone Markdown documents in `revisions/<article-slug>/`. It does **not** run an interactive A/R/M loop — the documents become input for subsequent revision passes (`/r-pp-a`, `/r-pp`, `/r-global`, `/r-conn`).
+This mode simulates two independent peer reviewers with distinct personas and writes their reports as standalone Markdown documents in `revisions/<article-slug>/`. It does **not** run an interactive decision loop — the documents become input for subsequent revision passes (`/r-pp-a`, `/r-pp`, `/r-global`, `/r-conn`).
 
 | Reviewer | Persona | Focus |
 |---|---|---|
@@ -108,7 +109,7 @@ This mode simulates two independent peer reviewers with distinct personas and wr
 5. **Synthesise** — Compare both reports. Classify each observation as Convergent (C: both agree), Divergent (D: they disagree), or Independent (I: one reviewer only). Write `peer-review-synthesis-vN.md` with: convergence matrix per section, unified proposal with modifications tagged [A], [B], or [A+B], and a priority-ordered action list.
 6. **Notify** — Output a one-page summary in chat: section count, convergent/divergent/independent counts, top-priority [A+B] items, file paths. The user then decides which revision command to run next.
 
-**No interactive A/R/M.** The synthesis document lists modifications with tags but does NOT apply them. The user triggers application later via `/r-pp-a`, `/r-pp`, `/r-global`, or `/r-conn`, referencing the synthesis document.
+**No interactive decision loop.** The synthesis document lists modifications with tags but does NOT apply them. The user triggers application later via `/r-pp-a`, `/r-pp`, `/r-global`, or `/r-conn`, referencing the synthesis document.
 
 ### `/r-conn` — Connector Revision
 
@@ -184,14 +185,14 @@ A focused pass that examines the article's **logical scaffolding**: connectors, 
    ```
 
 6. **Ask** the user to select which transitions to fix: *"Quali transizioni vuoi sistemare? (es. 'P3→P4, P7→P8, §2→§3' oppure 'tutte')"*
-7. **Propose** modifications for the selected items using the standard A/R/M pattern (one point per transition group).
-8. **Apply** on Accept, advance on command.
+7. **Propose** modifications for the selected items using the standard decision pattern (one point per transition group).
+8. **Apply** on `Accetta`, advance on command.
 
 Each `[Overused]` item becomes a separate proposal asking to rephrase *N* occurrences. The user can specify which occurrences to keep and which to replace.
 
 ### `/r-global` — Global / Holistic Revision
 
-A **non-granular, high-level** revision that examines the article as a whole organism. This mode does not descend into sentence-level edits — it operates at the structural, argumentative, and narrative level.
+A **non-granular, high-level** revision that examines the article as a whole organism. This mode does not descend into sentence-level edits — it operates at the structural, argumentative, and narrative level. After the diagnostic report, the user can either request structural decision proposals or save the report as a persistent trace for `/r-pp` / `/r-pp-a`.
 
 **The seven lenses of global revision:**
 
@@ -266,15 +267,25 @@ A **non-granular, high-level** revision that examines the article as a whole org
 
    ---
    **Azioni suggerite:** N interventi strutturali, M interventi di superficie.
-   Quali vuoi affrontare? (es. "tutte le proporzioni + terminologia" oppure "solo la mappa argomentativa")
+   Come vuoi usare questo report?
+   - "tutte" / "solo architettura" / "proporzioni + terminologia" → genero proposte decisionali
+   - "traccia per /r-pp" → salvo il report come guida globale per la revisione paragrafo per paragrafo
+   - "nessuna" → nessuna modifica
    ```
 
-3. **Wait** for the user to select which lenses to act on.
-4. For each selected lens, generate one or more revision points using the A/R/M pattern. Each point addresses a specific structural issue (e.g. "Cut §2 from 8200 to 5000 chars", "Rename 'emotional work' → 'emotional labour' globally").
-5. **Apply** on Accept. For structural changes (reordering, cutting), the skill edits the article with surgical precision. For global renaming, use `replaceAll`.
-6. **Advance** on explicit command.
+3. **Wait** for the user to choose how to use the report.
+4. If the user chooses `traccia per /r-pp`, ask before creating
+   `revisions/<article-slug>/sources/global-trace-<bumped-version>.md`, then
+   save the seven-lens report with a section/priority map. This does not modify
+   the article; it becomes diagnostic context for later `/r-pp` and `/r-pp-a`.
+5. If the user selects lenses to act on, generate one or more revision points
+   using the standard decision pattern. Each point addresses a specific structural issue
+   (e.g. "Cut §2 from 8200 to 5000 chars", "Rename 'emotional work' →
+   'emotional labour' globally").
+6. **Apply** on `Accetta`. For structural changes (reordering, cutting), the skill edits the article with surgical precision. For global renaming, use `replaceAll`.
+7. **Advance** on explicit command.
 
-This mode is designed to be run **before** granular revision (`/r-pp`, standard reviewer feedback) — fix the architecture first, then the bricks.
+This mode is designed to be run **before** granular revision (`/r-pp`, standard reviewer feedback): either fix the architecture first, or save the architecture diagnosis as a trace so paragraph-level revision keeps the global argument in view.
 
 ## Authority
 
@@ -444,7 +455,7 @@ Optional:
    `revisions/<reviewer>/revision-plan-vN.md` from the template, with
    each point in `To decide` state.
 4. `workflow/30-iterate-points.md` — for each point, propose, ask
-   `Accept / Reject / Modify`, apply on Accept. **Never commit
+   `Accetta / Modifica / Rivedi completamente / Tieni in considerazione`, apply on `Accetta`. **Never commit
    automatically** — the user controls git.
 4a. `workflow/31-paragraph-by-paragraph.md` — triggered by `/r-pp` or
     `/r-pp-a`. Walk every paragraph sequentially with AI diagnostic analysis
@@ -454,14 +465,15 @@ Optional:
 4b. `workflow/32-peer-review-simulation.md` — triggered by `/r-pr-2`.
    Generate two standalone reviewer documents in `revisions/<article-slug>/`
    (method-focused, theory-focused) plus a synthesis document. No interactive
-   A/R/M — the documents feed subsequent revision passes.
+   decision loop — the documents feed subsequent revision passes.
 4c. `workflow/33-connector-revision.md` — triggered by `/r-conn`.
    Analyse and polish logical connectors, transitions, and signposting
    between paragraphs and sections. Does not rewrite content.
 4d. `workflow/34-global-revision.md` — triggered by `/r-global`.
    High-level, non-granular revision across seven lenses: thesis clarity,
    argument architecture, section proportionality, narrative arc,
-   redundancy, terminology consistency, norm alignment.
+   redundancy, terminology consistency, norm alignment. Can save the report as
+   `revisions/<slug>/sources/global-trace-*.md` for later `/r-pp` / `/r-pp-a`.
 4e. `workflow/36-chapter-revision.md` — triggered by `/r-chapter`. Revises a
    single section at paragraph depth while checking it against the rest of the
    article across six cross-article dimensions: terminology, cross-references,
@@ -487,8 +499,10 @@ Optional:
    call `96-sync-current.md`. The round is not closed until all three complete.
 10. `workflow/96-sync-current.md` — mandatory sync step (called by 95). Overwrites
    `articles/current.md`, `articles/current.docx`, and
-   `bibliography/bibliography.docx`. Requires pandoc; warns and skips `.docx`
-   if pandoc is absent.
+   `bibliography/bibliography.docx`. Requires pandoc; uses `--citeproc` and
+   `nocite: @*` for the bibliography export, then warns if the generated
+   bibliography docx is missing or appears empty. Skips `.docx` exports only if
+   pandoc is absent.
 
 Collaboration / delivery steps (run on demand, not in fixed order):
 
@@ -540,7 +554,13 @@ For every revision point, output exactly this shape in chat:
 **Norms respected**: <list>
 **Possible exceptions**: <list, with reason>
 
-**A/R/M?** (indicare i numeri delle modifiche, es. "A 2,4" oppure "M 3: sostituire X con Y")
+**Decisione sulla proposta?**
+- `Accetta` — applica la proposta così com'è.
+- `Modifica <N>: <direzione>` — mantieni l'idea, ma cambia la modifica indicata.
+- `Rivedi completamente: <direzione>` — rigenera la proposta da capo.
+- `Tieni in considerazione: <nota>` — non applicare ora; registra come promemoria/traccia.
+
+Puoi indicare numeri specifici, es. `Accetta 2,4` oppure `Modifica 3: sostituire X con Y`.
 ```
 
 Then **wait** for the user. Do not pre-emptively apply.
@@ -551,7 +571,7 @@ must also write a companion file to disk before waiting for the user:
 `revisions/<reviewer>/proposal-revision-YYYY-MM-DD-HHMM.md`
 
 The file mirrors the exact proposal shown in chat and acts as the proposal to
-follow during the subsequent A/R/M loop. It must include:
+follow during the subsequent decision loop. It must include:
 
 - the reference article path and current version;
 - timestamp;
@@ -561,13 +581,14 @@ follow during the subsequent A/R/M loop. It must include:
 - numbered modifications;
 - current status: `proposed`.
 
-Each modification within a paragraph is numbered, so the user can accept or reject individual changes with precision:
-- `A 1,3` → accept modifications 1 and 3 only.
-- `R 2` → reject modification 2.
-- `M 4: <direzione>` → modify modification 4 as specified.
+Each modification within a paragraph is numbered, so the user can decide individual changes with precision:
+- `Accetta 1,3` → apply modifications 1 and 3 only.
+- `Modifica 4: <direzione>` → regenerate modification 4 as specified.
+- `Rivedi completamente: <direzione>` → regenerate the whole proposal.
+- `Tieni in considerazione 2: <nota>` → do not apply modification 2 now; record it as deferred/context.
 
-If the user responds with `A` without numbers, all modifications are accepted.
-If the user responds with `R` without numbers, the entire point is rejected.
+Optional shortcuts remain accepted for speed:
+`A = Accetta`, `M = Modifica`, `R = Rivedi completamente`, `T = Tieni in considerazione`.
 
 ### Auto-mode
 
@@ -577,7 +598,7 @@ When auto-mode is active:
 
 1. The skill runs the same diagnostic and proposal cycle for each paragraph.
 2. Each modification is **presented in chat** using the standard format above.
-3. After presenting, the skill **automatically applies** the modification (implicit `A`) and advances to the next.
+3. After presenting, the skill **automatically applies** the modification (implicit `Accetta`) and advances to the next.
 4. The skill **never waits** for user input between paragraphs.
 5. Only the following cases require pausing and asking the user:
    - Ambiguous or conflicting information that cannot be resolved from context
@@ -599,7 +620,7 @@ When auto-mode is active:
 [Auto-mode] Revisione completata: N sezioni, M modifiche applicate, K saltate.
 ```
 
-To **deactivate** auto-mode, the user says "ferma", "stop", "manual", or similar. The skill resumes the standard interactive A/R/M pattern from the current paragraph.
+To **deactivate** auto-mode, the user says "ferma", "stop", "manual", or similar. The skill resumes the standard interactive decision pattern from the current paragraph.
 
 ### After applying changes
 
@@ -609,7 +630,7 @@ Once modifications are applied, **do not advance** to the next point automatical
 Applicate modifiche <numeri>. [Restano in sospeso le modifiche <numeri>.] Ci sono altri cambiamenti da fare in questo paragrafo?
 ```
 
-And **wait** for an explicit command from the user (e.g. "A 1,3", "M 5: ...", "no, prossimo paragrafo", "passa al prossimo").
+And **wait** for an explicit command from the user (e.g. "Accetta 1,3", "Modifica 5: ...", "no, prossimo paragrafo", "passa al prossimo").
 
 When the user signals no further changes on the unit and asks to advance, run
 the freeze auto-offer (`15-freeze-ledger.md` §7) **before** moving on: offer to
@@ -618,14 +639,14 @@ the intention in the ledger (`log-comment`). Then advance.
 
 ### Handling responses
 
-- `Accept` (with selected numbers) → apply via Edit only the numbered modifications. Mark applied modifications as `Accepted` in the project file. Increment the *accepted-since-last-bump* counter. **Do not commit.** When the counter reaches `AUTO_BUMP_THRESHOLD`, suggest a version bump (see step 7). Ask for further changes on the same paragraph.
-- Every A/R/M interaction must be compatible with the project's
+- `Accetta` (with selected numbers) → apply via Edit only the numbered modifications. Mark applied modifications as `Accepted` in the project file. Increment the *accepted-since-last-bump* counter. **Do not commit.** When the counter reaches `AUTO_BUMP_THRESHOLD`, suggest a version bump (see step 7). Ask for further changes on the same paragraph.
+- Every decision interaction must be compatible with the project's
   `decision-log` skill. At the end of the revision round, `95-decision-log.md`
   is mandatory: the round must always be logged, even if the final outcome is
-  partial, rejected, or deferred.
-- `Reject` (with selected numbers) → annotate those modifications as `Rejected` + reason. No file edits for them. Ask for further changes on the same paragraph.
-- `Reject` (entire point) → annotate entire point `Rejected` + reason. Advance to next point.
-- `Modify <N>: <direzione>` → regenerate modification N according to the user's direction. Re-present the updated modification with the same numbering. Repeat until accepted or rejected.
+  partial or deferred.
+- `Modifica <N>: <direzione>` → regenerate modification N according to the user's direction. Re-present the updated modification with the same numbering. Repeat until accepted or deferred.
+- `Rivedi completamente: <direzione>` → regenerate the whole proposal from the original text. Do not edit the article until the user later chooses `Accetta`.
+- `Tieni in considerazione <N>: <nota>` → annotate those modifications as `Deferred` + note. No file edits for them. Record the note in the freeze ledger if it names a future intention.
 - Silent advance to the next point only when the user gives an explicit command (e.g. "no, prossimo", "passa al prossimo paragrafo", "next").
 
 If the proposal involves multiple separate edits (e.g. an inline citation + a bibliography entry), still present them as numbered modifications within a single coherent block, allowing the user to accept each independently.
@@ -672,7 +693,7 @@ editorial layout:
 - Do not introduce extra paragraph breaks while converting `.docx` to Markdown
   or Markdown back to `.docx`.
 - If a Word formatting change is proposed, present it as a revision point and
-  ask `Accept / Reject / Modify` before applying.
+  ask `Accetta / Modifica / Rivedi completamente / Tieni in considerazione` before applying.
 
 ## Git contract
 
@@ -695,7 +716,7 @@ A revision session closes in **two cases**:
 1. **Perimetro naturale esaurito** — all items in the revision scope have been processed:
    - `/article-revision`, `/r-pp`, `/r-pp-a`: last reviewer point or last paragraph reached.
    - `/r-conn`: all selected transitions and overused connectors fixed.
-   - `/r-global`: all selected lenses have produced and received A/R/M decisions.
+   - `/r-global`: all selected lenses have produced and received explicit decisions, or the user saved the seven-lens report as a trace for `/r-pp`.
    - `/r-chapter`: all selected cross-article dimensions fixed.
 
 2. **Chiusura esplicita** — user sends a closure phrase:
@@ -704,7 +725,7 @@ A revision session closes in **two cases**:
 
 **Mandatory closure sequence (always the same):**
 
-1. Present session summary (items processed, accepted/rejected/modified, Δ chars, active version).
+1. Present session summary (items processed, accepted/modified/fully revised/deferred, Δ chars, active version).
 2. Ask: *"Procedo con la chiusura? (sì / sì senza final sheet / annulla)"*
 3. On confirm:
    - `workflow/70-final-sheet.md` — if user requests it
@@ -722,16 +743,16 @@ point in the workflow:
 |---|---|---|
 | **Fragment** (sentence-level / inline) | *"fix this sentence"*, *"adjust this quotation"*, *"replace X with Y"* | Smallest possible diff. Touches a single sentence, citation, term, formatting fix. Goes through the same `Original / Proposal / Decision` pattern with surgical context. |
 | **Paragraph** (default during reviewer revision) | *"revise this paragraph"*, *"section 3 discussion"* | Operates on a coherent block (one paragraph or one numbered subsection). Standard mode for processing reviewer points. |
-| **Whole article** (full pass) | *"revise the whole article"*, *"check coherence from start to finish"* | Sequential walk through every section, point by point. Each candidate change is still presented individually for `Accept / Reject / Modify` — the user is not asked to approve a single mass-replacement. |
-| **Paragraph-by-paragraph** (`/r-pp`) | `/r-pp` | Walk every paragraph sequentially. For each: the AI checks unitary concept, clarity, connection, style/citations, and proposes modifications. At chapter boundaries it recaps organization and coherence. A/R/M per modification. |
-| **Deep paragraph-by-paragraph** (`/r-pp-a`) | `/r-pp-a` | As `/r-pp` but with six-layer AI analysis (unitary concept, logic, structure, tone, citations, norms). Proposals numbered by category; user can accept/reject by category. |
-| **Dual peer review** (`/r-pr-2`) | `/r-pr-2` | Generate two standalone reviewer reports (method-focused + theory-focused) + synthesis document in `revisions/<article-slug>/`. No interactive A/R/M — output files feed subsequent revision commands (`/r-pp-a`, `/r-global`, etc.). |
-| **Connector revision** (`/r-conn`) | `/r-conn` | Non-content pass: examine logical connectors, inter-paragraph transitions, inter-section transitions, signposting. Diagnostic table + selective fix with A/R/M. |
-| **Global revision** (`/r-global`) | `/r-global` | High-level, non-granular pass through seven lenses (thesis, architecture, proportionality, narrative, redundancy, terminology, norms). Diagnostic report → user selects lenses → structural A/R/M points. |
-| **Chapter revision** (`/r-chapter`) | `/r-chapter [§N]` | Paragraph-depth revision of a single section in full cross-article context. Six diagnostic dimensions: terminology, cross-references, section interfaces, redundancy, argument thread, norms compliance. A/R/M per point. |
-| **Drive collaboration** (`/r-gdrive`) | `/r-gdrive [create\|push\|sync]` | Create/sync a shared Drive folder; push the revised article + redline; pull colleague feedback into `revisions/<slug>/sources/`. No A/R/M — output is a source for later passes. User shares the folder. |
-| **Colleague approval** (`/r-approve`) | `/r-approve` | Gate `Accepted` points behind colleague sign-off (Doc suggestions or `approvals.md`). `approve` → mark approved; `changes` → re-propose via A/R/M; `reject` → ask user (no auto-revert). |
-| **Redline export** (`/r-redline`) | `/r-redline` | Colored old-vs-new `.docx`/`.html` for the reviewer + response-to-reviewers letter. Separate from the clean submission file. No A/R/M. |
+| **Whole article** (full pass) | *"revise the whole article"*, *"check coherence from start to finish"* | Sequential walk through every section, point by point. Each candidate change is still presented individually for `Accetta / Modifica / Rivedi completamente / Tieni in considerazione` — the user is not asked to approve a single mass-replacement. |
+| **Paragraph-by-paragraph** (`/r-pp`) | `/r-pp` | Walk every paragraph sequentially. If a global trace exists, load it as diagnostic context. For each paragraph: check unitary concept, clarity, connection, style/citations, and propose modifications. At chapter boundaries recap organization and coherence. Explicit decision per modification. |
+| **Deep paragraph-by-paragraph** (`/r-pp-a`) | `/r-pp-a` | As `/r-pp` but with six-layer AI analysis (unitary concept, logic, structure, tone, citations, norms). Uses any active global trace as context; proposals numbered by category. |
+| **Dual peer review** (`/r-pr-2`) | `/r-pr-2` | Generate two standalone reviewer reports (method-focused + theory-focused) + synthesis document in `revisions/<article-slug>/`. No interactive decision loop — output files feed subsequent revision commands (`/r-pp-a`, `/r-global`, etc.). |
+| **Connector revision** (`/r-conn`) | `/r-conn` | Non-content pass: examine logical connectors, inter-paragraph transitions, inter-section transitions, signposting. Diagnostic table + selective fix with explicit decisions. |
+| **Global revision** (`/r-global`) | `/r-global` | High-level, non-granular pass through seven lenses (thesis, architecture, proportionality, narrative, redundancy, terminology, norms). Diagnostic report → user either selects lenses for structural decisions or saves a trace for `/r-pp`. |
+| **Chapter revision** (`/r-chapter`) | `/r-chapter [§N]` | Paragraph-depth revision of a single section in full cross-article context. Six diagnostic dimensions: terminology, cross-references, section interfaces, redundancy, argument thread, norms compliance. Explicit decision per point. |
+| **Drive collaboration** (`/r-gdrive`) | `/r-gdrive [create\|push\|sync]` | Create/sync a shared Drive folder; push the revised article + redline; pull colleague feedback into `revisions/<slug>/sources/`. No interactive decision loop — output is a source for later passes. User shares the folder. |
+| **Colleague approval** (`/r-approve`) | `/r-approve` | Gate `Accepted` points behind colleague sign-off (Doc suggestions or `approvals.md`). `approve` → mark approved; `changes` → re-propose via the decision loop; `reject` → ask user (no auto-revert). |
+| **Redline export** (`/r-redline`) | `/r-redline` | Colored old-vs-new `.docx`/`.html` for the reviewer + response-to-reviewers letter. Separate from the clean submission file. No interactive decision loop. |
 | **Freeze** (`/r-freeze`) | `/r-freeze [unit]` | Mark a concluded part 🟢 frozen in the ledger. No-arg = last unit worked on; `P4` / `§3` / `§3 tutto` target explicitly. Ledger-only, no article edit. |
 | **Thaw** (`/r-thaw`) | `/r-thaw [unit]` | Mark a frozen part 🟡 open again so it can be revised without the advisory warning. |
 | **Status** (`/r-status`) | `/r-status` | Print the frozen/open/wip snapshot from the ledger + the next suggested intervention. Read-only. |
@@ -742,8 +763,8 @@ plus a phrasing change in the same paragraph → two points, two
 decisions, two micro-changes).
 
 Never collapse multiple semantic changes into a single proposal just to
-save chat tokens — the user must be able to accept one and reject the
-other.
+save chat tokens — the user must be able to accept one and keep the other as a
+deferred consideration.
 
 ## Revision session task file
 
@@ -758,7 +779,7 @@ The task file is:
 The closed task file contains:
 - The article path, version, command, and reviewer lane.
 - A step-by-step status table (`done` / `skipped` / `failed`).
-- Accepted / rejected / modified / deferred counts.
+- Accepted / modified / fully revised / deferred counts.
 - Final article char count vs limit.
 - The decision-log session identifier.
 
@@ -800,7 +821,7 @@ Run Python scripts with the project's Python venv (`PYTHON_BIN`). Bootstrap asks
 | `scripts/sample_stats.py` | Per-cohort stats from `.xlsx`/`.csv` via YAML mapping |
 | `scripts/new_version.sh` | Bump filename to `<prefix>-v(N+1)-YYYY-MM-DD-HHMM` |
 | `scripts/diff_versions.sh` | Word-level diff between two versions |
-| `scripts/sync_current.sh` | Sync `current.md`, `current.docx`, `bibliography.docx` after each revision round |
+| `scripts/sync_current.sh` | Sync `current.md`, `current.docx`, and a non-empty citeproc-rendered `bibliography.docx` after each revision round |
 
 ## Skill is **not** for
 

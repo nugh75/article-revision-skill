@@ -60,7 +60,7 @@ For **Corrected / Unreproducible / Inconsistent**, surface before applying:
 **Cause** (if not Confirmed): <e.g. substring `stem`⊂`sistema`; wrong denominator>
 ```
 
-Then continue the standard A/R/M proposal in `30-iterate-points.md`, carrying the corrected value.
+Then continue the standard decision proposal in `30-iterate-points.md`, carrying the corrected value.
 
 ## 5. Provenance Interaction
 

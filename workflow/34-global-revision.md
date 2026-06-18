@@ -1,6 +1,6 @@
 # 34 — Global / Holistic Revision
 
-Triggered by `/r-global`. A **non-granular, high-level** revision that examines the article as a whole organism through seven diagnostic lenses. This mode does not descend into sentence-level edits — it operates at the structural, argumentative, and narrative level.
+Triggered by `/r-global`. A **non-granular, high-level** revision that examines the article as a whole organism through seven diagnostic lenses. This mode does not descend into sentence-level edits — it operates at the structural, argumentative, and narrative level. After the diagnostic report, the user can either proceed with global decision proposals or save the report as a persistent trace for `/r-pp` / `/r-pp-a`.
 
 ## 0. Entry Point
 
@@ -152,16 +152,93 @@ Output the complete report as a single block:
 
 ---
 **Azioni suggerite:** N interventi strutturali, M interventi di superficie.
-Quali lenti vuoi affrontare?
+Come vuoi usare questo report?
 - "tutte" — elaboro proposte per ogni lente
 - "proporzioni + terminologia" — solo lenti specifiche
 - "solo architettura" — una singola lente
+- "traccia per /r-pp" — salvo il report come guida globale per la revisione paragrafo per paragrafo, senza modificare l'articolo
 - "nessuna" — prendo atto del report, nessuna modifica
 ```
 
 Adapt to English if `ARTICLE_LANG=en`.
 
-## 5. Generate Proposals by Lens
+## 5. Save as Global Trace for `/r-pp`
+
+If the user chooses `traccia per /r-pp`, `salva traccia`, `usa come traccia`,
+or equivalent:
+
+1. Do **not** modify the article.
+2. Prepare a standalone trace file at:
+
+   ```
+   revisions/<article-slug>/sources/global-trace-<bumped-version>.md
+   ```
+
+3. Before creating the file, show the exact path and ask:
+
+   ```
+   Creo la traccia globale per la revisione paragrafo per paragrafo?
+   File: revisions/<article-slug>/sources/global-trace-<bumped-version>.md
+   (sì / no)
+   ```
+
+4. On confirmation, create `revisions/<article-slug>/sources/` if missing and
+   write the trace file. The trace is a revision source, not an accepted change.
+   It must not be included in response-to-reviewers material unless the user
+   later applies concrete changes derived from it.
+5. Update the task file: `Seven lenses` → `done`; `Save trace or fix selected`
+   → `done` with note `global trace saved for /r-pp`.
+6. Ask whether to close the round or continue with selected global fixes:
+
+   ```
+   Traccia globale salvata. Vuoi chiudere la revisione globale o proporre anche modifiche globali? (chiudi / proponi modifiche)
+   ```
+
+### Trace File Format
+
+```
+---
+source: global
+status: active
+article: <article-path>
+article_version: <bumped-version>
+created: <YYYY-MM-DD>
+use_as_trace_for:
+  - /r-pp
+  - /r-pp-a
+---
+
+# Traccia revisione globale — <article>
+
+## Sintesi globale
+- Tesi/funzione dell'articolo: <one-line synthesis>
+- Problema principale da tenere presente: <priority issue>
+- Direzione editoriale: <what the paragraph pass should preserve or improve>
+
+## Priorità per la revisione paragrafo per paragrafo
+1. <priority from the seven-lens report>
+2. <priority>
+3. <priority>
+
+## Mappa per sezione
+| Sezione | Funzione nell'argomento | Rischi globali | Cosa controllare in `/r-pp` |
+|---|---|---|---|
+| §1 | <role> | <risk> | <paragraph-level checks> |
+
+## Indicazioni per i paragrafi
+- Verificare che ogni paragrafo serva la funzione della sua sezione.
+- Segnalare scarti rispetto alla tesi, salti logici, ridondanze e squilibri.
+- Usare queste indicazioni come contesto diagnostico: ogni modifica resta soggetta alla decisione esplicita dell'utente.
+
+## Report globale completo
+<paste the seven-lens diagnostic report>
+```
+
+If an active trace already exists for the same article, ask whether to overwrite
+it, keep both, or mark the older trace as superseded. Do not delete older traces
+silently.
+
+## 6. Generate Proposals by Lens
 
 Run the freeze check (`15-freeze-ledger.md` §4) on each unit a structural change
 would touch; if a unit is 🟢 `frozen`, apply the advisory warning flow (§5)
@@ -172,7 +249,7 @@ For each lens the user selects:
 
 ### Structural proposals (Lenses 1, 2, 4)
 
-For architectural changes, present as A/R/M points. Examples:
+For architectural changes, present as decision points. Examples:
 - **Restructure:** "Move the hypotheses from §2.3 into §1 (introduction) to establish the thesis earlier."
 - **Reorder:** "Swap §4 and §5: present discussion before detailed results tables."
 - **Add:** "Insert a transition paragraph between §2 and §3 explaining how the literature gap motivates the method."
@@ -182,7 +259,7 @@ For architectural changes, present as A/R/M points. Examples:
 For size adjustments:
 - Present the target char count per section.
 - Show which paragraphs to cut, consolidate, or expand.
-- Use A/R/M: user can accept the cut of specific paragraphs.
+- Use the standard decision labels: user can accept the cut of specific paragraphs, request modifications, ask for a full rewrite, or keep the issue as context.
 
 ```
 ## Point <N> — Proporzioni: ridurre §2 · scope: global
@@ -196,14 +273,14 @@ For size adjustments:
 
 **Δ**: chars -3000 / words -450 · risk: medium
 
-**A/R/M?**
+**Decisione sulla proposta?** (`Accetta` / `Modifica` / `Rivedi completamente` / `Tieni in considerazione`)
 ```
 
 ### Terminology proposals (Lens 6)
 
 For global renames:
 - Use `replaceAll` on the article file.
-- Present as a single A/R/M point.
+- Present as a single decision point.
 
 ```
 ## Point <N> — Terminologia: "emotional work" → "emotional labour" · scope: global
@@ -215,7 +292,7 @@ For global renames:
 
 **Δ**: chars +5 / words 0 · risk: low
 
-**A/R/M?**
+**Decisione sulla proposta?** (`Accetta` / `Modifica` / `Rivedi completamente` / `Tieni in considerazione`)
 ```
 
 ### Redundancy proposals (Lens 5)
@@ -225,26 +302,27 @@ For deduplication:
 - Propose which to keep and which to cut.
 - Allow the user to choose the keepers.
 
-## 6. Handle Responses
+## 7. Handle Responses
 
 Follow standard `30-iterate-points.md`, section 4, with one addition:
 
-- For global modifications (e.g. `replaceAll` renames), after Accept, verify the change with a grep to confirm all occurrences were updated.
+- For global modifications (e.g. `replaceAll` renames), after `Accetta`, verify the change with a grep to confirm all occurrences were updated.
 - After applying structural changes (section reordering), re-read the article and confirm no broken cross-references (e.g. "as discussed in §4" now points to the wrong section).
 
-## 7. Edge Cases
+## 8. Edge Cases
 
 - **Single-section article.** Still run the seven lenses. Scope adapts naturally.
 - **No structural issues found.** Announce: *"L'architettura dell'articolo è solida. Tutte e sette le lenti non rilevano problemi strutturali."* Offer to proceed to `/r-pp` for granular revision.
+- **Trace-only round.** If the user saves the diagnostic as trace and applies no global modifications, close the round normally; the mandatory decision log and current-file sync still run.
 - **Massive restructuring needed.** If the diagnostic identifies >5 structural issues, warn: *"Questa revisione comporta cambiamenti strutturali significativi. Consiglio di procedere una lente alla volta per non perdere il controllo."*
 - **Contradiction with reviewer feedback.** If reviewer feedback was previously processed via `/article-revision` and the global revision identifies a contradictory recommendation, surface the conflict explicitly: *"⚠️ Il Reviewer A ha chiesto di espandere §2, ma la lente 3 (proporzionalità) suggerisce di ridurlo. Quale direzione preferisci?"*
 - **Character budget.** Structural changes (cuts, moves, adds) have large character impact. Track the cumulative Δ after each accept and compare against `EDITORIAL_LIMIT_CHARS`.
 
-## 8. Revision Closure
+## 9. Revision Closure
 
 **Trigger — either of:**
 
-1. **Perimetro naturale esaurito**: tutte le lenti selezionate dall'utente hanno prodotto le loro proposte e ricevuto una decisione A/R/M.
+1. **Perimetro naturale esaurito**: tutte le lenti selezionate dall'utente hanno prodotto le loro proposte e ricevuto una decisione esplicita.
 2. **Chiusura esplicita**: l'utente invia una frase di chiusura —
    IT: `chiudi`, `fine`, `ho finito`, `concludi`, `stop`, `basta così`, `chiudiamo` /
    EN: `close`, `done`, `finish`, `end`, `I'm done`.
@@ -256,6 +334,7 @@ Follow standard `30-iterate-points.md`, section 4, with one addition:
    ```
    Revisione globale completata.
    Lenti analizzate: 7  |  Lenti con modifiche: N
+   Traccia per /r-pp: <none|path>
    Strutturali: X  |  Terminologiche: Y  |  Proporzione: Z  |  Rifiutate: R
    Bilancio caratteri: +Δ (limite: EDITORIAL_LIMIT_CHARS)
    Versione articolo attiva: <path>

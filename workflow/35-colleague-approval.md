@@ -13,7 +13,7 @@ To decide → Proposed → Accepted → Colleague-review → Colleague-approved 
                                ↘ Rejected
 ```
 
-`Accepted` means the author/user accepted it via A/R/M. `Colleague-approved`
+`Accepted` means the author/user accepted it via `Accetta`. `Colleague-approved`
 means a colleague signed off. Only `Colleague-approved`/`Final` points are
 listed as settled in `response-to-reviewers`; `Accepted`-but-not-approved
 points are flagged as pending in the final sheet.
@@ -50,10 +50,10 @@ When both exist, the structured `approvals.md` row wins for that point
    ```
 
 3. For each `approve`: set `approval: approved` in the project file. No
-   text change (already applied at Accept).
+   text change (already applied at `Accetta`).
 4. For each `changes`: re-open the point as a new proposal incorporating
-   the colleague's note, via the standard A/R/M block in
-   `30-iterate-points.md`. Apply on Accept; set `approval: approved` once
+   the colleague's note, via the standard decision block in
+   `30-iterate-points.md`. Apply on `Accetta`; set `approval: approved` once
    re-accepted.
 5. For each `reject`: present to the user — a colleague reject does not
    auto-revert. Ask `keep / revert / modify`. Only revert on explicit user

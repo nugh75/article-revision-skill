@@ -64,7 +64,7 @@ For Italian articles, translate the prose to formal academic Italian while keepi
 
 ## 5. Present As Normal Revision Point
 
-Hand the proposal back to `30-iterate-points.md` in the standard `Original / Proposal / Decision` shape. The user accepts, rejects, or modifies as usual.
+Hand the proposal back to `30-iterate-points.md` in the standard `Original / Proposal / Decision` shape. The user decides with `Accetta`, `Modifica`, `Rivedi completamente`, or `Tieni in considerazione`.
 
 ## 6. Notes
 

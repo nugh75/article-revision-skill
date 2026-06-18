@@ -35,7 +35,7 @@ and provides the input summary for `95-decision-log.md`.
 | `/r-pp-a` | Parse paragraphs · Walk P1..PN (deep) · Bibliography check · Final sheet · Decision log · Sync current files |
 | `/r-pr-2` | Generate Reviewer A · Generate Reviewer B · Synthesize · Decision log · Sync current files |
 | `/r-conn` | Parse transitions · Diagnose · Fix selected · Decision log · Sync current files |
-| `/r-global` | Read article · Seven lenses · Fix selected · Decision log · Sync current files |
+| `/r-global` | Read article · Seven lenses · Save trace or fix selected · Decision log · Sync current files |
 | `/r-chapter` | Select section · Load article · Cross-article analysis · Fix selected · Decision log · Sync current files |
 | `/r-redline` | Generate redline · Response letter · Decision log · Sync current files |
 | `/r-approve` | Load approvals · Apply outcomes · Decision log · Sync current files |
@@ -92,9 +92,9 @@ If `failed`: output one line `⚠ Step "<name>" failed — <note>` and wait for 
    - `failed` — only for the step that was active when an abnormal end occurred.
 3. Fill in `## Riepilogo`:
    - **Accettati**: total accepted modifications this session (from working memory counter).
-   - **Rifiutati**: total rejected.
+   - **Da considerare**: total items kept as deferred/context.
    - **Modificati**: total accepted-after-modify.
-   - **Rinviati**: total deferred.
+   - **Rinviati**: total deferred for external data or later decision.
 4. Fill in `## Stato articolo alla chiusura`:
    - **Versione finale**: path to the active article file at session end.
    - **Caratteri**: current char count + " / " + limit from `.env`.

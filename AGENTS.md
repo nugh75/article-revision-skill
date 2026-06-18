@@ -22,9 +22,9 @@ Trigger phrases:
 | `/article-revision` | Full revision workflow from reviewer feedback |
 | `/r-pp` | **Revisione Paragrafo per Paragrafo** — sequential walk with paragraph-unity checks, diagnostic questions, and chapter/section recaps |
 | `/r-pp-a` | **Revisione Paragrafo per Paragrafo Approfondita** — deep six-layer diagnostic per paragraph, including unitary-concept control |
-| `/r-pr-2` | **Revisione Due Peer Reviewer** — generate two standalone reviewer reports + synthesis in `revisions/<article-slug>/` (no interactive A/R/M) |
+| `/r-pr-2` | **Revisione Due Peer Reviewer** — generate two standalone reviewer reports + synthesis in `revisions/<article-slug>/` (no interactive decision loop) |
 | `/r-conn` | **Revisione Connettori** — analyse and polish logical connectors, transitions, and signposting |
-| `/r-global` | **Revisione Globale** — high-level, non-granular revision across seven structural lenses |
+| `/r-global` | **Revisione Globale** — high-level, non-granular revision across seven structural lenses; can save a trace for `/r-pp` |
 | `/r-freeze` | **Congela** una parte conclusa nel freeze ledger; in seguito la skill avvisa prima di toccarla (`workflow/15-freeze-ledger.md`) |
 | `/r-thaw` | **Scongela** una parte: torna modificabile senza avviso (`workflow/15-freeze-ledger.md`) |
 | `/r-status` | **Stato revisione** — mappa frozen (🟢) vs open (🟡) dal freeze ledger (`workflow/15-freeze-ledger.md`) |
@@ -34,7 +34,7 @@ Trigger phrases:
 | `/r-gdrive` | **Google Drive Collaboration** — create/sync a shared Drive folder; pull colleague feedback as a revision source (`workflow/80-gdrive-collab.md`) |
 | `/r-approve` | **Colleague Approval** — gate accepted modifications behind colleague sign-off before they count as final (`workflow/35-colleague-approval.md`) |
 | `/r-redline` | **Redline Export** — colored old-vs-new manuscript for the reviewer + response-to-reviewers letter (`workflow/90-redline-export.md`) |
-| `/r-help` | **Aiuto** — reference card of every command + A/R/M shortcuts; read-only, no setup or bump (`workflow/99-help.md`) |
+| `/r-help` | **Aiuto** — reference card of every command + decision shortcuts; read-only, no setup or bump (`workflow/99-help.md`) |
 
 See `SKILL.md` for the full description of each mode.
 
@@ -45,14 +45,14 @@ If the user is doing something else (writing the article from scratch, generatin
 ## Hard rules
 
 1. **The user controls all git operations.** This skill never runs `git add`, `git commit`, `git push`, or `git stage` on its own initiative. It only writes files unless the user gives an explicit git instruction. After each accepted change, briefly note that there are pending changes and stop. If the user explicitly asks the skill to commit, do so without `--no-verify`. If the user explicitly authorizes a push, the skill may run `git push` after confirming the target branch/remote.
-2. **Per-point granularity.** Every revision proposal goes through the user as one atomic decision: `Accept / Reject / Modify`. Never collapse multiple unrelated changes into one proposal.
+2. **Per-point granularity.** Every revision proposal goes through the user as one atomic decision: `Accetta / Modifica / Rivedi completamente / Tieni in considerazione`. Never collapse multiple unrelated changes into one proposal.
 3. **Always ask before creating.** Bootstrap, version bump, new files: every write step that creates something requires explicit confirmation. Idempotent re-checks of already-existing artifacts need no confirmation.
 4. **No silent behavior.** Whenever the skill takes a non-trivial action, output a one-line acknowledgement in chat.
 5. **Surgical edits.** Touch only what the current point requires. Do not clean up adjacent prose, formatting, or unrelated bibliography.
 6. **Mandatory bump at session start.** Every new revision session MUST start with a version bump (vN → vN+1) before any edits. The bump is enforced by `10-setup.md` step 5. Never skip it. The `AUTO_BUMP_THRESHOLD` handles additional mid-session bumps separately.
 7. **Task file per session.** Immediately after the bump, create `revisions/<article-slug>/task-<command-slug>-<bumped-version>.md` via `workflow/05-task.md`. Update it at each major step. Close it via `95-decision-log.md` at the end of the round. Never skip task file creation.
-8. **Sync current files.** At the end of every revision round, `workflow/95-decision-log.md` must call `workflow/96-sync-current.md`, which overwrites `articles/current.md`, `articles/current.docx`, and `bibliography/bibliography.docx`. This step is mandatory and runs even when no changes were accepted. Never close a round without it.
-9. **Revision closure triggers.** A round closes either when its natural perimeter is exhausted (last paragraph, last lens, last dimension, all reviewer points decided) OR when the user sends an explicit closure phrase (`chiudi`, `fine`, `ho finito`, `stop` / `close`, `done`, `finish`, `end`). In both cases, present a summary, ask for confirmation, then run the mandatory closure sequence.
+8. **Sync current files.** At the end of every revision round, `workflow/95-decision-log.md` must call `workflow/96-sync-current.md`, which overwrites `articles/current.md`, `articles/current.docx`, and regenerates `bibliography/bibliography.docx` from `reference.bib` with citeproc. This step is mandatory and runs even when no changes were accepted. Never close a round while `bibliography.docx` is missing or appears empty without an explicit warning.
+9. **Revision closure triggers.** A round closes either when its natural perimeter is exhausted (last paragraph, last lens, saved global trace, last dimension, all reviewer points decided) OR when the user sends an explicit closure phrase (`chiudi`, `fine`, `ho finito`, `stop` / `close`, `done`, `finish`, `end`). In both cases, present a summary, ask for confirmation, then run the mandatory closure sequence.
 10. **Freeze ledger.** Keep one persistent ledger per article at `revisions/<article-slug>/freeze-ledger.md` (`workflow/15-freeze-ledger.md`). Check it before every proposal: a 🟢 frozen part is *advisory* — warn (`⚠ congelata`) and require explicit `sì, procedi` before applying. When the user states a change but does not apply it this turn, record it in the ledger (🟡 open + intention) — never leave deferred intentions only in chat. Offer to freeze a unit when its work concludes.
 
 ---
@@ -116,10 +116,10 @@ See `.env.example` for the complete template.
 | 2a | `workflow/15-freeze-ledger.md` | Per-article freeze ledger: `ensure` (setup), advisory `check` before every proposal, `freeze`/`thaw`/`status`, `log-comment`, `carry-forward` (bump) |
 | 3 | `workflow/20-plan-revision.md` | When user provides reviewer feedback |
 | 4 | `workflow/30-iterate-points.md` | Core loop: propose, ask, apply (no commit) |
-| 4a | `workflow/31-paragraph-by-paragraph.md` | Triggered by `/r-pp` or `/r-pp-a`. Per-paragraph diagnostic walk with unitary-concept control and chapter/section recaps. |
-| 4b | `workflow/32-peer-review-simulation.md` | Triggered by `/r-pr-2`. Generates three standalone documents in `revisions/<article-slug>/`. No interactive A/R/M. |
+| 4a | `workflow/31-paragraph-by-paragraph.md` | Triggered by `/r-pp` or `/r-pp-a`. Per-paragraph diagnostic walk with unitary-concept control, optional global trace context, and chapter/section recaps. |
+| 4b | `workflow/32-peer-review-simulation.md` | Triggered by `/r-pr-2`. Generates three standalone documents in `revisions/<article-slug>/`. No interactive decision loop. |
 | 4c | `workflow/33-connector-revision.md` | Triggered by `/r-conn`. Connector and transition polish. |
-| 4d | `workflow/34-global-revision.md` | Triggered by `/r-global`. Seven-lens structural review. |
+| 4d | `workflow/34-global-revision.md` | Triggered by `/r-global`. Seven-lens structural review; optionally saves a global trace in `revisions/<slug>/sources/` for `/r-pp`. |
 | 4e | `workflow/36-chapter-revision.md` | Triggered by `/r-chapter`. Paragraph-depth revision of one section with full cross-article context across six dimensions. |
 | 5 | `workflow/40-bibliography-check.md` | When a citation is touched or a reviewer flags one |
 | 6 | `workflow/50-sample-description.md` | When methodology asks for sample stats from raw data |
@@ -140,15 +140,15 @@ The user can pick one of three scopes:
 | **Fragment** | *"fix this sentence"*, *"adjust this quotation"*, *"replace X with Y"* | Smallest possible diff |
 | **Paragraph** (default for reviewer points) | *"revise this paragraph"*, *"section 3"* | One paragraph or numbered subsection |
 | **Whole article** | *"revise the whole article"* | Sequential walk; every change still individually approved |
-| **Paragraph-by-paragraph** (`/r-pp`) | `/r-pp` | Walk every paragraph; check unitary concept, clarity, connection, style/citations before proposing; recap organization and coherence at each chapter/section boundary |
-| **Deep paragraph-by-paragraph** (`/r-pp-a`) | `/r-pp-a` | Six-layer diagnostic (unitary concept, logic, structure, tone, citations, norms) per paragraph; proposals numbered by category |
-| **Dual peer review** (`/r-pr-2`) | `/r-pr-2` | Generate two standalone reviewer reports (method + theory) + synthesis in `revisions/`. No interactive A/R/M. |
-| **Connector revision** (`/r-conn`) | `/r-conn` | Non-content pass: logical connectors, transitions, signposting. Diagnostic table + selective fix with A/R/M |
-| **Global revision** (`/r-global`) | `/r-global` | High-level, non-granular: seven lenses (thesis, architecture, proportionality, narrative, redundancy, terminology, norms) |
+| **Paragraph-by-paragraph** (`/r-pp`) | `/r-pp` | Walk every paragraph; load any active global trace as context; check unitary concept, clarity, connection, style/citations before proposing; recap organization and coherence at each chapter/section boundary |
+| **Deep paragraph-by-paragraph** (`/r-pp-a`) | `/r-pp-a` | Six-layer diagnostic (unitary concept, logic, structure, tone, citations, norms) per paragraph; uses any active global trace as context; proposals numbered by category |
+| **Dual peer review** (`/r-pr-2`) | `/r-pr-2` | Generate two standalone reviewer reports (method + theory) + synthesis in `revisions/`. No interactive decision loop. |
+| **Connector revision** (`/r-conn`) | `/r-conn` | Non-content pass: logical connectors, transitions, signposting. Diagnostic table + selective fix with explicit decisions |
+| **Global revision** (`/r-global`) | `/r-global` | High-level, non-granular: seven lenses (thesis, architecture, proportionality, narrative, redundancy, terminology, norms); either propose structural decisions or save a trace for `/r-pp` |
 | **Chapter revision** (`/r-chapter`) | `/r-chapter [§N]` | Paragraph-depth revision of one section with full cross-article context: terminology, cross-references, section interfaces, redundancy, argument thread, norms compliance |
-| **Drive collaboration** (`/r-gdrive`) | `/r-gdrive [create\|push\|sync]` | Create/sync a shared Drive folder; pull colleague feedback into `revisions/<slug>/sources/`. No A/R/M — output is a source for later passes. User shares the folder. |
-| **Colleague approval** (`/r-approve`) | `/r-approve` | Gate `Accepted` points behind colleague sign-off (Doc suggestions or `approvals.md`). `approve` → mark approved; `changes` → re-propose via A/R/M; `reject` → ask user (no auto-revert). |
-| **Redline export** (`/r-redline`) | `/r-redline` | Colored old-vs-new `.docx`/`.html` for the reviewer + response-to-reviewers letter. Separate from the clean submission file. No A/R/M. |
+| **Drive collaboration** (`/r-gdrive`) | `/r-gdrive [create\|push\|sync]` | Create/sync a shared Drive folder; pull colleague feedback into `revisions/<slug>/sources/`. No interactive decision loop — output is a source for later passes. User shares the folder. |
+| **Colleague approval** (`/r-approve`) | `/r-approve` | Gate `Accepted` points behind colleague sign-off (Doc suggestions or `approvals.md`). `approve` → mark approved; `changes` → re-propose via the decision loop; `reject` → ask user (no auto-revert). |
+| **Redline export** (`/r-redline`) | `/r-redline` | Colored old-vs-new `.docx`/`.html` for the reviewer + response-to-reviewers letter. Separate from the clean submission file. No interactive decision loop. |
 | **Freeze / Thaw / Status** (`/r-freeze`, `/r-thaw`, `/r-status`) | `/r-freeze [unit]`, `/r-thaw [unit]`, `/r-status` | Mark a concluded part 🟢 frozen (advisory) / reopen it 🟡 / print the frozen-vs-open snapshot. Ledger-only, no article edit. |
 
 Never collapse heterogeneous changes (citation + phrasing + structure) into one proposal. Split them into separate decisions.
@@ -178,17 +178,25 @@ For every revision proposal, output exactly this structure:
 **Norms respected**: <list>
 **Possible exceptions**: <list, with reason>
 
-**A/R/M?** (indicare i numeri delle modifiche, es. "A 2,4" oppure "M 3: sostituire X con Y")
+**Decisione sulla proposta?**
+- `Accetta` — applica la proposta così com'è.
+- `Modifica <N>: <direzione>` — mantieni l'idea, ma cambia la modifica indicata.
+- `Rivedi completamente: <direzione>` — rigenera la proposta da capo.
+- `Tieni in considerazione: <nota>` — non applicare ora; registra come promemoria/traccia.
+
+Puoi indicare numeri specifici, es. `Accetta 2,4` oppure `Modifica 3: sostituire X con Y`.
 ```
 
 Then **wait** for the user. Never apply pre-emptively.
 
-Each modification within a paragraph is numbered. The user can accept/reject individual changes:
-- `A 1,3` → accept modifications 1 and 3 only.
-- `R 2` → reject modification 2.
-- `M 4: <direction>` → modify modification 4 as specified.
-- `A` (no numbers) → accept all.
-- `R` (no numbers) → reject entire point.
+Each modification within a paragraph is numbered. The user can decide individual changes:
+- `Accetta 1,3` → apply modifications 1 and 3 only.
+- `Modifica 4: <direction>` → regenerate modification 4 as specified.
+- `Rivedi completamente: <direction>` → regenerate the whole proposal.
+- `Tieni in considerazione 2: <note>` → do not apply modification 2 now; record it as deferred/context.
+
+Optional shortcuts remain accepted for speed:
+`A = Accetta`, `M = Modifica`, `R = Rivedi completamente`, `T = Tieni in considerazione`.
 
 ### After applying changes
 
@@ -200,13 +208,13 @@ Applicate modifiche <numbers>. [Restano in sospeso le modifiche <numbers>.] Ci s
 
 And **wait** for an explicit command (e.g. "no, prossimo paragrafo", "next", "passa al prossimo").
 
-On `Accept` (selected numbers): edit the file(s), update the project file, increment the *accepted-since-last-bump* counter. **Do not commit.** Ask for further changes on the same paragraph.
+On `Accetta` (selected numbers): edit the file(s), update the project file, increment the *accepted-since-last-bump* counter. **Do not commit.** Ask for further changes on the same paragraph.
 
-On `Reject` (selected numbers): annotate rejected + reason. No file edits. Ask for further changes.
+On `Modifica <N>: <direction>`: regenerate modification N per user direction. Re-present it.
 
-On `Reject` (entire point): annotate rejected + reason. Advance to next point.
+On `Rivedi completamente: <direction>`: regenerate the full proposal from the original text. No file edits until `Accetta`.
 
-On `Modify <N>: <direction>`: regenerate modification N per user direction. Re-present it.
+On `Tieni in considerazione`: annotate as `Deferred` + note. No file edits. Record the note in the freeze ledger if it names a future intention.
 
 Silent advance only on explicit user command ("prossimo", "next", etc.).
 
@@ -262,7 +270,7 @@ When the project contains Word files (`.docx`) or the revised Markdown article m
 - Body paragraphs must not have blank-line spacing between consecutive paragraphs; use paragraph spacing values instead of inserting empty paragraphs.
 - Keep visible spacing between headings and the following body text through heading style spacing before/after, not through manual blank lines.
 - Do not introduce extra paragraph breaks while converting `.docx` to Markdown or Markdown back to `.docx`.
-- If a Word formatting change is proposed, present it as a revision point and ask `Accept / Reject / Modify` before applying.
+- If a Word formatting change is proposed, present it as a revision point and ask `Accetta / Modifica / Rivedi completamente / Tieni in considerazione` before applying.
 
 ---
 

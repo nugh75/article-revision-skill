@@ -15,15 +15,15 @@ names verbatim.
 ```
 # article-revision (artr) — comandi
 
-## Revisione (passi interattivi, A/R/M per modifica)
+## Revisione (decisione esplicita per modifica)
   /article-revision   Revisione completa dai commenti di un revisore
-  /r-pp               Paragrafo per paragrafo — unità concettuale + 4 dimensioni
-  /r-pp-a             Paragrafo per paragrafo APPROFONDITA — 6 dimensioni
+  /r-pp               Paragrafo per paragrafo — traccia globale opzionale + 4 dimensioni
+  /r-pp-a             Paragrafo per paragrafo APPROFONDITA — traccia globale + 6 dimensioni
   /r-conn             Connettori, transizioni, segnali logici (no contenuto)
-  /r-global           Globale — 7 lenti strutturali (non granulare)
+  /r-global           Globale — 7 lenti; può salvare traccia per /r-pp
   /r-chapter [§N]     Capitolo — una sezione nel contesto dell'intero articolo
 
-## Diagnostica senza A/R/M (genera documenti)
+## Diagnostica senza ciclo decisionale (genera documenti)
   /r-pr-2             Due peer reviewer simulati + sintesi → revisions/<slug>/
 
 ## Freeze ledger (parti concluse vs da rivedere)
@@ -43,12 +43,13 @@ names verbatim.
 
   /r-help             Questa scheda
 
-## Risposte durante A/R/M
-  A          accetta tutte le modifiche del punto
-  A 1,3      accetta solo le modifiche 1 e 3
-  R          rifiuta l'intero punto
-  R 2        rifiuta la modifica 2
-  M 4: ...   rimodula la modifica 4 secondo la tua indicazione
+## Decisioni sulle proposte
+  Accetta                  applica tutte le modifiche del punto
+  Accetta 1,3              applica solo le modifiche 1 e 3
+  Modifica 4: ...          cambia la modifica 4 secondo la tua indicazione
+  Rivedi completamente     rigenera la proposta da capo
+  Tieni in considerazione  non applica ora; registra come promemoria/traccia
+  Scorciatoie: A / M / R / T
   prossimo / next        passa al punto/paragrafo successivo
   pause / stop           sospendi (si riprende da qui)
   chiudi / fine          chiusura sessione (final sheet? + decision log + sync)

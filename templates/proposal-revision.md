@@ -30,7 +30,7 @@
 ## Decision Trail
 
 - Initial state: `proposed`
-- User decision: `pending`
+- User decision: `pending` <!-- Accetta | Modifica | Rivedi completamente | Tieni in considerazione -->
 
 ## Notes
 

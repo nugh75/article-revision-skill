@@ -15,6 +15,45 @@ If the user invokes by phrase (e.g. "revisione paragrafo per paragrafo") without
 
 If not already done, run `00-bootstrap.md` and `10-setup.md` to load `.env`, norms, bibliography, active article, and detect `ARTICLE_LANG`. **Note:** `10-setup.md` step 5 enforces a mandatory version bump before any revision work begins — do not skip it.
 
+## 1a. Load Optional Global Trace
+
+Before parsing paragraphs, look for global trace files produced by
+`workflow/34-global-revision.md`:
+
+```
+revisions/<article-slug>/sources/global-trace-*.md
+```
+
+If one or more files exist:
+
+1. Prefer the newest trace whose frontmatter has `status: active`.
+2. If no active trace is marked, prefer the newest `global-trace-*.md`.
+3. Load the trace as **diagnostic context only**. It must not force edits and
+   never bypasses the decision loop.
+4. If the trace was created for an older article version, warn:
+
+   ```
+   ⚠ Traccia globale da versione precedente: <trace-version>. La uso come orientamento, non come vincolo rigido.
+   ```
+
+5. Announce:
+
+   ```
+   Traccia globale caricata: <path>
+   Uso la traccia per mantenere visione d'insieme durante la revisione paragrafo per paragrafo.
+   ```
+
+If multiple traces are equally plausible, ask the user to choose one or continue
+without trace. If the user says `senza traccia`, continue normally and record
+`GLOBAL_TRACE_PATH=none` for the session.
+
+When a trace is loaded, use it to check whether each paragraph supports the
+global function of its section, respects the priorities identified by
+`/r-global`, and avoids global issues already flagged there (e.g. redundancy,
+logical gaps, terminology drift, proportional imbalance). Summarize only the
+relevant trace point for the current paragraph; do not paste the full trace into
+every diagnostic block.
+
 ## 2. Parse Article Into Paragraphs
 
 1. Read the full article (skip YAML frontmatter).
@@ -33,6 +72,7 @@ If not already done, run `00-bootstrap.md` and `10-setup.md` to load `.env`, nor
    Articolo: <article-path>
    Paragrafi individuati: N
    Capitoli/sezioni individuati: C
+   Traccia globale: <none|GLOBAL_TRACE_PATH>
    Modalità: <standard|approfondita>
    Lingua rilevata: <ARTICLE_LANG>
 
@@ -77,6 +117,9 @@ If no unitary concept can be identified, flag the paragraph as structurally weak
 **Contesto** (paragrafo precedente):
 > <preceding paragraph, truncated to 200 chars if long>
 
+**Traccia globale rilevante:**
+> <section-level or article-level guidance from GLOBAL_TRACE_PATH, or "Nessuna traccia globale caricata">
+
 **Paragrafo corrente:**
 > <current paragraph verbatim>
 
@@ -110,6 +153,9 @@ Adapt to English if `ARTICLE_LANG=en`:
 **Contesto** (paragrafo precedente):
 > <preceding paragraph, truncated to 200 chars if long>
 
+**Traccia globale rilevante:**
+> <section-level or article-level guidance from GLOBAL_TRACE_PATH, or "Nessuna traccia globale caricata">
+
 **Paragrafo corrente:**
 > <current paragraph verbatim>
 
@@ -129,7 +175,7 @@ Rispondi per categoria (es. "unità: due idee da separare; logica: manca un pass
 
 ## 4. Propose Modifications
 
-Based on the user's diagnostic answers, generate a proposal using the standard A/R/M pattern from `30-iterate-points.md`, section 3:
+Based on the user's diagnostic answers, generate a proposal using the standard decision pattern from `30-iterate-points.md`, section 3:
 
 ```
 ## Point <N> — P<N> revision · scope: paragraph · mode: <standard|deep>
@@ -139,6 +185,9 @@ Based on the user's diagnostic answers, generate a proposal using the standard A
 
 **Concetto unitario:**
 > <the governing concept after diagnosis, or "non unitario" if the proposal splits/reorganizes it>
+
+**Vincolo dalla traccia globale:**
+> <relevant global orientation, or "nessuno">
 
 **Diagnosi:**
 - <summary of user's answers>
@@ -156,7 +205,13 @@ Based on the user's diagnostic answers, generate a proposal using the standard A
 **Norms respected**: <list>
 **Possible exceptions**: <list, with reason>
 
-**A/R/M?** (indicare i numeri delle modifiche, es. "A 2,4" oppure "M 3: sostituire X con Y")
+**Decisione sulla proposta?**
+- `Accetta` — applica la proposta così com'è.
+- `Modifica <N>: <direzione>` — mantieni l'idea, ma cambia la modifica indicata.
+- `Rivedi completamente: <direzione>` — rigenera la proposta da capo.
+- `Tieni in considerazione: <nota>` — non applicare ora; registra come promemoria/traccia.
+
+Puoi indicare numeri specifici, es. `Accetta 2,4` oppure `Modifica 3: sostituire X con Y`.
 ```
 
 If a proposal requires splitting a paragraph, show the exact resulting paragraphs under `**Proposta**`, mark `risk: medium` or `high` depending on content movement, and keep each split/move as a separate numbered modification.
@@ -174,16 +229,18 @@ In deep mode, prefix each modification with its diagnostic category:
 ...
 ```
 
-The user may accept/reject by category: `A logica`, `R tono`, etc.
+The user may decide by category: `Accetta logica`, `Modifica tono: <direzione>`,
+`Tieni in considerazione citazioni: <nota>`, etc. Shortcuts remain optional:
+`A = Accetta`, `M = Modifica`, `R = Rivedi completamente`, `T = Tieni in considerazione`.
 
 ## 5. Handle Responses
 
 Follow the standard response handling from `30-iterate-points.md`, section 4:
 
-- **Accept** → edit file, increment counter, ask "Ci sono altri cambiamenti in questo paragrafo?".
-- **Reject** → annotate, ask if more changes.
-- **Reject entire point** → advance to next paragraph.
-- **Modify** → regenerate modification N per direction.
+- **Accetta** → edit file, increment counter, ask "Ci sono altri cambiamenti in questo paragrafo?".
+- **Modifica** → regenerate modification N per direction.
+- **Rivedi completamente** → regenerate the full proposal from the original paragraph.
+- **Tieni in considerazione** → record the note as deferred/context; no file edits.
 
 **Do not advance automatically.** Wait for explicit command: `prossimo`, `next`, `passa al prossimo paragrafo`.
 
@@ -203,7 +260,7 @@ and before presenting the first paragraph of the next chapter/section. Also run
 it for the final chapter before the revision closure summary.
 
 The recap is diagnostic first: do not edit automatically. If the recap identifies
-fixes, propose them as normal A/R/M points, split by issue type (e.g. one point
+fixes, propose them as normal decision points, split by issue type (e.g. one point
 for a transition, one point for a paragraph split, one point for section order).
 
 ### Output Format
@@ -216,6 +273,9 @@ for a transition, one point for a paragraph split, one point for section order).
 **Mappa dei concetti unitari:**
 - P<X>: <concept>
 - P<Y>: <concept>
+
+**Confronto con traccia globale:**
+- <how this chapter/section aligns or conflicts with the loaded global trace>
 
 **Chiarezza e coerenza:**
 - Tesi/funzione del capitolo: <clear|partly clear|unclear> — <reason>
@@ -266,7 +326,7 @@ Criteria:
 
    ```
    Revisione paragrafo per paragrafo completata.
-   Paragrafi processati: N  |  Accettati: A  |  Rifiutati: R  |  Saltati: S
+   Paragrafi processati: N  |  Accettati: A  |  Rivisti: R  |  Da considerare: T  |  Saltati: S
    Capitoli/sezioni riepilogati: C
    Bilancio caratteri: +Δ (limite: EDITORIAL_LIMIT_CHARS)
    Versione articolo attiva: <path>

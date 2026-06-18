@@ -9,17 +9,17 @@ The two files (`AGENTS.md` and `OPENCODE.md`) carry the same workflow. Edit one 
 | Command | Description |
 |---|---|
 | `/article-revision` | Full revision workflow from reviewer feedback |
-| `/r-pp` | Revisione Paragrafo per Paragrafo — unitary concept + 4 diagnostic questions per paragraph; recap at chapter/section boundaries |
-| `/r-pp-a` | Revisione Paragrafo per Paragrafo Approfondita — 6-layer deep diagnostic, including unitary-concept control |
-| `/r-pr-2` | Dual Peer Reviewer — generate standalone reports + synthesis in `revisions/` (no interactive A/R/M) |
+| `/r-pp` | Revisione Paragrafo per Paragrafo — optional global trace + unitary concept + 4 diagnostic questions per paragraph; recap at chapter/section boundaries |
+| `/r-pp-a` | Revisione Paragrafo per Paragrafo Approfondita — optional global trace + 6-layer deep diagnostic, including unitary-concept control |
+| `/r-pr-2` | Dual Peer Reviewer — generate standalone reports + synthesis in `revisions/` (no interactive decision loop) |
 | `/r-conn` | Connector revision: transitions, signposting, overused connectors |
-| `/r-global` | Global revision: 7-lens structural review (non-granular) |
+| `/r-global` | Global revision: 7-lens structural review; can save a trace for `/r-pp` |
 | `/r-freeze` | Freeze a concluded part in the per-article freeze ledger (advisory) |
 | `/r-thaw` | Reopen a frozen part so it can be revised without the warning |
 | `/r-status` | Print the frozen (🟢) vs open (🟡) snapshot from the freeze ledger |
 | `/r-bump` | Bump article version (vN → vN+1) |
 | `/r-sheet` | Generate final revision sheet |
-| `/r-help` | Reference card of every command + A/R/M shortcuts (read-only, no bump) |
+| `/r-help` | Reference card of every command + decision shortcuts (read-only, no bump) |
 
 Revision commands enforce the mandatory session-start bump (`10-setup.md` step 5).
 The read-only commands `/r-help` and `/r-status`, and the ledger-only commands
@@ -32,7 +32,7 @@ Commands are registered in the project's `opencode.json` under `"command"`.
 For the complete workflow, see `AGENTS.md` in this repository. The same rules apply in opencode, including:
 
 - user-controlled git operations;
-- per-point `Accept / Reject / Modify` decisions;
+- per-point `Accetta / Modifica / Rivedi completamente / Tieni in considerazione` decisions;
 - English workflow prompts and templates;
 - multilingual article proposals via `ARTICLE_LANG`;
 - explicit Python interpreter selection via `PYTHON_BIN`;

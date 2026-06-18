@@ -94,12 +94,12 @@ Era considerata conclusa. Vuoi davvero rivederla?
 Then show the normal proposal block, but the closing line becomes:
 
 ```
-**A/R/M?** — procedere su una parte congelata richiede conferma esplicita.
-Rispondi "sì, procedi" per attivare A/R/M, oppure "lascia congelato".
+**Decisione sulla proposta?** — procedere su una parte congelata richiede conferma esplicita.
+Rispondi "sì, procedi" per attivare il ciclo decisionale, oppure "lascia congelato".
 ```
 
 - If the user confirms (`sì, procedi`) → set the unit to 🔵 `wip` and run the
-  normal A/R/M loop. On the first applied change, log a `thaw` in the storico
+  normal decision loop. On the first applied change, log a `thaw` in the storico
   (frozen → wip) so the history is honest.
 - If the user declines (`lascia congelato`) → skip the unit, leave it 🟢, and
   advance.
@@ -126,7 +126,7 @@ the user signals no further changes on it (e.g. "no, prossimo paragrafo",
 "next") — offer to freeze it **before** advancing:
 
 ```
-Lavoro su <unit> (<sezione>) concluso: <X> accettate, <Y> respinte.
+Lavoro su <unit> (<sezione>) concluso: <X> accettate, <Y> tenute in considerazione.
 Congelo questa parte come conclusa? (sì / no / più tardi)
 ```
 

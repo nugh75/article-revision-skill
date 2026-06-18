@@ -23,6 +23,28 @@ CURRENT_MD="$ARTICLES_DIR/current.md"
 CURRENT_DOCX="$ARTICLES_DIR/current.docx"
 BIB_DOCX="$BIB_DIR/bibliography.docx"
 
+find_first_csl() {
+  local norms_dir="$PROJECT_ROOT/editorial-norms"
+  [[ -d "$norms_dir" ]] || return 0
+  find "$norms_dir" -name "*.csl" -print -quit 2>/dev/null || true
+}
+
+docx_body_has_text() {
+  local docx="$1"
+  local text body
+
+  [[ -s "$docx" ]] || return 1
+  command -v unzip &>/dev/null || return 0
+
+  text="$(unzip -p "$docx" word/document.xml 2>/dev/null \
+    | sed -E 's/<[^>]+>/ /g' \
+    | tr -s '[:space:]' ' ' || true)"
+  body="${text//Bibliography/}"
+  body="${body//References/}"
+  body="${body//Bibliografia/}"
+  [[ "$body" =~ [[:alnum:]] ]]
+}
+
 # --- 1. current.md ---
 cp "$ARTICLE" "$CURRENT_MD"
 echo "✓ current.md  → $CURRENT_MD"
@@ -36,6 +58,7 @@ else
     --from markdown
     --to docx
     --standalone
+    --citeproc
     --bibliography "$BIB"
   )
 
@@ -44,7 +67,7 @@ else
   [[ -f "$REF_DOCX" ]] && PANDOC_OPTS+=(--reference-doc "$REF_DOCX")
 
   # CSL citation style
-  CSL_FILE=$(find "$PROJECT_ROOT/editorial-norms" -name "*.csl" 2>/dev/null | head -1)
+  CSL_FILE="$(find_first_csl)"
   [[ -n "$CSL_FILE" ]] && PANDOC_OPTS+=(--csl "$CSL_FILE")
 
   pandoc "${PANDOC_OPTS[@]}" -o "$CURRENT_DOCX" "$CURRENT_MD"
@@ -57,30 +80,46 @@ if ! command -v pandoc &>/dev/null; then
 elif [[ ! -f "$BIB" ]]; then
   echo "⚠ $BIB non trovato — bibliography.docx non generato"
 else
+  BIB_ENTRY_COUNT=$(grep -Eic '^[[:space:]]*@[A-Za-z]+[[:space:]]*[{(]' "$BIB" || true)
+  if [[ "$BIB_ENTRY_COUNT" -eq 0 ]]; then
+    echo "⚠ $BIB non contiene entry BibTeX — bibliography.docx non generato"
+    exit 0
+  fi
+
   # Build a minimal markdown wrapper that pandoc can render as a reference list
   TMPMD=$(mktemp /tmp/bib_XXXXXX.md)
   trap 'rm -f "$TMPMD"' EXIT
 
   cat > "$TMPMD" <<'MDEOF'
 ---
-title: "Bibliography"
-nocite: "@*"
+nocite: |
+  @*
 ---
+
+# Bibliography
+
+::: {#refs}
+:::
 MDEOF
 
   BIB_PANDOC_OPTS=(
     --from markdown
     --to docx
     --standalone
+    --citeproc
     --bibliography "$BIB"
   )
 
-  CSL_FILE=$(find "$PROJECT_ROOT/editorial-norms" -name "*.csl" 2>/dev/null | head -1)
+  CSL_FILE="$(find_first_csl)"
   [[ -n "$CSL_FILE" ]] && BIB_PANDOC_OPTS+=(--csl "$CSL_FILE")
 
   REF_DOCX="$PROJECT_ROOT/editorial-norms/reference.docx"
   [[ -f "$REF_DOCX" ]] && BIB_PANDOC_OPTS+=(--reference-doc "$REF_DOCX")
 
   pandoc "${BIB_PANDOC_OPTS[@]}" -o "$BIB_DOCX" "$TMPMD"
-  echo "✓ bibliography.docx → $BIB_DOCX"
+  if docx_body_has_text "$BIB_DOCX"; then
+    echo "✓ bibliography.docx → $BIB_DOCX ($BIB_ENTRY_COUNT entries)"
+  else
+    echo "⚠ bibliography.docx generato ma sembra vuoto — controlla $BIB e lo stile CSL"
+  fi
 fi

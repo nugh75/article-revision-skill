@@ -56,12 +56,18 @@ to pandoc for journal-compliant formatting.
 The same `scripts/sync_current.sh` call handles this. It converts `reference.bib`
 to a formatted reference list using:
 
-1. Pandoc + CSL (if a `.csl` file is found in `editorial-norms/`).
-2. Fallback: plain numbered list via `scripts/bib_check.py --format=docx`.
+1. Pandoc with `--citeproc`, `nocite: @*`, and an explicit `refs` block so every
+   BibTeX entry is rendered even when the article does not cite it directly.
+2. CSL if a `.csl` file is found in `editorial-norms/`.
+3. `editorial-norms/reference.docx` if present, for journal-compliant Word layout.
+
+After generation, the script checks that `bibliography.docx` contains body text
+beyond the heading. If the file is missing, empty, or contains no rendered
+references, warn explicitly; do not report the bibliography sync as successful.
 
 Announce in chat:
 ```
-bibliography.docx → bibliography/bibliography.docx ✓
+bibliography.docx → bibliography/bibliography.docx ✓ (<entry-count> entries)
 ```
 
 ## 5. Update Task File
