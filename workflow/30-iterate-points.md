@@ -26,6 +26,16 @@ If the change requires sample-description data, run `50-sample-description.md` f
 
 If the original or proposed text contains a numeric claim — a percentage, count, mean, index, correlation, rank, or a qualitative claim that holds only if a figure holds — run `51-data-verification.md` **before** generating the proposal. Never inherit the figure from the previous version or from the reviewer's wording. This is binding, not optional.
 
+Run the freeze check (`15-freeze-ledger.md` §4) on the target unit **before**
+generating the proposal:
+
+- 🟢 `frozen` → apply the advisory warning flow (`15-freeze-ledger.md` §5):
+  prepend `⚠ Questa parte è CONGELATA …`, and require an explicit `sì, procedi`
+  before running A/R/M. If the user declines, skip the unit and advance.
+- 🟡 `open` → if the row carries an intention, fold it into the diagnosis so the
+  proposal addresses what was already noted.
+- 🔵 `wip` / untracked → proceed; mark the unit `wip` while working.
+
 ## 2. Generate Proposal
 
 Apply:
@@ -138,6 +148,18 @@ Only advance when the user gives an explicit command:
 - "passa al prossimo"
 - "next"
 - "prossimo"
+
+**Before advancing, run the freeze auto-offer** (`15-freeze-ledger.md` §7):
+
+- If the unit's work concluded cleanly, offer to freeze it:
+  `Lavoro su <unit> concluso: <X> accettate, <Y> respinte. Congelo questa parte come conclusa? (sì / no / più tardi)`.
+  `sì` → `freeze`; `più tardi` → leave 🔵 `wip`.
+- If the user named something still to do on the unit (or chose `no` with a
+  reason), record it via `log-comment` (`15-freeze-ledger.md` §9): the unit
+  becomes 🟡 `open` with the intention written into the ledger. Never let a
+  deferred intention live only in chat.
+
+Then advance.
 
 ## 5. Edge Cases
 

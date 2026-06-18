@@ -163,6 +163,11 @@ Adapt to English if `ARTICLE_LANG=en`.
 
 ## 5. Generate Proposals by Lens
 
+Run the freeze check (`15-freeze-ledger.md` §4) on each unit a structural change
+would touch; if a unit is 🟢 `frozen`, apply the advisory warning flow (§5)
+before proposing. A global rename that sweeps frozen units must list them and ask
+confirmation once for the whole sweep.
+
 For each lens the user selects:
 
 ### Structural proposals (Lenses 1, 2, 4)

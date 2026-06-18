@@ -93,4 +93,19 @@ Immediately after the bump is confirmed, call `workflow/05-task.md` — action
 
 The task file path is stored as `TASK_FILE_PATH` in working memory.
 
-After creation, wait for the next instruction (reviewer feedback, `/r-pp`, `/r-pr-2`, `/r-conn`, `/r-global`, `/r-chapter`).
+## 8. Ensure Freeze Ledger
+
+Call `workflow/15-freeze-ledger.md` — action `ensure`. This creates
+`revisions/<article-slug>/freeze-ledger.md` from `templates/freeze-ledger.md` if
+absent, otherwise loads it and updates `reconciled-version`/`updated` to the
+bumped version. Store `FREEZE_LEDGER_PATH` in working memory.
+
+From here on, the ledger governs the advisory check before every proposal
+(`15-freeze-ledger.md` §4–5) and records frozen/open units and their intentions.
+Confirm in chat (one line):
+
+```text
+Freeze ledger: revisions/<article-slug>/freeze-ledger.md (🟢 X frozen · 🟡 Y open)
+```
+
+After creation, wait for the next instruction (reviewer feedback, `/r-pp`, `/r-pr-2`, `/r-conn`, `/r-global`, `/r-chapter`, `/r-status`).

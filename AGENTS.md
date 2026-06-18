@@ -25,6 +25,9 @@ Trigger phrases:
 | `/r-pr-2` | **Revisione Due Peer Reviewer** — generate two standalone reviewer reports + synthesis in `revisions/<article-slug>/` (no interactive A/R/M) |
 | `/r-conn` | **Revisione Connettori** — analyse and polish logical connectors, transitions, and signposting |
 | `/r-global` | **Revisione Globale** — high-level, non-granular revision across seven structural lenses |
+| `/r-freeze` | **Congela** una parte conclusa nel freeze ledger; in seguito la skill avvisa prima di toccarla (`workflow/15-freeze-ledger.md`) |
+| `/r-thaw` | **Scongela** una parte: torna modificabile senza avviso (`workflow/15-freeze-ledger.md`) |
+| `/r-status` | **Stato revisione** — mappa frozen (🟢) vs open (🟡) dal freeze ledger (`workflow/15-freeze-ledger.md`) |
 | `/r-bump` | Bump article version (hand off to `workflow/60-bump-version.md`) |
 | `/r-sheet` | Generate final revision sheet (hand off to `workflow/70-final-sheet.md`) |
 | `/r-chapter` | **Revisione Capitolo** — paragraph-depth revision of one section in cross-article context: terminology, cross-references, interfaces, redundancy, argument thread, norms compliance (`workflow/36-chapter-revision.md`) |
@@ -49,6 +52,7 @@ If the user is doing something else (writing the article from scratch, generatin
 7. **Task file per session.** Immediately after the bump, create `revisions/<article-slug>/task-<command-slug>-<bumped-version>.md` via `workflow/05-task.md`. Update it at each major step. Close it via `95-decision-log.md` at the end of the round. Never skip task file creation.
 8. **Sync current files.** At the end of every revision round, `workflow/95-decision-log.md` must call `workflow/96-sync-current.md`, which overwrites `articles/current.md`, `articles/current.docx`, and `bibliography/bibliography.docx`. This step is mandatory and runs even when no changes were accepted. Never close a round without it.
 9. **Revision closure triggers.** A round closes either when its natural perimeter is exhausted (last paragraph, last lens, last dimension, all reviewer points decided) OR when the user sends an explicit closure phrase (`chiudi`, `fine`, `ho finito`, `stop` / `close`, `done`, `finish`, `end`). In both cases, present a summary, ask for confirmation, then run the mandatory closure sequence.
+10. **Freeze ledger.** Keep one persistent ledger per article at `revisions/<article-slug>/freeze-ledger.md` (`workflow/15-freeze-ledger.md`). Check it before every proposal: a 🟢 frozen part is *advisory* — warn (`⚠ congelata`) and require explicit `sì, procedi` before applying. When the user states a change but does not apply it this turn, record it in the ledger (🟡 open + intention) — never leave deferred intentions only in chat. Offer to freeze a unit when its work concludes.
 
 ---
 
@@ -65,6 +69,8 @@ If the user is doing something else (writing the article from scratch, generatin
 │   └── norms-<journal>.md
 ├── data/                             # optional, for sample stats from raw data
 └── revisions/
+    ├── <article-slug>/
+    │   └── freeze-ledger.md          # persistent: frozen vs open parts + intentions
     └── <reviewer-slug>/
         ├── revision-plan-vN.md
         └── final-sheet-vN.md
@@ -105,7 +111,8 @@ See `.env.example` for the complete template.
 |---|---|---|
 | 0 | `workflow/05-task.md` | Called by `10-setup.md` (create) and `95-decision-log.md` (close); tracks steps and produces session summary |
 | 1 | `workflow/00-bootstrap.md` | First invocation in a new project, or whenever an artifact is missing |
-| 2 | `workflow/10-setup.md` | After bootstrap; loads `.env`, norms, bibliography, active article, detects language, creates task file |
+| 2 | `workflow/10-setup.md` | After bootstrap; loads `.env`, norms, bibliography, active article, detects language, creates task file, ensures freeze ledger |
+| 2a | `workflow/15-freeze-ledger.md` | Per-article freeze ledger: `ensure` (setup), advisory `check` before every proposal, `freeze`/`thaw`/`status`, `log-comment`, `carry-forward` (bump) |
 | 3 | `workflow/20-plan-revision.md` | When user provides reviewer feedback |
 | 4 | `workflow/30-iterate-points.md` | Core loop: propose, ask, apply (no commit) |
 | 4a | `workflow/31-paragraph-by-paragraph.md` | Triggered by `/r-pp` or `/r-pp-a`. Per-paragraph diagnostic walk. |
@@ -141,6 +148,7 @@ The user can pick one of three scopes:
 | **Drive collaboration** (`/r-gdrive`) | `/r-gdrive [create\|push\|sync]` | Create/sync a shared Drive folder; pull colleague feedback into `revisions/<slug>/sources/`. No A/R/M — output is a source for later passes. User shares the folder. |
 | **Colleague approval** (`/r-approve`) | `/r-approve` | Gate `Accepted` points behind colleague sign-off (Doc suggestions or `approvals.md`). `approve` → mark approved; `changes` → re-propose via A/R/M; `reject` → ask user (no auto-revert). |
 | **Redline export** (`/r-redline`) | `/r-redline` | Colored old-vs-new `.docx`/`.html` for the reviewer + response-to-reviewers letter. Separate from the clean submission file. No A/R/M. |
+| **Freeze / Thaw / Status** (`/r-freeze`, `/r-thaw`, `/r-status`) | `/r-freeze [unit]`, `/r-thaw [unit]`, `/r-status` | Mark a concluded part 🟢 frozen (advisory) / reopen it 🟡 / print the frozen-vs-open snapshot. Ledger-only, no article edit. |
 
 Never collapse heterogeneous changes (citation + phrasing + structure) into one proposal. Split them into separate decisions.
 

@@ -61,6 +61,22 @@ In the project file, reset `<!-- accepted_since_bump: 0 -->` and add an entry to
 - vN → v(N+1) — YYYY-MM-DD HH:MM — <K> accepted changes
 ```
 
+## 4b. Carry Freeze Ledger Forward
+
+Call `workflow/15-freeze-ledger.md` — action `carry-forward`. The ledger file
+path is stable (`revisions/<article-slug>/freeze-ledger.md`), so only its
+contents are reconciled:
+
+- Re-anchor every row against v(N+1) by matching the anchor incipit; refresh the
+  advisory line ranges.
+- Update frontmatter `reconciled-version` → v(N+1) and `updated`.
+- Any row whose anchor no longer matches → mark `⚠ stale`, list those in chat,
+  and ask the user to re-point or drop them. Never drop a frozen unit silently.
+
+If no ledger exists yet (e.g. the mandatory session-start bump runs before any
+freeze), `15-freeze-ledger.md#ensure` created an empty one — carry-forward is a
+no-op beyond the frontmatter update.
+
 ## 5. Notify User
 
 ```text

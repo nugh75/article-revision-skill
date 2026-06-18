@@ -38,6 +38,18 @@ If not already done, run `00-bootstrap.md` and `10-setup.md` to load `.env`, nor
 
 ## 3. Diagnostic Interview Per Paragraph
 
+Before presenting each paragraph, run the freeze check (`15-freeze-ledger.md`
+§4). If the paragraph is 🟢 `frozen`, prepend the advisory note and ask whether
+to revisit it before running diagnostics:
+
+```
+P<N> §<section> è CONGELATO (frozen il <data>) — considerato concluso.
+Lo rivediamo lo stesso? (sì, procedi / lascia congelato e prossimo)
+```
+
+`lascia congelato` → skip to the next paragraph. `sì, procedi` → set 🔵 `wip` and
+continue. If the row carries an intention (🟡 `open`), fold it into the diagnosis.
+
 For each paragraph, present it in context and ask the diagnostic questions. **Wait for answers before proposing.**
 
 ### Output Format (Standard — `/r-pp`)
@@ -142,6 +154,12 @@ Follow the standard response handling from `30-iterate-points.md`, section 4:
 - **Modify** → regenerate modification N per direction.
 
 **Do not advance automatically.** Wait for explicit command: `prossimo`, `next`, `passa al prossimo paragrafo`.
+
+**On the advance command, run the freeze auto-offer** (`15-freeze-ledger.md` §7)
+before moving to the next paragraph: offer to freeze the just-finished paragraph
+(`Congelo P<N> come concluso? (sì / no / più tardi)`). If the user declines but
+named something still to do, record it via `log-comment` so the paragraph stays
+🟡 `open` with its intention in the ledger.
 
 ## 6. Edge Cases
 

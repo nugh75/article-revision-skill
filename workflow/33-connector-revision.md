@@ -137,6 +137,10 @@ Wait for the user. Do not apply pre-emptively.
 
 ## 8. Propose Modifications
 
+Run the freeze check (`15-freeze-ledger.md` §4) on each unit a proposal would
+touch; if a unit is 🟢 `frozen`, apply the advisory warning flow (§5) before
+proposing.
+
 For each selected item group, generate a proposal using the standard A/R/M pattern.
 
 **For transitions** (one point per group of up to 5 transitions that share a type):

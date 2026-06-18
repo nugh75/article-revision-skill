@@ -68,6 +68,7 @@ Write these sections:
 ## Note
 <open items, deferred issues, next step>
 <if a task file was closed in step 0: include its Riepilogo and Stato articolo alla chiusura here>
+<freeze ledger snapshot: 🟢 X frozen · 🟡 Y open; list units frozen this round and any 🟡 open intentions still pending (read from revisions/<article-slug>/freeze-ledger.md)>
 ```
 
 ## 4. Update Index

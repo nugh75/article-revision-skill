@@ -31,6 +31,9 @@ bibliography skills around a structured revision workflow.
 | `/r-pr-2` | **Revisione Due Peer Reviewer** — simulate two independent peer reviewers; generate Standalone reviewer documents in `revisions/<article-slug>/` without interactive A/R/M; the documents feed subsequent revision passes |
 | `/r-conn` | **Revisione Connettori** — analyse and polish logical connectors, transitions, and signposting between paragraphs and sections |
 | `/r-global` | **Revisione Globale** — high-level, non-granular revision: overall structure, argument coherence, section proportionality, redundancy, terminology consistency |
+| `/r-freeze` | **Congela** una parte conclusa (paragrafo/sezione/frammento) nel freeze ledger; in seguito la skill avvisa prima di toccarla (`workflow/15-freeze-ledger.md`) |
+| `/r-thaw` | **Scongela** una parte congelata: torna modificabile senza avviso (`workflow/15-freeze-ledger.md`) |
+| `/r-status` | **Stato revisione** — mappa di cosa è concluso (🟢 frozen) e cosa richiede intervento (🟡 open), dal freeze ledger (`workflow/15-freeze-ledger.md`) |
 | `/r-bump` | Bump article version (hand off to `workflow/60-bump-version.md`) |
 | `/r-sheet` | Generate final revision sheet (hand off to `workflow/70-final-sheet.md`) |
 | `/r-chapter` | **Revisione Capitolo** — revisiona una singola sezione in relazione al resto dell'articolo: terminologia, cross-riferimenti, filo argomentativo, ridondanze, interfacce di sezione (`workflow/36-chapter-revision.md`) |
@@ -310,6 +313,36 @@ reproduces the value, the point is `Deferred` — never replaced with a
 plausible number. Skipping this when a figure is in scope is a binding
 violation, same severity as auto-committing.
 
+## Freeze ledger (advisory, persistent)
+
+The skill keeps one **freeze ledger** per article at
+`revisions/<article-slug>/freeze-ledger.md` — the single artifact that always
+answers: *which parts are concluded and good (🟢 frozen), which still need work
+(🟡 open), and what we intend to change about them.* It persists across version
+bumps and sessions; see `workflow/15-freeze-ledger.md`.
+
+Binding rules:
+
+- **Check before proposing.** Every interactive revision workflow
+  (`30`, `31`, `33`, `34`, `36`) reads the ledger before touching a unit.
+- **Frozen is advisory, not silent-skip.** A proposal may still touch a 🟢 frozen
+  unit, but the skill must first warn (`⚠ questa parte è congelata`) and get an
+  explicit confirmation (`sì, procedi`) in the same turn before applying. Without
+  confirmation, leave it frozen and advance.
+- **Track intentions, don't lose them.** Whenever the user states something to
+  change but the change is not applied this turn, record it in the ledger
+  (`log-comment`): the unit becomes 🟡 open with the intention written down. Chat
+  is not memory — the ledger is.
+- **Offer to freeze on conclusion.** When a unit's work concludes and the user
+  signals no further changes on it, the skill offers to freeze it before
+  advancing (once per unit per session). `/r-freeze` freezes on demand.
+- **Carry forward on bump.** `60-bump-version.md` re-anchors the ledger to the
+  new version by incipit; a unit whose anchor no longer matches is flagged
+  `⚠ stale`, never dropped silently.
+
+Freezing is a project-record convenience, not a git operation. It changes the
+ledger only — never the article and never the repository state.
+
 ## Project layout (required)
 
 ```
@@ -328,6 +361,8 @@ violation, same severity as auto-committing.
 │   └── <style>.csl                   # optional: CSL file for citation formatting
 ├── data/                             # optional, for sample stats
 └── revisions/
+    ├── <article-slug>/
+    │   └── freeze-ledger.md          # persistent: frozen vs open parts + intentions
     ├── <reviewer-name>/
     │   ├── revision-plan-vN.md
     │   ├── proposal-revision-YYYY-MM-DD-HHMM.md
@@ -397,6 +432,10 @@ Optional:
    anything already in place.
 2. `workflow/10-setup.md` — load `.env`, norms, bib, current article version,
    detect article language.
+2a. `workflow/15-freeze-ledger.md` — ensure the per-article freeze ledger exists
+   and is reconciled to the bumped version (`ensure`). Thereafter it governs the
+   advisory check before every proposal and records frozen/open units and their
+   intentions. Also drives `/r-freeze`, `/r-thaw`, `/r-status`.
 3. `workflow/20-plan-revision.md` — accept reviewer feedback, generate
    `revisions/<reviewer>/revision-plan-vN.md` from the template, with
    each point in `To decide` state.
@@ -561,6 +600,11 @@ Applicate modifiche <numeri>. [Restano in sospeso le modifiche <numeri>.] Ci son
 
 And **wait** for an explicit command from the user (e.g. "A 1,3", "M 5: ...", "no, prossimo paragrafo", "passa al prossimo").
 
+When the user signals no further changes on the unit and asks to advance, run
+the freeze auto-offer (`15-freeze-ledger.md` §7) **before** moving on: offer to
+freeze the concluded unit, or — if the user named something still to do — record
+the intention in the ledger (`log-comment`). Then advance.
+
 ### Handling responses
 
 - `Accept` (with selected numbers) → apply via Edit only the numbered modifications. Mark applied modifications as `Accepted` in the project file. Increment the *accepted-since-last-bump* counter. **Do not commit.** When the counter reaches `AUTO_BUMP_THRESHOLD`, suggest a version bump (see step 7). Ask for further changes on the same paragraph.
@@ -677,6 +721,9 @@ point in the workflow:
 | **Drive collaboration** (`/r-gdrive`) | `/r-gdrive [create\|push\|sync]` | Create/sync a shared Drive folder; push the revised article + redline; pull colleague feedback into `revisions/<slug>/sources/`. No A/R/M — output is a source for later passes. User shares the folder. |
 | **Colleague approval** (`/r-approve`) | `/r-approve` | Gate `Accepted` points behind colleague sign-off (Doc suggestions or `approvals.md`). `approve` → mark approved; `changes` → re-propose via A/R/M; `reject` → ask user (no auto-revert). |
 | **Redline export** (`/r-redline`) | `/r-redline` | Colored old-vs-new `.docx`/`.html` for the reviewer + response-to-reviewers letter. Separate from the clean submission file. No A/R/M. |
+| **Freeze** (`/r-freeze`) | `/r-freeze [unit]` | Mark a concluded part 🟢 frozen in the ledger. No-arg = last unit worked on; `P4` / `§3` / `§3 tutto` target explicitly. Ledger-only, no article edit. |
+| **Thaw** (`/r-thaw`) | `/r-thaw [unit]` | Mark a frozen part 🟡 open again so it can be revised without the advisory warning. |
+| **Status** (`/r-status`) | `/r-status` | Print the frozen/open/wip snapshot from the ledger + the next suggested intervention. Read-only. |
 
 For paragraph and whole-article scopes, break into more granular points
 when the change touches separate concerns (e.g. a citation correction

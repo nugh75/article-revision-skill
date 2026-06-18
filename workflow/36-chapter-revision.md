@@ -189,6 +189,10 @@ Wait for user selection.
 
 ## 5. Iterate Fixes
 
+Run the freeze check (`15-freeze-ledger.md` §4) on each paragraph a point would
+touch; if a paragraph is 🟢 `frozen`, apply the advisory warning flow (§5) before
+proposing.
+
 For each selected dimension, generate revision points following the standard
 A/R/M interaction pattern from `SKILL.md` § "Interaction pattern (binding)".
 
