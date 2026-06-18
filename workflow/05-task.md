@@ -11,6 +11,8 @@ and provides the input summary for `95-decision-log.md`.
 |---|---|
 | `create` | `workflow/10-setup.md` — immediately after the mandatory bump |
 | `update-step` | Any workflow file when a named step reaches a new status |
+| `handoff` | `workflow/06-handoff.md` — whenever work is paused or may be interrupted |
+| `resume` | `workflow/06-handoff.md` — when continuing from a paused task file |
 | `close` | `workflow/95-decision-log.md` — before writing the session entry |
 
 ---
@@ -30,15 +32,15 @@ and provides the input summary for `95-decision-log.md`.
 
 | Command | Steps (in order) |
 |---|---|
-| `/article-revision` | Plan revision · Iterate points · Bibliography check · Final sheet · Decision log · Sync current files |
-| `/r-pp` | Parse paragraphs · Walk P1..PN · Bibliography check · Final sheet · Decision log · Sync current files |
-| `/r-pp-a` | Parse paragraphs · Walk P1..PN (deep) · Bibliography check · Final sheet · Decision log · Sync current files |
-| `/r-pr-2` | Generate Reviewer A · Generate Reviewer B · Synthesize · Decision log · Sync current files |
-| `/r-conn` | Parse transitions · Diagnose · Fix selected · Decision log · Sync current files |
-| `/r-global` | Read article · Seven lenses · Save trace or fix selected · Decision log · Sync current files |
-| `/r-chapter` | Select section · Load article · Cross-article analysis · Fix selected · Decision log · Sync current files |
-| `/r-redline` | Generate redline · Response letter · Decision log · Sync current files |
-| `/r-approve` | Load approvals · Apply outcomes · Decision log · Sync current files |
+| `/article-revision` | Plan revision · Iterate points · Bibliography check · Handoff checkpoint · Final sheet · Decision log · Sync current files |
+| `/r-pp` | Parse paragraphs · Walk P1..PN · Bibliography check · Handoff checkpoint · Final sheet · Decision log · Sync current files |
+| `/r-pp-a` | Parse paragraphs · Walk P1..PN (deep) · Bibliography check · Handoff checkpoint · Final sheet · Decision log · Sync current files |
+| `/r-pr-2` | Generate Reviewer A · Generate Reviewer B · Synthesize · Handoff checkpoint · Decision log · Sync current files |
+| `/r-conn` | Parse transitions · Diagnose · Fix selected · Handoff checkpoint · Decision log · Sync current files |
+| `/r-global` | Read article · Seven lenses · Save trace or fix selected · Handoff checkpoint · Decision log · Sync current files |
+| `/r-chapter` | Select section · Load article · Cross-article analysis · Fix selected · Handoff checkpoint · Decision log · Sync current files |
+| `/r-redline` | Generate redline · Response letter · Handoff checkpoint · Decision log · Sync current files |
+| `/r-approve` | Load approvals · Apply outcomes · Handoff checkpoint · Decision log · Sync current files |
 
 All initial step statuses: `pending`. Steps 1 and 2 are pre-filled as `done`.
 
@@ -65,7 +67,7 @@ Store `TASK_FILE_PATH` in working memory for the session.
 **Called with**: step name (must match the exact string in column "Passo") +
 new status + optional note.
 
-**Status values**: `pending` → `in-progress` → `done` | `skipped` | `failed`
+**Status values**: `pending` → `in-progress` → `done` | `skipped` | `failed` | `paused`
 
 **Procedure**:
 
@@ -80,7 +82,37 @@ If `failed`: output one line `⚠ Step "<name>" failed — <note>` and wait for 
 
 ---
 
-## 3. close
+## 3. handoff
+
+Called by `workflow/06-handoff.md`.
+
+**Procedure**:
+
+1. Read `TASK_FILE_PATH`.
+2. Set frontmatter `status: paused`.
+3. Set the `Handoff checkpoint` row to `paused` or `done`:
+   - `paused` if the round is being interrupted now;
+   - `done` if the checkpoint is a routine save but the agent continues.
+4. Replace the `## Handoff / Ripresa` section using the fields defined in
+   `workflow/06-handoff.md`.
+5. Write back. Do not close the task file.
+
+## 4. resume
+
+Called by `workflow/06-handoff.md`.
+
+**Procedure**:
+
+1. Read the selected paused task file.
+2. Set frontmatter `status: in-progress`.
+3. Set `Handoff checkpoint` row to `in-progress`.
+4. Update `## Handoff / Ripresa`:
+   - `Stato`: `resumed`
+   - `Ultimo aggiornamento`: current timestamp
+   - keep `Prossima azione esatta` unless the user changes it.
+5. Restore working memory from the task file fields.
+
+## 5. close
 
 **Called by `95-decision-log.md`** before writing the session entry.
 
@@ -102,6 +134,7 @@ If `failed`: output one line `⚠ Step "<name>" failed — <note>` and wait for 
 5. Change frontmatter `status`:
    - `completed` — all core steps reached `done`.
    - `partial` — some core steps were `skipped`.
+   - `paused` — only if the user requested handoff and closure was cancelled.
    - `abandoned` — session cut short (one step `failed`).
 6. Write back.
 

@@ -190,6 +190,10 @@ Follow standard `30-iterate-points.md`, section 4. After applying, ask: *"Ci son
 - **Section headings as connectors.** If a section heading already contains an explicit transition (e.g. «§3: From Theory to Method»), mark the inter-section transition as `OK` regardless of the paragraph content.
 - **Bibliography check.** Not applicable — this mode does not touch citations.
 - **Character budget.** Connector edits are minor. Warn only if adding signposting sentences causes significant change.
+- **Handoff / pause.** If the user says `pause`, `stop`, `sospendi`,
+  `interrompi`, or `/r-handoff`, call `workflow/06-handoff.md` with the current
+  transition group, pending connector proposal, and exact next action. Do not
+  run closure or sync.
 
 ## 11. Revision Closure
 
@@ -197,7 +201,7 @@ Follow standard `30-iterate-points.md`, section 4. After applying, ask: *"Ci son
 
 1. **Perimetro naturale esaurito**: tutte le transizioni e i connettori selezionati dall'utente sono stati sistemati.
 2. **Chiusura esplicita**: l'utente invia una frase di chiusura —
-   IT: `chiudi`, `fine`, `ho finito`, `concludi`, `stop`, `basta così`, `chiudiamo` /
+   IT: `chiudi`, `fine`, `ho finito`, `concludi`, `basta così`, `chiudiamo` /
    EN: `close`, `done`, `finish`, `end`, `I'm done`.
 
 **Sequenza obbligatoria:**

@@ -120,7 +120,7 @@ Optional shortcuts remain accepted for speed:
 
    Wait for an explicit command from the user.
 
-7. If the counter has reached `AUTO_BUMP_THRESHOLD`, after the user signals to advance, propose a bump (hand off to `60-bump-version.md`).
+7. If the counter has reached `AUTO_BUMP_THRESHOLD`, after the user signals to advance, propose a bump (call `60-bump-version.md`).
 
 ### Tieni in considerazione (selected numbers or all)
 
@@ -183,7 +183,12 @@ Then advance.
 - **Character overshoot after Accetta.** Report and ask: `The overrun is now +X. Do you prefer to proceed and handle it in the final sweep, or look for a compensating cut now?`
 - **Bibliography conflict.** If the user wants a key that does not exist or has dubious metadata, defer to `40-bibliography-check.md` and do not apply until cleared.
 - **Anglicism not in whitelist** (`ARTICLE_LANG=it` only). Surface in the proposal block under `Possible exceptions`; the user decides whether to add it to the whitelist or rephrase.
-- **Whole article scope.** Walk the article section by section. The user can pause at any moment with `pause` or `stop`, and resume later from the same point.
+- **Handoff / pause.** If the user says `pause`, `stop`, `sospendi`,
+  `interrompi`, or `/r-handoff`, call `workflow/06-handoff.md` immediately.
+  Do not run closure, sync, or final-sheet steps.
+- **Whole article scope.** Walk the article section by section. The user can
+  pause at any moment via the handoff workflow and resume later from the same
+  point.
 
 ## 6. State Persistence
 
@@ -195,7 +200,7 @@ The accepted-since-bump counter and per-point decision state live entirely insid
 
 1. **Perimetro naturale esaurito**: tutti i punti del piano di revisione sono in stato `Accepted`, `Modified`, o `Deferred`.
 2. **Chiusura esplicita**: l'utente invia una frase di chiusura —
-   IT: `chiudi`, `fine`, `ho finito`, `concludi`, `stop`, `basta così`, `chiudiamo` /
+   IT: `chiudi`, `fine`, `ho finito`, `concludi`, `basta così`, `chiudiamo` /
    EN: `close`, `done`, `finish`, `end`, `I'm done`.
 
 **Sequenza obbligatoria:**

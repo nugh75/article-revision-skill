@@ -210,8 +210,12 @@ Handle `Accetta`, `Modifica`, `Rivedi completamente`, and
 
 ## 6. Post-revision checks
 
-- If any citation was touched → hand off to `workflow/40-bibliography-check.md`.
-- If any numeric claim was touched → hand off to `workflow/51-data-verification.md`.
+- If any citation was touched → call `workflow/40-bibliography-check.md`.
+- If any numeric claim was touched → call `workflow/51-data-verification.md`.
+- If the user says `pause`, `stop`, `sospendi`, `interrompi`, or
+  `/r-handoff` before the chapter revision closes, call
+  `workflow/06-handoff.md` with the current dimension, pending proposal,
+  chapter recap state, and exact next action. Do not run closure or sync.
 
 ## 7. Revision Closure
 
@@ -219,7 +223,7 @@ Handle `Accetta`, `Modifica`, `Rivedi completamente`, and
 
 1. **Perimetro naturale esaurito**: tutte le dimensioni selezionate dall'utente hanno ricevuto una decisione esplicita.
 2. **Chiusura esplicita**: l'utente invia una frase di chiusura —
-   IT: `chiudi`, `fine`, `ho finito`, `concludi`, `stop`, `basta così`, `chiudiamo` /
+   IT: `chiudi`, `fine`, `ho finito`, `concludi`, `basta così`, `chiudiamo` /
    EN: `close`, `done`, `finish`, `end`, `I'm done`.
 
 **Sequenza obbligatoria:**

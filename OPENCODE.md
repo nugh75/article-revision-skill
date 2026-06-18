@@ -17,13 +17,17 @@ The two files (`AGENTS.md` and `OPENCODE.md`) carry the same workflow. Edit one 
 | `/r-freeze` | Freeze a concluded part in the per-article freeze ledger (advisory) |
 | `/r-thaw` | Reopen a frozen part so it can be revised without the warning |
 | `/r-status` | Print the frozen (🟢) vs open (🟡) snapshot from the freeze ledger |
+| `/r-handoff` | Write a resumable checkpoint without closing the revision round |
+| `/r-resume` | Resume from a paused task file without a new version bump |
 | `/r-bump` | Bump article version (vN → vN+1) |
 | `/r-sheet` | Generate final revision sheet |
 | `/r-help` | Reference card of every command + decision shortcuts (read-only, no bump) |
 
 Revision commands enforce the mandatory session-start bump (`10-setup.md` step 5).
-The read-only commands `/r-help` and `/r-status`, and the ledger-only commands
-`/r-freeze` / `/r-thaw`, do **not** trigger a bump.
+The read-only commands `/r-help` and `/r-status`, the ledger-only commands
+`/r-freeze` / `/r-thaw`, and `/r-resume` from a paused task do **not** trigger a bump.
+`pause`, `stop`, `sospendi`, and `/r-handoff` write a checkpoint; they do not
+run the closure sequence or sync current files.
 The freeze ledger (`workflow/15-freeze-ledger.md`) is checked before every
 proposal: a frozen part triggers a warning + explicit confirmation before editing.
 
@@ -33,6 +37,7 @@ For the complete workflow, see `AGENTS.md` in this repository. The same rules ap
 
 - user-controlled git operations;
 - per-point `Accetta / Modifica / Rivedi completamente / Tieni in considerazione` decisions;
+- resumable handoff checkpoints via `workflow/06-handoff.md`;
 - English workflow prompts and templates;
 - multilingual article proposals via `ARTICLE_LANG`;
 - explicit Python interpreter selection via `PYTHON_BIN`;

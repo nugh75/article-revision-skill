@@ -214,7 +214,7 @@ content and enforce these layout rules:
 - **User controls git.** The skill never commits, never stages, never pushes. It writes files; you commit.
 - **Always ask before creating.** Bootstrap, version bump, file generation — every write step asks for confirmation when ambiguous.
 - **Per-point granularity.** No mass replacements, no batched approvals. Every individual change goes through *Accetta / Modifica / Rivedi completamente / Tieni in considerazione*.
-- **State lives in markdown.** The project file and final sheet are the source of truth; sessions resume cleanly after interruption.
+- **State lives in markdown.** The project file, task file, and handoff checkpoint are the source of truth; sessions resume cleanly after interruption without a new bump.
 - **Surgical edits only.** Touch what the reviewer's point requires, nothing more.
 
 ---

@@ -317,6 +317,10 @@ Follow standard `30-iterate-points.md`, section 4, with one addition:
 - **Massive restructuring needed.** If the diagnostic identifies >5 structural issues, warn: *"Questa revisione comporta cambiamenti strutturali significativi. Consiglio di procedere una lente alla volta per non perdere il controllo."*
 - **Contradiction with reviewer feedback.** If reviewer feedback was previously processed via `/article-revision` and the global revision identifies a contradictory recommendation, surface the conflict explicitly: *"⚠️ Il Reviewer A ha chiesto di espandere §2, ma la lente 3 (proporzionalità) suggerisce di ridurlo. Quale direzione preferisci?"*
 - **Character budget.** Structural changes (cuts, moves, adds) have large character impact. Track the cumulative Δ after each accept and compare against `EDITORIAL_LIMIT_CHARS`.
+- **Handoff / pause.** If the user says `pause`, `stop`, `sospendi`,
+  `interrompi`, or `/r-handoff`, call `workflow/06-handoff.md` with the current
+  lens, whether the global trace has been saved, pending structural proposals,
+  and exact next action. Do not run closure or sync.
 
 ## 9. Revision Closure
 
@@ -324,7 +328,7 @@ Follow standard `30-iterate-points.md`, section 4, with one addition:
 
 1. **Perimetro naturale esaurito**: tutte le lenti selezionate dall'utente hanno prodotto le loro proposte e ricevuto una decisione esplicita.
 2. **Chiusura esplicita**: l'utente invia una frase di chiusura —
-   IT: `chiudi`, `fine`, `ho finito`, `concludi`, `stop`, `basta così`, `chiudiamo` /
+   IT: `chiudi`, `fine`, `ho finito`, `concludi`, `basta così`, `chiudiamo` /
    EN: `close`, `done`, `finish`, `end`, `I'm done`.
 
 **Sequenza obbligatoria:**

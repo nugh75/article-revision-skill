@@ -49,7 +49,22 @@ Pick the higher score. Tie-breaker: ask the user. The result is `ARTICLE_LANG`. 
 
 **Every new revision session MUST start with a version bump.** After setup confirms the active article:
 
-1. Hand off to `60-bump-version.md` to create v(N+1) from the current vN.
+First check whether this is a resume, not a new session:
+
+1. Search `revisions/<article-slug>/task-*-*.md` for frontmatter
+   `status: paused` or `status: in-progress`.
+2. If one exists and the user asked to resume (`riprendi`, `continua`,
+   `/r-resume`, same command after interruption), call
+   `workflow/06-handoff.md#resume-from-handoff`.
+3. On resume, do **not** run a new bump, do **not** create a new task file, and
+   continue from the task file's `## Handoff / Ripresa`.
+4. If a paused/in-progress task exists but the user did not clearly ask for a
+   new session, show the newest candidate and ask whether to resume it or start
+   a new session. Do not bump until that choice is clear.
+
+If this is a new session:
+
+1. Call `60-bump-version.md` to create v(N+1) from the current vN.
 2. Do **not** proceed to any revision workflow until the bump is confirmed and completed.
 3. If the session already created a bump earlier (detectable via `accepted_since_bump: 0` + today's date entry in project file), skip — do not double-bump.
 

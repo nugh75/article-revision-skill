@@ -304,7 +304,10 @@ Criteria:
 ## 7. Edge Cases
 
 - **Skip paragraph.** If the user says `salta` or `skip`, mark the paragraph as `Skipped` and advance.
-- **Pause.** `pause` — record the current paragraph index. On next invocation, resume from that paragraph.
+- **Handoff / pause.** If the user says `pause`, `stop`, `sospendi`,
+  `interrompi`, or `/r-handoff`, call `workflow/06-handoff.md`: record the
+  current paragraph, chapter/section recap status, active global trace, pending
+  proposal, and exact next action. Do not run closure or sync.
 - **Go back.** `torna a P<N>` — jump to a specific paragraph and re-run diagnostics.
 - **Empty paragraph.** If a paragraph is truly empty or contains only whitespace, skip it silently (do not number it).
 - **Very long paragraph.** If a paragraph exceeds ~2000 chars, warn: *"Questo paragrafo è molto lungo (X caratteri). Vuoi trattarlo come unico o suddividerlo?"*
@@ -317,7 +320,7 @@ Criteria:
 
 1. **Perimetro naturale esaurito**: l'ultimo paragrafo dell'articolo è stato processato.
 2. **Chiusura esplicita**: l'utente invia una frase di chiusura —
-   IT: `chiudi`, `fine`, `ho finito`, `concludi`, `stop`, `basta così`, `chiudiamo` /
+   IT: `chiudi`, `fine`, `ho finito`, `concludi`, `basta così`, `chiudiamo` /
    EN: `close`, `done`, `finish`, `end`, `I'm done`.
 
 **Sequenza obbligatoria:**

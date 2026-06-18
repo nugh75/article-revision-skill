@@ -33,6 +33,23 @@ status: in-progress
 - **Modificati**: —
 - **Rinviati**: —
 
+## Handoff / Ripresa
+
+- **Ultimo aggiornamento**: —
+- **Stato**: in-progress
+- **Comando**: `{{COMMAND}}`
+- **Articolo di lavoro**: `{{ARTICLE_PATH}}`
+- **Versione di lavoro**: `{{BUMPED_VERSION}}`
+- **Fase corrente**: —
+- **Unità corrente**: —
+- **Ultima proposta mostrata**: —
+- **Decisioni già prese**: —
+- **Decisioni pendenti**: —
+- **Tracce/fonti da ricaricare**: —
+- **File modificati finora**: —
+- **Prossima azione esatta**: —
+- **Avvertenze**: —
+
 ## Stato articolo alla chiusura
 
 - **Versione finale**: —

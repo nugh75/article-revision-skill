@@ -28,8 +28,10 @@ Trigger phrases:
 | `/r-freeze` | **Congela** una parte conclusa nel freeze ledger; in seguito la skill avvisa prima di toccarla (`workflow/15-freeze-ledger.md`) |
 | `/r-thaw` | **Scongela** una parte: torna modificabile senza avviso (`workflow/15-freeze-ledger.md`) |
 | `/r-status` | **Stato revisione** — mappa frozen (🟢) vs open (🟡) dal freeze ledger (`workflow/15-freeze-ledger.md`) |
-| `/r-bump` | Bump article version (hand off to `workflow/60-bump-version.md`) |
-| `/r-sheet` | Generate final revision sheet (hand off to `workflow/70-final-sheet.md`) |
+| `/r-handoff` | **Handoff** — write a resumable checkpoint without closing the revision round (`workflow/06-handoff.md`) |
+| `/r-resume` | **Resume** — resume from a paused task file without a new version bump (`workflow/06-handoff.md`) |
+| `/r-bump` | Bump article version (call `workflow/60-bump-version.md`) |
+| `/r-sheet` | Generate final revision sheet (call `workflow/70-final-sheet.md`) |
 | `/r-chapter` | **Revisione Capitolo** — paragraph-depth revision of one section in cross-article context: terminology, cross-references, interfaces, redundancy, argument thread, norms compliance (`workflow/36-chapter-revision.md`) |
 | `/r-gdrive` | **Google Drive Collaboration** — create/sync a shared Drive folder; pull colleague feedback as a revision source (`workflow/80-gdrive-collab.md`) |
 | `/r-approve` | **Colleague Approval** — gate accepted modifications behind colleague sign-off before they count as final (`workflow/35-colleague-approval.md`) |
@@ -52,8 +54,9 @@ If the user is doing something else (writing the article from scratch, generatin
 6. **Mandatory bump at session start.** Every new revision session MUST start with a version bump (vN → vN+1) before any edits. The bump is enforced by `10-setup.md` step 5. Never skip it. The `AUTO_BUMP_THRESHOLD` handles additional mid-session bumps separately.
 7. **Task file per session.** Immediately after the bump, create `revisions/<article-slug>/task-<command-slug>-<bumped-version>.md` via `workflow/05-task.md`. Update it at each major step. Close it via `95-decision-log.md` at the end of the round. Never skip task file creation.
 8. **Sync current files.** At the end of every revision round, `workflow/95-decision-log.md` must call `workflow/96-sync-current.md`, which overwrites `articles/current.md`, `articles/current.docx`, and regenerates `bibliography/bibliography.docx` from `reference.bib` with citeproc. This step is mandatory and runs even when no changes were accepted. Never close a round while `bibliography.docx` is missing or appears empty without an explicit warning.
-9. **Revision closure triggers.** A round closes either when its natural perimeter is exhausted (last paragraph, last lens, saved global trace, last dimension, all reviewer points decided) OR when the user sends an explicit closure phrase (`chiudi`, `fine`, `ho finito`, `stop` / `close`, `done`, `finish`, `end`). In both cases, present a summary, ask for confirmation, then run the mandatory closure sequence.
+9. **Revision closure triggers.** A round closes either when its natural perimeter is exhausted (last paragraph, last lens, saved global trace, last dimension, all reviewer points decided) OR when the user sends an explicit closure phrase (`chiudi`, `fine`, `ho finito`, `concludi` / `close`, `done`, `finish`, `end`). `pause`, `stop`, `sospendi`, and `/r-handoff` trigger handoff, not closure. In closure cases, present a summary, ask for confirmation, then run the mandatory closure sequence.
 10. **Freeze ledger.** Keep one persistent ledger per article at `revisions/<article-slug>/freeze-ledger.md` (`workflow/15-freeze-ledger.md`). Check it before every proposal: a 🟢 frozen part is *advisory* — warn (`⚠ congelata`) and require explicit `sì, procedi` before applying. When the user states a change but does not apply it this turn, record it in the ledger (🟡 open + intention) — never leave deferred intentions only in chat. Offer to freeze a unit when its work concludes.
+11. **Handoff is mandatory on interruption.** If work is interrupted before natural closure, call `workflow/06-handoff.md`: mark the task file paused, record current unit/proposal/pending decisions, and print the exact next action. Resume from that task file without a new bump.
 
 ---
 
@@ -111,6 +114,7 @@ See `.env.example` for the complete template.
 | Step | File | When |
 |---|---|---|
 | 0 | `workflow/05-task.md` | Called by `10-setup.md` (create) and `95-decision-log.md` (close); tracks steps and produces session summary |
+| 0a | `workflow/06-handoff.md` | Called by `pause`, `stop`, `/r-handoff`, `/r-resume`, or any interruption; writes/loads resumable checkpoints |
 | 1 | `workflow/00-bootstrap.md` | First invocation in a new project, or whenever an artifact is missing |
 | 2 | `workflow/10-setup.md` | After bootstrap; loads `.env`, norms, bibliography, active article, detects language, creates task file, ensures freeze ledger |
 | 2a | `workflow/15-freeze-ledger.md` | Per-article freeze ledger: `ensure` (setup), advisory `check` before every proposal, `freeze`/`thaw`/`status`, `log-comment`, `carry-forward` (bump) |
@@ -149,6 +153,7 @@ The user can pick one of three scopes:
 | **Drive collaboration** (`/r-gdrive`) | `/r-gdrive [create\|push\|sync]` | Create/sync a shared Drive folder; pull colleague feedback into `revisions/<slug>/sources/`. No interactive decision loop — output is a source for later passes. User shares the folder. |
 | **Colleague approval** (`/r-approve`) | `/r-approve` | Gate `Accepted` points behind colleague sign-off (Doc suggestions or `approvals.md`). `approve` → mark approved; `changes` → re-propose via the decision loop; `reject` → ask user (no auto-revert). |
 | **Redline export** (`/r-redline`) | `/r-redline` | Colored old-vs-new `.docx`/`.html` for the reviewer + response-to-reviewers letter. Separate from the clean submission file. No interactive decision loop. |
+| **Handoff / Resume** (`/r-handoff`, `/r-resume`) | `/r-handoff`, `/r-resume`, `pause`, `stop`, `sospendi`, `riprendi`, `continua` | Save a resumable checkpoint in the current task file without closing/syncing; later resume that same task without a new mandatory bump. |
 | **Freeze / Thaw / Status** (`/r-freeze`, `/r-thaw`, `/r-status`) | `/r-freeze [unit]`, `/r-thaw [unit]`, `/r-status` | Mark a concluded part 🟢 frozen (advisory) / reopen it 🟡 / print the frozen-vs-open snapshot. Ledger-only, no article edit. |
 
 Never collapse heterogeneous changes (citation + phrasing + structure) into one proposal. Split them into separate decisions.

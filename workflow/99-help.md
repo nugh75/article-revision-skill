@@ -35,6 +35,8 @@ names verbatim.
 ## Versione e chiusura
   /r-bump             Nuova versione (vN → vN+1)
   /r-sheet            Final sheet (stato post-revisione)
+  /r-handoff          Sospende: checkpoint riprendibile, nessuna chiusura/sync
+  /r-resume           Riprende da un task sospeso, senza nuovo bump
 
 ## Collaborazione ed export
   /r-gdrive [create|push|sync]  Cartella Drive condivisa; feedback colleghi
@@ -51,11 +53,12 @@ names verbatim.
   Tieni in considerazione  non applica ora; registra come promemoria/traccia
   Scorciatoie: A / M / R / T
   prossimo / next        passa al punto/paragrafo successivo
-  pause / stop           sospendi (si riprende da qui)
+  pause / stop           handoff: sospendi e salva checkpoint
   chiudi / fine          chiusura sessione (final sheet? + decision log + sync)
 
 ## Regole chiave
   • Ogni sessione inizia con bump obbligatorio (vN → vN+1).
+  • Riprendere da handoff non è una nuova sessione: niente nuovo bump.
   • La skill non committa mai da sola: git lo controlli tu.
   • Parte congelata = avviso prima di toccarla, serve "sì, procedi".
   • Dati numerici ri-derivati dalla fonte, mai ereditati.

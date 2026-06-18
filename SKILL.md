@@ -4,8 +4,9 @@ description: |
   Coordinate iterative revision of a scientific article in markdown. Trigger
   when the user asks to apply reviewer feedback ("revise article",
   "apply reviewer X comments", "let's process the reviewer comments"),
-  to bump the article to a new version, or invokes `/article-revision`
-  explicitly. Skill assumes a project layout with `articles/`, `bibliography/
+  to bump the article to a new version, pause/resume an in-progress revision
+  via `/r-handoff` or `/r-resume`, or invokes `/article-revision` explicitly.
+  Skill assumes a project layout with `articles/`, `bibliography/
   reference.bib`, `editorial-norms/`, `revisions/`, and an `.env` file.
   For each reviewer point: shows original text + proposed change in chat,
   asks Accetta / Modifica / Rivedi completamente / Tieni in considerazione,
@@ -35,8 +36,10 @@ bibliography skills around a structured revision workflow.
 | `/r-freeze` | **Congela** una parte conclusa (paragrafo/sezione/frammento) nel freeze ledger; in seguito la skill avvisa prima di toccarla (`workflow/15-freeze-ledger.md`) |
 | `/r-thaw` | **Scongela** una parte congelata: torna modificabile senza avviso (`workflow/15-freeze-ledger.md`) |
 | `/r-status` | **Stato revisione** — mappa di cosa è concluso (🟢 frozen) e cosa richiede intervento (🟡 open), dal freeze ledger (`workflow/15-freeze-ledger.md`) |
-| `/r-bump` | Bump article version (hand off to `workflow/60-bump-version.md`) |
-| `/r-sheet` | Generate final revision sheet (hand off to `workflow/70-final-sheet.md`) |
+| `/r-handoff` | **Handoff** — scrive un checkpoint riprendibile senza chiudere la revisione (`workflow/06-handoff.md`) |
+| `/r-resume` | **Resume** — riprende da un task file sospeso senza nuovo bump (`workflow/06-handoff.md`) |
+| `/r-bump` | Bump article version (call `workflow/60-bump-version.md`) |
+| `/r-sheet` | Generate final revision sheet (call `workflow/70-final-sheet.md`) |
 | `/r-chapter` | **Revisione Capitolo** — revisiona una singola sezione in relazione al resto dell'articolo: terminologia, cross-riferimenti, filo argomentativo, ridondanze, interfacce di sezione (`workflow/36-chapter-revision.md`) |
 | `/r-gdrive` | **Google Drive Collaboration** — create/sync a shared Drive folder for colleagues; pull their feedback back as a revision source (`workflow/80-gdrive-collab.md`) |
 | `/r-approve` | **Colleague Approval** — gate accepted modifications behind colleague sign-off (Google Doc suggestions or `approvals.md`) before they count as final (`workflow/35-colleague-approval.md`) |
@@ -66,7 +69,9 @@ For each paragraph in sequence:
 5. At the end of each chapter/section, recap the section's unitary-concept map, paragraph progression, transitions, redundancies, and overall coherence before moving on.
 6. **Advance** only on explicit command (`prossimo`, `next`, `passa al prossimo`).
 
-The user can pause with `pause` and resume later from the current paragraph.
+The user can pause with `pause`, `stop`, or `/r-handoff`; the skill records the
+current paragraph via `workflow/06-handoff.md` and later resumes with
+`/r-resume` without a new bump.
 
 #### `/r-pp-a` — Deep Paragraph-by-Paragraph
 
@@ -438,9 +443,12 @@ Optional:
 ## Workflow files (must be followed in order on first invocation)
 
 0. `workflow/05-task.md` — per-session task file lifecycle (create, update-step,
-   close). Called by `10-setup.md` (create) and `95-decision-log.md` (close).
+   handoff, resume, close). Called by setup, handoff/resume, and closure.
    Stores the running step list and produces the session summary for the
    decision log.
+0a. `workflow/06-handoff.md` — resumable checkpoint and resume workflow. Called
+   by `pause`, `stop`, `/r-handoff`, `/r-resume`, or whenever the agent may be
+   interrupted before natural closure.
 1. `workflow/00-bootstrap.md` — set up the revision environment if missing
    (venv with Python deps, `.bib` file, `.env` with editorial parameters
    and Zotero credentials, editorial norms file). Idempotent: skips
@@ -604,7 +612,8 @@ When auto-mode is active:
    - Ambiguous or conflicting information that cannot be resolved from context
    - A modification with `risk: high` (structural change, potential loss of content)
    - A modification that requires a decision between two valid alternatives
-   - End of section or end of article (report summary, then stop or continue)
+   - End of section or end of article (report summary, then ask whether to
+     continue or write a handoff checkpoint)
 6. At the end of each section, output the chapter/section recap from
    `workflow/31-paragraph-by-paragraph.md`: unitary-concept map, organization,
    coherence, transitions, redundancies, and any issue to address before
@@ -620,7 +629,10 @@ When auto-mode is active:
 [Auto-mode] Revisione completata: N sezioni, M modifiche applicate, K saltate.
 ```
 
-To **deactivate** auto-mode, the user says "ferma", "stop", "manual", or similar. The skill resumes the standard interactive decision pattern from the current paragraph.
+To **deactivate** auto-mode without suspending the round, the user says
+"manual", "manuale", or "ferma auto-mode". The skill resumes the standard
+interactive decision pattern from the current paragraph. If the user simply says
+`stop`, `pause`, or `sospendi`, treat it as `workflow/06-handoff.md`.
 
 ### After applying changes
 
@@ -711,7 +723,8 @@ editorial layout:
 
 ## Revision closure triggers
 
-A revision session closes in **two cases**:
+A revision session closes in **two cases**. A pause/handoff is different from
+closure and uses `workflow/06-handoff.md`.
 
 1. **Perimetro naturale esaurito** — all items in the revision scope have been processed:
    - `/article-revision`, `/r-pp`, `/r-pp-a`: last reviewer point or last paragraph reached.
@@ -720,7 +733,7 @@ A revision session closes in **two cases**:
    - `/r-chapter`: all selected cross-article dimensions fixed.
 
 2. **Chiusura esplicita** — user sends a closure phrase:
-   - IT: `chiudi`, `fine`, `ho finito`, `concludi`, `stop`, `basta così`, `chiudiamo`
+   - IT: `chiudi`, `fine`, `ho finito`, `concludi`, `basta così`, `chiudiamo`
    - EN: `close`, `done`, `finish`, `end`, `I'm done`
 
 **Mandatory closure sequence (always the same):**
@@ -733,6 +746,19 @@ A revision session closes in **two cases**:
 
 Never advance to the closure sequence without user confirmation. Never skip
 `95-decision-log.md` or `96-sync-current.md` once closure is confirmed.
+
+## Handoff and Resume
+
+If the user says `pause`, `stop`, `sospendi`, `interrompi`, `/r-handoff`, or
+similar while the round is not complete, run `workflow/06-handoff.md` instead of
+the closure sequence. Handoff writes a checkpoint in the task file, marks the
+session `paused`, records the current unit/proposal/pending decisions, and
+prints the exact next action for a future agent.
+
+If the user says `riprendi`, `continua`, `/r-resume`, or re-invokes a command
+after interruption, run `workflow/06-handoff.md#resume-from-handoff` during
+setup. Resuming an existing paused task is not a new revision session: do not
+run a new mandatory bump and do not create a new task file.
 
 ## Revision scope (granularity)
 
@@ -753,6 +779,7 @@ point in the workflow:
 | **Drive collaboration** (`/r-gdrive`) | `/r-gdrive [create\|push\|sync]` | Create/sync a shared Drive folder; push the revised article + redline; pull colleague feedback into `revisions/<slug>/sources/`. No interactive decision loop — output is a source for later passes. User shares the folder. |
 | **Colleague approval** (`/r-approve`) | `/r-approve` | Gate `Accepted` points behind colleague sign-off (Doc suggestions or `approvals.md`). `approve` → mark approved; `changes` → re-propose via the decision loop; `reject` → ask user (no auto-revert). |
 | **Redline export** (`/r-redline`) | `/r-redline` | Colored old-vs-new `.docx`/`.html` for the reviewer + response-to-reviewers letter. Separate from the clean submission file. No interactive decision loop. |
+| **Handoff / Resume** (`/r-handoff`, `/r-resume`) | `/r-handoff`, `/r-resume`, `pause`, `stop`, `sospendi`, `riprendi`, `continua` | Save a resumable checkpoint in the current task file without closing/syncing; later resume that same task without a new mandatory bump. |
 | **Freeze** (`/r-freeze`) | `/r-freeze [unit]` | Mark a concluded part 🟢 frozen in the ledger. No-arg = last unit worked on; `P4` / `§3` / `§3 tutto` target explicitly. Ledger-only, no article edit. |
 | **Thaw** (`/r-thaw`) | `/r-thaw [unit]` | Mark a frozen part 🟡 open again so it can be revised without the advisory warning. |
 | **Status** (`/r-status`) | `/r-status` | Print the frozen/open/wip snapshot from the ledger + the next suggested intervention. Read-only. |
@@ -774,11 +801,14 @@ Every revision session creates one task file at:
 The task file is:
 - **Created** by `workflow/05-task.md` immediately after the mandatory bump (`10-setup.md` step 7).
 - **Updated** step by step as each workflow phase completes (`05-task.md#update-step`).
+- **Checkpointed** by `workflow/06-handoff.md` whenever the session is paused.
+- **Resumed** by `workflow/06-handoff.md` without a new bump when the user continues.
 - **Closed** by `workflow/95-decision-log.md` before writing the session entry (`05-task.md#close`).
 
 The closed task file contains:
 - The article path, version, command, and reviewer lane.
 - A step-by-step status table (`done` / `skipped` / `failed`).
+- The latest `## Handoff / Ripresa` checkpoint, if the session was paused.
 - Accepted / modified / fully revised / deferred counts.
 - Final article char count vs limit.
 - The decision-log session identifier.
@@ -787,7 +817,7 @@ Never skip task file creation. If `TASK_FILE_PATH` is not set when `95-decision-
 
 ## Mandatory Bump at Session Start
 
-**Every new revision session MUST start with a version bump.** This is non-negotiable. The skill does not wait for the user to accumulate edits before bumping — the bump is the first action after setup, before any revision work begins.
+**Every new revision session MUST start with a version bump.** This is non-negotiable. The skill does not wait for the user to accumulate edits before bumping — the bump is the first action after setup, before any revision work begins. Resuming a paused task via `workflow/06-handoff.md` is not a new session and must not create another bump.
 
 **Rule:**
 - After `10-setup.md` completes and the active article is identified, immediately propose a version bump via `60-bump-version.md`.

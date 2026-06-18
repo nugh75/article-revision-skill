@@ -70,13 +70,13 @@ The skill writes the final sheet but **does not commit**. Suggested commit messa
 revision(<slug>): final sheet — round closed
 ```
 
-## 7. Hand Off
+## 7. Continue To Decision Log
 
-After writing the final sheet, the workflow must always hand off to
-`workflow/95-decision-log.md`. This handoff is mandatory even when:
+After writing the final sheet, the workflow must always continue to
+`workflow/95-decision-log.md`. This continuation is mandatory even when:
 
 - the round produced no accepted changes;
-- the user stopped after a partial pass;
+- the user closed after a partial pass;
 - the outcome is deferred;
 - no git commit exists.
 
