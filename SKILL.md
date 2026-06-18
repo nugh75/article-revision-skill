@@ -26,8 +26,8 @@ bibliography skills around a structured revision workflow.
 | Command | Action |
 |---|---|
 | `/article-revision` | Full revision workflow from reviewer feedback |
-| `/r-pp` | **Revisione Paragrafo per Paragrafo** — walk every paragraph sequentially; for each, the AI analyzes three diagnostic dimensions and proposes modifications |
-| `/r-pp-a` | **Revisione Paragrafo per Paragrafo Approfondita** — as `/r-pp` but with deep AI analysis (content, structure, style, citations, norms) before proposing |
+| `/r-pp` | **Revisione Paragrafo per Paragrafo** — walk every paragraph sequentially; for each, the AI checks paragraph unity, clarity, connection, style/citations, then proposes modifications; at chapter boundaries it recaps coherence and organization |
+| `/r-pp-a` | **Revisione Paragrafo per Paragrafo Approfondita** — as `/r-pp` but with deep AI analysis (unitary concept, logic, structure, style, citations, norms) before proposing |
 | `/r-pr-2` | **Revisione Due Peer Reviewer** — simulate two independent peer reviewers; generate Standalone reviewer documents in `revisions/<article-slug>/` without interactive A/R/M; the documents feed subsequent revision passes |
 | `/r-conn` | **Revisione Connettori** — analyse and polish logical connectors, transitions, and signposting between paragraphs and sections |
 | `/r-global` | **Revisione Globale** — high-level, non-granular revision: overall structure, argument coherence, section proportionality, redundancy, terminology consistency |
@@ -44,38 +44,41 @@ bibliography skills around a structured revision workflow.
 
 ### Paragraph-by-Paragraph Modes (`/r-pp`, `/r-pp-a`)
 
-These modes perform a **proactive** revision walk over the entire article, paragraph by paragraph. The AI actively analyzes each paragraph using multiple diagnostic dimensions before proposing changes. Unlike the standard reviewer-feedback flow, this is not reactive to external feedback — it's an autonomous diagnostic process.
+These modes perform a **proactive** revision walk over the entire article, paragraph by paragraph. The AI actively analyzes each paragraph using multiple diagnostic dimensions before proposing changes. Unlike the standard reviewer-feedback flow, this is not reactive to external feedback — it's an autonomous diagnostic process. At the end of each chapter/section, the AI must recap whether the paragraphs are organized clearly and coherently before advancing.
 
 #### `/r-pp` — Standard Paragraph-by-Paragraph
 
 For each paragraph in sequence:
 
 1. **Show** the paragraph with context (preceding paragraph + current paragraph).
-2. **Analyze** the paragraph using three standard diagnostic dimensions (adapted to `ARTICLE_LANG`):
+2. **Analyze** the paragraph using four standard diagnostic dimensions (adapted to `ARTICLE_LANG`):
 
     | # | IT | EN |
-    |---||---|---|
-    | Q1 | L'argomento è chiaro e completo? | Is the argument clear and complete? |
-    | Q2 | Il paragrafo si collega bene al precedente? | Does it connect well to the previous paragraph? |
-    | Q3 | Ci sono problemi di stile, registro o citazioni? | Any issues with style, register, or citations? |
+    |---|---|---|
+    | Q1 | Il paragrafo esprime un concetto unitario, cioè un'idea declinata in parti coerenti, o contiene più idee autonome? | Does the paragraph express one governing concept, developed in coherent parts, or multiple autonomous ideas? |
+    | Q2 | L'argomento è chiaro e completo? | Is the argument clear and complete? |
+    | Q3 | Il paragrafo si collega bene al precedente? | Does it connect well to the previous paragraph? |
+    | Q4 | Ci sono problemi di stile, registro o citazioni? | Any issues with style, register, or citations? |
 
 3. **Propose** modifications based on the AI's analysis, using the standard A/R/M pattern.
 4. After decision on each proposal, ask: *"Ci sono altri cambiamenti in questo paragrafo?"* before advancing.
-5. **Advance** only on explicit command (`prossimo`, `next`, `passa al prossimo`).
+5. At the end of each chapter/section, recap the section's unitary-concept map, paragraph progression, transitions, redundancies, and overall coherence before moving on.
+6. **Advance** only on explicit command (`prossimo`, `next`, `passa al prossimo`).
 
 The user can pause with `pause` and resume later from the current paragraph.
 
 #### `/r-pp-a` — Deep Paragraph-by-Paragraph
 
-As `/r-pp`, but with an **extended AI analysis** before proposing. For each paragraph, the AI analyzes five layered dimensions:
+As `/r-pp`, but with an **extended AI analysis** before proposing. For each paragraph, the AI analyzes six layered dimensions:
 
 | # | IT | EN |
-|---||---|---|
-| Q1 | L'argomento è logicamente completo? Mancano passaggi? | Is the argument logically complete? Any missing steps? |
-| Q2 | La struttura interna funziona? (topic sentence, sviluppo, chiusura) | Does the internal structure work? (topic sentence, development, closure) |
-| Q3 | Il tono e il registro sono appropriati alla rivista? | Is the tone and register appropriate for the journal? |
-| Q4 | Ogni affermazione è supportata da una citazione? Le citazioni sono formattate correttamente? | Is every claim backed by a citation? Are citations correctly formatted? |
-| Q5 | Il paragrafo rispetta le norme editoriali? (limiti, stile, terminologia) | Does the paragraph respect the editorial norms? (limits, style, terminology) |
+|---|---|---|
+| Q1 | Il paragrafo ha un solo concetto guida, anche se articolato in più parti, o fonde idee autonome? | Does the paragraph have one governing concept, even if developed in several parts, or does it merge autonomous ideas? |
+| Q2 | L'argomento è logicamente completo? Mancano passaggi? | Is the argument logically complete? Any missing steps? |
+| Q3 | La struttura interna funziona? (topic sentence, sviluppo, chiusura) | Does the internal structure work? (topic sentence, development, closure) |
+| Q4 | Il tono e il registro sono appropriati alla rivista? | Is the tone and register appropriate for the journal? |
+| Q5 | Ogni affermazione è supportata da una citazione? Le citazioni sono formattate correttamente? | Is every claim backed by a citation? Are citations correctly formatted? |
+| Q6 | Il paragrafo rispetta le norme editoriali? (limiti, stile, terminologia) | Does the paragraph respect the editorial norms? (limits, style, terminology) |
 
 After the AI completes its analysis, it synthesises the findings into a unified proposal block, numbering each modification by diagnostic category. The user may accept/reject by category (e.g. `A struttura` or `R citazioni`).
 
@@ -445,7 +448,9 @@ Optional:
    automatically** — the user controls git.
 4a. `workflow/31-paragraph-by-paragraph.md` — triggered by `/r-pp` or
     `/r-pp-a`. Walk every paragraph sequentially with AI diagnostic analysis
-    before proposing. Deep mode (`/r-pp-a`) uses five-layer diagnostics.
+    before proposing; each paragraph must have one governing concept, and each
+    chapter/section gets a coherence recap before advancing. Deep mode
+    (`/r-pp-a`) uses six-layer diagnostics.
 4b. `workflow/32-peer-review-simulation.md` — triggered by `/r-pr-2`.
    Generate two standalone reviewer documents in `revisions/<article-slug>/`
    (method-focused, theory-focused) plus a synthesis document. No interactive
@@ -579,10 +584,13 @@ When auto-mode is active:
    - A modification with `risk: high` (structural change, potential loss of content)
    - A modification that requires a decision between two valid alternatives
    - End of section or end of article (report summary, then stop or continue)
-6. At the end of each section, output a brief summary:
+6. At the end of each section, output the chapter/section recap from
+   `workflow/31-paragraph-by-paragraph.md`: unitary-concept map, organization,
+   coherence, transitions, redundancies, and any issue to address before
+   advancing. Include the auto-mode counts in that recap:
 
 ```
-[Auto-mode] §<N> completato: X modifiche applicate, Y saltate.
+[Auto-mode] §<N> completato: X modifiche applicate, Y saltate. Recap: <clear|issues>.
 ```
 
 7. At the end of the full revision, output a final summary:
@@ -715,8 +723,8 @@ point in the workflow:
 | **Fragment** (sentence-level / inline) | *"fix this sentence"*, *"adjust this quotation"*, *"replace X with Y"* | Smallest possible diff. Touches a single sentence, citation, term, formatting fix. Goes through the same `Original / Proposal / Decision` pattern with surgical context. |
 | **Paragraph** (default during reviewer revision) | *"revise this paragraph"*, *"section 3 discussion"* | Operates on a coherent block (one paragraph or one numbered subsection). Standard mode for processing reviewer points. |
 | **Whole article** (full pass) | *"revise the whole article"*, *"check coherence from start to finish"* | Sequential walk through every section, point by point. Each candidate change is still presented individually for `Accept / Reject / Modify` — the user is not asked to approve a single mass-replacement. |
-| **Paragraph-by-paragraph** (`/r-pp`) | `/r-pp` | Walk every paragraph sequentially. For each: the AI analyzes three diagnostic dimensions (clarity, connection, style/citations) and proposes modifications. A/R/M per modification. |
-| **Deep paragraph-by-paragraph** (`/r-pp-a`) | `/r-pp-a` | As `/r-pp` but with five-layer AI analysis (logic, structure, tone, citations, norms). Proposals numbered by category; user can accept/reject by category. |
+| **Paragraph-by-paragraph** (`/r-pp`) | `/r-pp` | Walk every paragraph sequentially. For each: the AI checks unitary concept, clarity, connection, style/citations, and proposes modifications. At chapter boundaries it recaps organization and coherence. A/R/M per modification. |
+| **Deep paragraph-by-paragraph** (`/r-pp-a`) | `/r-pp-a` | As `/r-pp` but with six-layer AI analysis (unitary concept, logic, structure, tone, citations, norms). Proposals numbered by category; user can accept/reject by category. |
 | **Dual peer review** (`/r-pr-2`) | `/r-pr-2` | Generate two standalone reviewer reports (method-focused + theory-focused) + synthesis document in `revisions/<article-slug>/`. No interactive A/R/M — output files feed subsequent revision commands (`/r-pp-a`, `/r-global`, etc.). |
 | **Connector revision** (`/r-conn`) | `/r-conn` | Non-content pass: examine logical connectors, inter-paragraph transitions, inter-section transitions, signposting. Diagnostic table + selective fix with A/R/M. |
 | **Global revision** (`/r-global`) | `/r-global` | High-level, non-granular pass through seven lenses (thesis, architecture, proportionality, narrative, redundancy, terminology, norms). Diagnostic report → user selects lenses → structural A/R/M points. |

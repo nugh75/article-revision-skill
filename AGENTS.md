@@ -20,8 +20,8 @@ Trigger phrases:
 | Command | Action |
 |---|---|
 | `/article-revision` | Full revision workflow from reviewer feedback |
-| `/r-pp` | **Revisione Paragrafo per Paragrafo** — sequential walk with diagnostic questions per paragraph |
-| `/r-pp-a` | **Revisione Paragrafo per Paragrafo Approfondita** — deep five-layer diagnostic per paragraph |
+| `/r-pp` | **Revisione Paragrafo per Paragrafo** — sequential walk with paragraph-unity checks, diagnostic questions, and chapter/section recaps |
+| `/r-pp-a` | **Revisione Paragrafo per Paragrafo Approfondita** — deep six-layer diagnostic per paragraph, including unitary-concept control |
 | `/r-pr-2` | **Revisione Due Peer Reviewer** — generate two standalone reviewer reports + synthesis in `revisions/<article-slug>/` (no interactive A/R/M) |
 | `/r-conn` | **Revisione Connettori** — analyse and polish logical connectors, transitions, and signposting |
 | `/r-global` | **Revisione Globale** — high-level, non-granular revision across seven structural lenses |
@@ -116,7 +116,7 @@ See `.env.example` for the complete template.
 | 2a | `workflow/15-freeze-ledger.md` | Per-article freeze ledger: `ensure` (setup), advisory `check` before every proposal, `freeze`/`thaw`/`status`, `log-comment`, `carry-forward` (bump) |
 | 3 | `workflow/20-plan-revision.md` | When user provides reviewer feedback |
 | 4 | `workflow/30-iterate-points.md` | Core loop: propose, ask, apply (no commit) |
-| 4a | `workflow/31-paragraph-by-paragraph.md` | Triggered by `/r-pp` or `/r-pp-a`. Per-paragraph diagnostic walk. |
+| 4a | `workflow/31-paragraph-by-paragraph.md` | Triggered by `/r-pp` or `/r-pp-a`. Per-paragraph diagnostic walk with unitary-concept control and chapter/section recaps. |
 | 4b | `workflow/32-peer-review-simulation.md` | Triggered by `/r-pr-2`. Generates three standalone documents in `revisions/<article-slug>/`. No interactive A/R/M. |
 | 4c | `workflow/33-connector-revision.md` | Triggered by `/r-conn`. Connector and transition polish. |
 | 4d | `workflow/34-global-revision.md` | Triggered by `/r-global`. Seven-lens structural review. |
@@ -140,8 +140,8 @@ The user can pick one of three scopes:
 | **Fragment** | *"fix this sentence"*, *"adjust this quotation"*, *"replace X with Y"* | Smallest possible diff |
 | **Paragraph** (default for reviewer points) | *"revise this paragraph"*, *"section 3"* | One paragraph or numbered subsection |
 | **Whole article** | *"revise the whole article"* | Sequential walk; every change still individually approved |
-| **Paragraph-by-paragraph** (`/r-pp`) | `/r-pp` | Walk every paragraph; three diagnostic questions per paragraph before proposing |
-| **Deep paragraph-by-paragraph** (`/r-pp-a`) | `/r-pp-a` | Five-layer diagnostic (logic, structure, tone, citations, norms) per paragraph; proposals numbered by category |
+| **Paragraph-by-paragraph** (`/r-pp`) | `/r-pp` | Walk every paragraph; check unitary concept, clarity, connection, style/citations before proposing; recap organization and coherence at each chapter/section boundary |
+| **Deep paragraph-by-paragraph** (`/r-pp-a`) | `/r-pp-a` | Six-layer diagnostic (unitary concept, logic, structure, tone, citations, norms) per paragraph; proposals numbered by category |
 | **Dual peer review** (`/r-pr-2`) | `/r-pr-2` | Generate two standalone reviewer reports (method + theory) + synthesis in `revisions/`. No interactive A/R/M. |
 | **Connector revision** (`/r-conn`) | `/r-conn` | Non-content pass: logical connectors, transitions, signposting. Diagnostic table + selective fix with A/R/M |
 | **Global revision** (`/r-global`) | `/r-global` | High-level, non-granular: seven lenses (thesis, architecture, proportionality, narrative, redundancy, terminology, norms) |

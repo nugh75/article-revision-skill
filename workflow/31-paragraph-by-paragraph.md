@@ -1,13 +1,13 @@
 # 31 — Paragraph-by-Paragraph Revision
 
-Triggered by `/r-pp` (standard) or `/r-pp-a` (deep). Performs a proactive diagnostic walk over every paragraph of the article, asking the user structured questions before proposing modifications.
+Triggered by `/r-pp` (standard) or `/r-pp-a` (deep). Performs a proactive diagnostic walk over every paragraph of the article, asking the user structured questions before proposing modifications. Every paragraph must be checked for a single governing concept; at the end of each chapter/section, run a recap on clarity, coherence, organization, and paragraph progression before advancing.
 
 ## 0. Determine Mode
 
 | Command | Mode | Diagnostic depth |
 |---|---|---|
-| `/r-pp` | Standard | 3 questions per paragraph |
-| `/r-pp-a` | Deep (`--approfondita`) | 5 questions per paragraph |
+| `/r-pp` | Standard | 4 questions per paragraph |
+| `/r-pp-a` | Deep (`--approfondita`) | 6 questions per paragraph |
 
 If the user invokes by phrase (e.g. "revisione paragrafo per paragrafo") without a slash command, ask which mode they want.
 
@@ -23,11 +23,16 @@ If not already done, run `00-bootstrap.md` and `10-setup.md` to load `.env`, nor
    - **Skip** headings (lines starting with `#`), blockquotes, code blocks, tables.
    - **Do not** split numbered list items — treat each item as a paragraph.
 3. Number paragraphs sequentially: `P1`, `P2`, ..., `PN`.
-4. Announce in chat:
+4. Map each paragraph to a chapter/section:
+   - Treat a chapter as the highest body heading level below the article title that has at least two occurrences.
+   - If that cannot be detected safely, use the nearest preceding Markdown heading as `§<section>`.
+   - If the article has no headings, treat the whole article as one chapter and run the recap only before closure.
+5. Announce in chat:
 
    ```
    Articolo: <article-path>
    Paragrafi individuati: N
+   Capitoli/sezioni individuati: C
    Modalità: <standard|approfondita>
    Lingua rilevata: <ARTICLE_LANG>
 
@@ -52,6 +57,18 @@ continue. If the row carries an intention (🟡 `open`), fold it into the diagno
 
 For each paragraph, present it in context and ask the diagnostic questions. **Wait for answers before proposing.**
 
+### Paragraph Unity Requirement
+
+Before asking diagnostic questions, identify the paragraph's **concetto unitario** in one sentence.
+
+A paragraph is unitary when it expresses one governing idea or concept, even if that idea is then developed in two or more coordinated parts (e.g. definition + consequence, claim + evidence, premise + implication). It is not unitary when it contains two or more autonomous ideas that could stand as separate paragraphs.
+
+If no unitary concept can be identified, flag the paragraph as structurally weak and propose one of these remedies:
+
+- split the paragraph into two or more paragraphs;
+- move one autonomous idea to a better section;
+- narrow the paragraph so all sentences serve the same governing concept.
+
 ### Output Format (Standard — `/r-pp`)
 
 ```
@@ -63,21 +80,26 @@ For each paragraph, present it in context and ask the diagnostic questions. **Wa
 **Paragrafo corrente:**
 > <current paragraph verbatim>
 
-**Domande:**
-1. L'argomento è chiaro e completo?
-2. Il paragrafo si collega bene al precedente?
-3. Ci sono problemi di stile, registro o citazioni?
+**Ipotesi di concetto unitario:**
+> <one governing idea/concept that the paragraph should express>
 
-Rispondi punto per punto (es. "1. sì, 2. no: il collegamento è forzato, 3. citazione mancante in riga X").
+**Domande:**
+1. Il paragrafo esprime un concetto unitario, cioè un'unica idea declinata in parti coerenti, o contiene più idee autonome?
+2. L'argomento è chiaro e completo?
+3. Il paragrafo si collega bene al precedente?
+4. Ci sono problemi di stile, registro o citazioni?
+
+Rispondi punto per punto (es. "1. sì, ma il concetto va formulato meglio; 2. sì; 3. no: il collegamento è forzato; 4. citazione mancante in riga X").
 ```
 
 Adapt to English if `ARTICLE_LANG=en`:
 
 ```
 **Questions:**
-1. Is the argument clear and complete?
-2. Does it connect well to the previous paragraph?
-3. Any issues with style, register, or citations?
+1. Does the paragraph express one governing concept, developed in coherent parts, or does it contain multiple autonomous ideas?
+2. Is the argument clear and complete?
+3. Does it connect well to the previous paragraph?
+4. Any issues with style, register, or citations?
 ```
 
 ### Output Format (Deep — `/r-pp-a`)
@@ -91,14 +113,18 @@ Adapt to English if `ARTICLE_LANG=en`:
 **Paragrafo corrente:**
 > <current paragraph verbatim>
 
-**Domande approfondite:**
-1. [Logica] L'argomento è logicamente completo? Mancano passaggi intermedi?
-2. [Struttura] La struttura interna funziona? (topic sentence, sviluppo, chiusura)
-3. [Tono] Il tono e il registro sono appropriati alla rivista?
-4. [Citazioni] Ogni affermazione è supportata? Le citazioni sono formattate correttamente?
-5. [Norme] Il paragrafo rispetta le norme editoriali? (limiti, stile, terminologia)
+**Ipotesi di concetto unitario:**
+> <one governing idea/concept that the paragraph should express>
 
-Rispondi per categoria (es. "logica: manca un passaggio tra X e Y; struttura: ok; tono: troppo informale in riga 3; citazioni: ok; norme: ok").
+**Domande approfondite:**
+1. [Unità] Il paragrafo ha un solo concetto guida, anche se articolato in più parti, o fonde idee autonome?
+2. [Logica] L'argomento è logicamente completo? Mancano passaggi intermedi?
+3. [Struttura] La struttura interna funziona? (topic sentence, sviluppo, chiusura)
+4. [Tono] Il tono e il registro sono appropriati alla rivista?
+5. [Citazioni] Ogni affermazione è supportata? Le citazioni sono formattate correttamente?
+6. [Norme] Il paragrafo rispetta le norme editoriali? (limiti, stile, terminologia)
+
+Rispondi per categoria (es. "unità: due idee da separare; logica: manca un passaggio tra X e Y; struttura: ok; tono: troppo informale in riga 3; citazioni: ok; norme: ok").
 ```
 
 ## 4. Propose Modifications
@@ -110,6 +136,9 @@ Based on the user's diagnostic answers, generate a proposal using the standard A
 
 **Original** (`<article>:<line-range>`)
 > <verbatim text>
+
+**Concetto unitario:**
+> <the governing concept after diagnosis, or "non unitario" if the proposal splits/reorganizes it>
 
 **Diagnosi:**
 - <summary of user's answers>
@@ -130,15 +159,18 @@ Based on the user's diagnostic answers, generate a proposal using the standard A
 **A/R/M?** (indicare i numeri delle modifiche, es. "A 2,4" oppure "M 3: sostituire X con Y")
 ```
 
+If a proposal requires splitting a paragraph, show the exact resulting paragraphs under `**Proposta**`, mark `risk: medium` or `high` depending on content movement, and keep each split/move as a separate numbered modification.
+
 ### Deep mode numbering (`/r-pp-a`)
 
 In deep mode, prefix each modification with its diagnostic category:
 
 ```
 **Modifiche:**
-1. [logica] <old> → <new> [(motivazione)]
-2. [struttura] <old> → <new> [(motivazione)]
-3. [tono] <old> → <new> [(motivazione)]
+1. [unità] <old> → <new> [(motivazione)]
+2. [logica] <old> → <new> [(motivazione)]
+3. [struttura] <old> → <new> [(motivazione)]
+4. [tono] <old> → <new> [(motivazione)]
 ...
 ```
 
@@ -161,7 +193,55 @@ before moving to the next paragraph: offer to freeze the just-finished paragraph
 named something still to do, record it via `log-comment` so the paragraph stays
 🟡 `open` with its intention in the ledger.
 
-## 6. Edge Cases
+If the next paragraph belongs to a new chapter/section, run the chapter recap
+(section 6) before moving on.
+
+## 6. Chapter/Section Recap
+
+Run this step after the last paragraph of each chapter/section has been handled
+and before presenting the first paragraph of the next chapter/section. Also run
+it for the final chapter before the revision closure summary.
+
+The recap is diagnostic first: do not edit automatically. If the recap identifies
+fixes, propose them as normal A/R/M points, split by issue type (e.g. one point
+for a transition, one point for a paragraph split, one point for section order).
+
+### Output Format
+
+```
+## Recap capitolo/sezione — §<section-name>
+
+**Paragrafi coperti:** P<X>–P<Y>
+
+**Mappa dei concetti unitari:**
+- P<X>: <concept>
+- P<Y>: <concept>
+
+**Chiarezza e coerenza:**
+- Tesi/funzione del capitolo: <clear|partly clear|unclear> — <reason>
+- Progressione tra paragrafi: <linear|has gaps|has redundancies> — <reason>
+- Transizioni interne: <adequate|weak|missing> — <reason>
+- Ridondanze o salti logici: <none|list>
+
+**Esito:**
+- <chapter is organized clearly and coherently | issues to address before moving on>
+
+**Prossimo passo:** procedo al prossimo capitolo? (sì / rivedi P<N> / proponi correzione / congela capitolo / chiudi)
+```
+
+Criteria:
+
+- The chapter/section should have a clear internal function in the article.
+- Paragraphs should progress in a recognizable order, not merely accumulate.
+- Each paragraph's unitary concept should be distinct from adjacent paragraphs.
+- If two adjacent paragraphs share the same concept, propose merging or sharpening
+  their functions.
+- If one paragraph carries two autonomous concepts, return to that paragraph and
+  propose a split before advancing.
+- If the user names a deferred issue but does not apply it immediately, record it
+  in the freeze ledger with `log-comment` for the relevant paragraph or section.
+
+## 7. Edge Cases
 
 - **Skip paragraph.** If the user says `salta` or `skip`, mark the paragraph as `Skipped` and advance.
 - **Pause.** `pause` — record the current paragraph index. On next invocation, resume from that paragraph.
@@ -171,7 +251,7 @@ named something still to do, record it via `log-comment` so the paragraph stays
 - **Bibliography check.** If citations are touched, run `40-bibliography-check.md` before applying.
 - **Character budget.** After each accepted change, check against `EDITORIAL_LIMIT_CHARS`. If over, warn immediately (see `30-iterate-points.md`, edge case "Character overshoot").
 
-## 7. Revision Closure
+## 8. Revision Closure
 
 **Trigger — either of:**
 
@@ -187,6 +267,7 @@ named something still to do, record it via `log-comment` so the paragraph stays
    ```
    Revisione paragrafo per paragrafo completata.
    Paragrafi processati: N  |  Accettati: A  |  Rifiutati: R  |  Saltati: S
+   Capitoli/sezioni riepilogati: C
    Bilancio caratteri: +Δ (limite: EDITORIAL_LIMIT_CHARS)
    Versione articolo attiva: <path>
    ```

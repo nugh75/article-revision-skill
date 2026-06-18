@@ -9,8 +9,8 @@ The two files (`AGENTS.md` and `OPENCODE.md`) carry the same workflow. Edit one 
 | Command | Description |
 |---|---|
 | `/article-revision` | Full revision workflow from reviewer feedback |
-| `/r-pp` | Revisione Paragrafo per Paragrafo — 3 diagnostic questions per paragraph |
-| `/r-pp-a` | Revisione Paragrafo per Paragrafo Approfondita — 5-layer deep diagnostic |
+| `/r-pp` | Revisione Paragrafo per Paragrafo — unitary concept + 4 diagnostic questions per paragraph; recap at chapter/section boundaries |
+| `/r-pp-a` | Revisione Paragrafo per Paragrafo Approfondita — 6-layer deep diagnostic, including unitary-concept control |
 | `/r-pr-2` | Dual Peer Reviewer — generate standalone reports + synthesis in `revisions/` (no interactive A/R/M) |
 | `/r-conn` | Connector revision: transitions, signposting, overused connectors |
 | `/r-global` | Global revision: 7-lens structural review (non-granular) |

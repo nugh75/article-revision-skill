@@ -17,8 +17,8 @@ names verbatim.
 
 ## Revisione (passi interattivi, A/R/M per modifica)
   /article-revision   Revisione completa dai commenti di un revisore
-  /r-pp               Paragrafo per paragrafo — 3 dimensioni diagnostiche
-  /r-pp-a             Paragrafo per paragrafo APPROFONDITA — 5 dimensioni
+  /r-pp               Paragrafo per paragrafo — unità concettuale + 4 dimensioni
+  /r-pp-a             Paragrafo per paragrafo APPROFONDITA — 6 dimensioni
   /r-conn             Connettori, transizioni, segnali logici (no contenuto)
   /r-global           Globale — 7 lenti strutturali (non granulare)
   /r-chapter [§N]     Capitolo — una sezione nel contesto dell'intero articolo
