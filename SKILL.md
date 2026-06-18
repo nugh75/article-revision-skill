@@ -40,6 +40,7 @@ bibliography skills around a structured revision workflow.
 | `/r-gdrive` | **Google Drive Collaboration** — create/sync a shared Drive folder for colleagues; pull their feedback back as a revision source (`workflow/80-gdrive-collab.md`) |
 | `/r-approve` | **Colleague Approval** — gate accepted modifications behind colleague sign-off (Google Doc suggestions or `approvals.md`) before they count as final (`workflow/35-colleague-approval.md`) |
 | `/r-redline` | **Redline Export** — colored old-vs-new manuscript for the journal reviewer (insert = green/underline, delete = red/strikethrough) + response-to-reviewers letter (`workflow/90-redline-export.md`) |
+| `/r-help` | **Aiuto** — scheda di riferimento con tutti i comandi e le scorciatoie A/R/M; read-only, nessun setup o bump (`workflow/99-help.md`) |
 
 ### Paragraph-by-Paragraph Modes (`/r-pp`, `/r-pp-a`)
 
@@ -497,6 +498,8 @@ Collaboration / delivery steps (run on demand, not in fixed order):
   old-vs-new manuscript for the reviewer (`scripts/make_redline.py`) plus
   the point-by-point response letter. The redline is a **separate**
   deliverable; the clean submission file carries no revision marks.
+- `workflow/99-help.md` — triggered by `/r-help`. Prints the command reference
+  card. Standalone and read-only: no bootstrap, no setup, no bump, no file I/O.
 
 Skipping is allowed if a step is not applicable; never silently skip a
 step that *should* run.

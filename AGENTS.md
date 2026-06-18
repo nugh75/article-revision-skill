@@ -34,6 +34,7 @@ Trigger phrases:
 | `/r-gdrive` | **Google Drive Collaboration** — create/sync a shared Drive folder; pull colleague feedback as a revision source (`workflow/80-gdrive-collab.md`) |
 | `/r-approve` | **Colleague Approval** — gate accepted modifications behind colleague sign-off before they count as final (`workflow/35-colleague-approval.md`) |
 | `/r-redline` | **Redline Export** — colored old-vs-new manuscript for the reviewer + response-to-reviewers letter (`workflow/90-redline-export.md`) |
+| `/r-help` | **Aiuto** — reference card of every command + A/R/M shortcuts; read-only, no setup or bump (`workflow/99-help.md`) |
 
 See `SKILL.md` for the full description of each mode.
 

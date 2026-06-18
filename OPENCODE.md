@@ -19,8 +19,11 @@ The two files (`AGENTS.md` and `OPENCODE.md`) carry the same workflow. Edit one 
 | `/r-status` | Print the frozen (🟢) vs open (🟡) snapshot from the freeze ledger |
 | `/r-bump` | Bump article version (vN → vN+1) |
 | `/r-sheet` | Generate final revision sheet |
+| `/r-help` | Reference card of every command + A/R/M shortcuts (read-only, no bump) |
 
-All commands enforce the mandatory session-start bump (`10-setup.md` step 5).
+Revision commands enforce the mandatory session-start bump (`10-setup.md` step 5).
+The read-only commands `/r-help` and `/r-status`, and the ledger-only commands
+`/r-freeze` / `/r-thaw`, do **not** trigger a bump.
 The freeze ledger (`workflow/15-freeze-ledger.md`) is checked before every
 proposal: a frozen part triggers a warning + explicit confirmation before editing.
 
