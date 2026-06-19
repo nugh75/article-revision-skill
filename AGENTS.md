@@ -28,7 +28,7 @@ Trigger phrases:
 | `/r-freeze` | **Congela** una parte conclusa nel freeze ledger; in seguito la skill avvisa prima di toccarla (`workflow/15-freeze-ledger.md`) |
 | `/r-thaw` | **Scongela** una parte: torna modificabile senza avviso (`workflow/15-freeze-ledger.md`) |
 | `/r-status` | **Stato revisione** — mappa frozen (🟢) vs open (🟡) dal freeze ledger (`workflow/15-freeze-ledger.md`) |
-| `/r-handoff` | **Handoff** — write a resumable checkpoint without closing the revision round (`workflow/06-handoff.md`) |
+| `/r-handoff` | **Handoff** — write a resumable checkpoint and commit the handoff state without closing the revision round (`workflow/06-handoff.md`) |
 | `/r-resume` | **Resume** — resume from a paused task file without a new version bump (`workflow/06-handoff.md`) |
 | `/r-bump` | Bump article version (call `workflow/60-bump-version.md`) |
 | `/r-sheet` | Generate final revision sheet (call `workflow/70-final-sheet.md`) |
@@ -46,7 +46,7 @@ If the user is doing something else (writing the article from scratch, generatin
 
 ## Hard rules
 
-1. **The user controls all git operations.** This skill never runs `git add`, `git commit`, `git push`, or `git stage` on its own initiative. It only writes files unless the user gives an explicit git instruction. After each accepted change, briefly note that there are pending changes and stop. If the user explicitly asks the skill to commit, do so without `--no-verify`. If the user explicitly authorizes a push, the skill may run `git push` after confirming the target branch/remote.
+1. **The user controls normal git operations.** This skill never runs `git add`, `git commit`, `git push`, or `git stage` on proposal acceptance. Handoff is the only automatic exception: `workflow/06-handoff.md` stages only active-session files and creates a clear handoff commit after writing the checkpoint. It never pushes and never includes unrelated user changes. After each accepted change, briefly note that there are pending changes and stop. If the user explicitly asks the skill to commit outside handoff, do so without `--no-verify`. If the user explicitly authorizes a push, the skill may run `git push` after confirming the target branch/remote.
 2. **Per-point granularity.** Every revision proposal goes through the user as one atomic decision: `Accetta / Modifica / Rivedi completamente / Tieni in considerazione`. Never collapse multiple unrelated changes into one proposal.
 3. **Always ask before creating.** Bootstrap, version bump, new files: every write step that creates something requires explicit confirmation. Idempotent re-checks of already-existing artifacts need no confirmation.
 4. **No silent behavior.** Whenever the skill takes a non-trivial action, output a one-line acknowledgement in chat.
@@ -56,7 +56,7 @@ If the user is doing something else (writing the article from scratch, generatin
 8. **Sync current files.** At the end of every revision round, `workflow/95-decision-log.md` must call `workflow/96-sync-current.md`, which overwrites `articles/current.md`, `articles/current.docx`, and regenerates `bibliography/bibliography.docx` from `reference.bib` with citeproc. This step is mandatory and runs even when no changes were accepted. Never close a round while `bibliography.docx` is missing or appears empty without an explicit warning.
 9. **Revision closure triggers.** A round closes either when its natural perimeter is exhausted (last paragraph, last lens, saved global trace, last dimension, all reviewer points decided) OR when the user sends an explicit closure phrase (`chiudi`, `fine`, `ho finito`, `concludi` / `close`, `done`, `finish`, `end`). `pause`, `stop`, `sospendi`, and `/r-handoff` trigger handoff, not closure. In closure cases, present a summary, ask for confirmation, then run the mandatory closure sequence.
 10. **Freeze ledger.** Keep one persistent ledger per article at `revisions/<article-slug>/freeze-ledger.md` (`workflow/15-freeze-ledger.md`). Check it before every proposal: a 🟢 frozen part is *advisory* — warn (`⚠ congelata`) and require explicit `sì, procedi` before applying. When the user states a change but does not apply it this turn, record it in the ledger (🟡 open + intention) — never leave deferred intentions only in chat. Offer to freeze a unit when its work concludes.
-11. **Handoff is mandatory on interruption.** If work is interrupted before natural closure, call `workflow/06-handoff.md`: mark the task file paused, record current unit/proposal/pending decisions, and print the exact next action. Resume from that task file without a new bump.
+11. **Handoff is mandatory on interruption.** If work is interrupted before natural closure, call `workflow/06-handoff.md`: mark the task file paused, record current unit/proposal/pending decisions, commit the handoff state with a clear message, and print the exact next action. Resume from that task file without a new bump.
 
 ---
 
@@ -153,7 +153,7 @@ The user can pick one of three scopes:
 | **Drive collaboration** (`/r-gdrive`) | `/r-gdrive [create\|push\|sync]` | Create/sync a shared Drive folder; pull colleague feedback into `revisions/<slug>/sources/`. No interactive decision loop — output is a source for later passes. User shares the folder. |
 | **Colleague approval** (`/r-approve`) | `/r-approve` | Gate `Accepted` points behind colleague sign-off (Doc suggestions or `approvals.md`). `approve` → mark approved; `changes` → re-propose via the decision loop; `reject` → ask user (no auto-revert). |
 | **Redline export** (`/r-redline`) | `/r-redline` | Colored old-vs-new `.docx`/`.html` for the reviewer + response-to-reviewers letter. Separate from the clean submission file. No interactive decision loop. |
-| **Handoff / Resume** (`/r-handoff`, `/r-resume`) | `/r-handoff`, `/r-resume`, `pause`, `stop`, `sospendi`, `riprendi`, `continua` | Save a resumable checkpoint in the current task file without closing/syncing; later resume that same task without a new mandatory bump. |
+| **Handoff / Resume** (`/r-handoff`, `/r-resume`) | `/r-handoff`, `/r-resume`, `pause`, `stop`, `sospendi`, `riprendi`, `continua` | Save a resumable checkpoint in the current task file and commit the handoff state without closing/syncing; later resume that same task without a new mandatory bump. |
 | **Freeze / Thaw / Status** (`/r-freeze`, `/r-thaw`, `/r-status`) | `/r-freeze [unit]`, `/r-thaw [unit]`, `/r-status` | Mark a concluded part 🟢 frozen (advisory) / reopen it 🟡 / print the frozen-vs-open snapshot. Ledger-only, no article edit. |
 
 Never collapse heterogeneous changes (citation + phrasing + structure) into one proposal. Split them into separate decisions.
@@ -253,7 +253,7 @@ Mixed rounds (a self-review layered on a real round) are split by tag: only `jou
 
 ## Data verification (binding)
 
-A numeric claim is never inherited. Whenever a proposal adds, changes, or relies on a percentage, count, mean, index, correlation, rank, or a qualitative claim contingent on a figure, `workflow/51-data-verification.md` must run **before** proposing: re-derive the figure from the authoritative source (`DATA_VERIFY_PATH` / `DATA_VERIFY_NOTES`, or a data-source section in the project's `AGENTS.md`), with an explicit criterion (column, filter, denominator, regex with word boundaries). If no source reproduces the value, the point is `Deferred` — never replaced with a plausible number. Skipping this when a figure is in scope is a binding violation, same severity as auto-committing.
+A numeric claim is never inherited. Whenever a proposal adds, changes, or relies on a percentage, count, mean, index, correlation, rank, or a qualitative claim contingent on a figure, `workflow/51-data-verification.md` must run **before** proposing: re-derive the figure from the authoritative source (`DATA_VERIFY_PATH` / `DATA_VERIFY_NOTES`, or a data-source section in the project's `AGENTS.md`), with an explicit criterion (column, filter, denominator, regex with word boundaries). If no source reproduces the value, the point is `Deferred` — never replaced with a plausible number. Skipping this when a figure is in scope is a binding violation, same severity as an unauthorized auto-commit.
 
 ---
 
@@ -299,7 +299,7 @@ Run Python scripts with the project's Python venv. The bootstrap asks before cre
 - Writing an article from scratch.
 - Editing `.bib` independently of a revision flow.
 - Anonymisation pass (handle separately).
-- Opening PRs or sending email. Committing and pushing are allowed only on explicit user instruction, following the Git contract.
+- Opening PRs or sending email. Committing is allowed only on explicit user instruction or the mandatory handoff commit; pushing is allowed only on explicit user instruction, following the Git contract.
 
 For these, defer to the appropriate companion skill or to the user.
 

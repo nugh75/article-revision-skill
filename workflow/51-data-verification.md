@@ -68,6 +68,6 @@ If a corrected/unreproducible figure also appears in **prior published or submit
 
 ## 6. Notes
 
-- This step is **not optional** when a numeric claim is in scope. Skipping it silently is a binding violation, same severity as auto-committing.
+- This step is **not optional** when a numeric claim is in scope. Skipping it silently is a binding violation, same severity as an unauthorized auto-commit.
 - The check applies symmetrically: verify a figure you are *removing* too, in case the removal is based on a wrong premise.
 - Cache nothing across versions. Re-derive every round; the data source may have changed.

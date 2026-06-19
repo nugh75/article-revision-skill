@@ -1,8 +1,9 @@
 # 06 — Handoff / Resume
 
-Creates a resumable checkpoint for an unfinished revision session. This is not
-revision closure: it does not run `95-decision-log.md`, does not sync current
-files, and does not mark the round complete.
+Creates a resumable checkpoint for an unfinished revision session, then commits
+that checkpoint and the session files changed so far. This is not revision
+closure: it does not run `95-decision-log.md`, does not sync current files, does
+not push, and does not mark the round complete.
 
 ## When to invoke
 
@@ -56,16 +57,64 @@ Update the task file:
    ledger via `15-freeze-ledger.md#log-comment`; never leave deferred intentions
    only in the task file.
 
-## 2. Chat Output
+## 2. Handoff Commit
+
+After the checkpoint is written, create a git commit for the handoff state.
+
+1. From the project root, inspect the worktree:
+
+   ```bash
+   git status --short
+   git diff --name-only
+   ```
+
+2. Stage only files that belong to the active revision session:
+   - `TASK_FILE_PATH`;
+   - `ARTICLE_PATH`;
+   - the active revision plan/project file;
+   - the freeze ledger;
+   - proposal sidecar files, approval files, bibliography files, data-audit
+     outputs, redline outputs, or source traces explicitly listed in
+     `File modificati finora` or changed by the current session.
+
+   Leave unrelated user changes unstaged and mention them in chat. If the repo
+   provides a commit helper script, use it only if it preserves this same scoped
+   staging rule and runs a normal `git commit`.
+
+3. Commit without bypassing hooks:
+
+   ```bash
+   git add -- <session files>
+   git commit -m "handoff(<article-slug>): pause <command> at <unit>" \
+     -m "Checkpoint: <what was completed or generated so far>" \
+     -m "Next: <Prossima azione esatta>"
+   ```
+
+   The subject must identify the article slug, command, and current unit. The
+   body must briefly say what was done and the exact next action. Do not use
+   `--no-verify`.
+
+4. If there are no changes after writing the checkpoint, do not create an empty
+   commit unless the user explicitly asks for one. Report that there was nothing
+   to commit.
+
+5. Handoff never pushes. `gh` may be used for repository inspection if useful,
+   but pushing or opening a PR is out of scope for handoff.
+
+## 3. Chat Output
 
 Output a concise handoff block:
 
 ```text
-Handoff scritto.
+Handoff scritto e commit creato.
 - Task file: <TASK_FILE_PATH>
+- Commit: <short-hash> <subject>
 - Stato: paused
 - Ripresa: <Prossima azione esatta>
 ```
+
+If there was nothing to commit, replace the first line with
+`Handoff scritto. Nessuna modifica da committare.` and omit the commit line.
 
 If pending user decisions remain, list them explicitly:
 
@@ -73,7 +122,13 @@ If pending user decisions remain, list them explicitly:
 Decisioni pendenti: <items>
 ```
 
-## 3. Resume From Handoff
+If unrelated changes were intentionally left unstaged, add:
+
+```text
+Non inclusi nel commit di handoff: <files>
+```
+
+## 4. Resume From Handoff
 
 When the user asks to resume (`riprendi`, `resume`, `continua`, `/r-resume`, or
 re-invokes the same command in a project with a paused task file):
@@ -104,11 +159,14 @@ re-invokes the same command in a project with a paused task file):
    ambiguous, ask one clarifying question and keep the task paused until the user
    answers.
 
-## 4. Hard Rules
+## 5. Hard Rules
 
 - Handoff never replaces the mandatory closure sequence. When the user later
   closes the round, still run `95-decision-log.md` and `96-sync-current.md`.
-- Handoff never commits, stages, pushes, or syncs current files.
+- Handoff must commit the checkpoint state with a clear message, but it never
+  pushes or syncs current files.
+- Handoff stages only active-session files. Never include unrelated user changes
+  in the handoff commit.
 - Handoff never silently discards a pending proposal. Record pending item numbers,
   categories, and the exact next action.
 - A resumed session is not a new revision session and must not trigger a new

@@ -36,7 +36,7 @@ bibliography skills around a structured revision workflow.
 | `/r-freeze` | **Congela** una parte conclusa (paragrafo/sezione/frammento) nel freeze ledger; in seguito la skill avvisa prima di toccarla (`workflow/15-freeze-ledger.md`) |
 | `/r-thaw` | **Scongela** una parte congelata: torna modificabile senza avviso (`workflow/15-freeze-ledger.md`) |
 | `/r-status` | **Stato revisione** — mappa di cosa è concluso (🟢 frozen) e cosa richiede intervento (🟡 open), dal freeze ledger (`workflow/15-freeze-ledger.md`) |
-| `/r-handoff` | **Handoff** — scrive un checkpoint riprendibile senza chiudere la revisione (`workflow/06-handoff.md`) |
+| `/r-handoff` | **Handoff** — scrive un checkpoint riprendibile e committa lo stato senza chiudere la revisione (`workflow/06-handoff.md`) |
 | `/r-resume` | **Resume** — riprende da un task file sospeso senza nuovo bump (`workflow/06-handoff.md`) |
 | `/r-bump` | Bump article version (call `workflow/60-bump-version.md`) |
 | `/r-sheet` | Generate final revision sheet (call `workflow/70-final-sheet.md`) |
@@ -331,7 +331,7 @@ data-source section in the project's `AGENTS.md`), with an explicit criterion
 (column, filter, denominator, regex with word boundaries). If no source
 reproduces the value, the point is `Deferred` — never replaced with a
 plausible number. Skipping this when a figure is in scope is a binding
-violation, same severity as auto-committing.
+violation, same severity as an unauthorized auto-commit.
 
 ## Freeze ledger (advisory, persistent)
 
@@ -709,10 +709,14 @@ editorial layout:
 
 ## Git contract
 
-- **The user controls all git operations.** The skill never commits, stages,
-  or pushes on its own initiative. Modifications to the article, the `.bib`,
+- **The user controls normal git operations.** The skill never commits, stages,
+  or pushes on proposal acceptance. Modifications to the article, the `.bib`,
   the project file, and the final sheet are written to disk and remain there
   until the user gives an explicit git instruction.
+- **Handoff is the only automatic git exception.** `workflow/06-handoff.md`
+  stages only active-session files and creates a commit with a clear message
+  after writing the checkpoint. It never pushes and never includes unrelated
+  user changes.
 - After each accepted change, the skill briefly notes that there are
   pending changes — without performing any git action unless explicitly asked.
 - Suggested commit message format (when the user asks): `revision(<reviewer-slug>): <point-id> — <summary>`. The skill can supply the message text in chat for the user to paste.
@@ -753,7 +757,8 @@ If the user says `pause`, `stop`, `sospendi`, `interrompi`, `/r-handoff`, or
 similar while the round is not complete, run `workflow/06-handoff.md` instead of
 the closure sequence. Handoff writes a checkpoint in the task file, marks the
 session `paused`, records the current unit/proposal/pending decisions, and
-prints the exact next action for a future agent.
+creates a scoped git commit with a clear message before printing the exact next
+action for a future agent.
 
 If the user says `riprendi`, `continua`, `/r-resume`, or re-invokes a command
 after interruption, run `workflow/06-handoff.md#resume-from-handoff` during
@@ -779,7 +784,7 @@ point in the workflow:
 | **Drive collaboration** (`/r-gdrive`) | `/r-gdrive [create\|push\|sync]` | Create/sync a shared Drive folder; push the revised article + redline; pull colleague feedback into `revisions/<slug>/sources/`. No interactive decision loop — output is a source for later passes. User shares the folder. |
 | **Colleague approval** (`/r-approve`) | `/r-approve` | Gate `Accepted` points behind colleague sign-off (Doc suggestions or `approvals.md`). `approve` → mark approved; `changes` → re-propose via the decision loop; `reject` → ask user (no auto-revert). |
 | **Redline export** (`/r-redline`) | `/r-redline` | Colored old-vs-new `.docx`/`.html` for the reviewer + response-to-reviewers letter. Separate from the clean submission file. No interactive decision loop. |
-| **Handoff / Resume** (`/r-handoff`, `/r-resume`) | `/r-handoff`, `/r-resume`, `pause`, `stop`, `sospendi`, `riprendi`, `continua` | Save a resumable checkpoint in the current task file without closing/syncing; later resume that same task without a new mandatory bump. |
+| **Handoff / Resume** (`/r-handoff`, `/r-resume`) | `/r-handoff`, `/r-resume`, `pause`, `stop`, `sospendi`, `riprendi`, `continua` | Save a resumable checkpoint in the current task file and commit the handoff state without closing/syncing; later resume that same task without a new mandatory bump. |
 | **Freeze** (`/r-freeze`) | `/r-freeze [unit]` | Mark a concluded part 🟢 frozen in the ledger. No-arg = last unit worked on; `P4` / `§3` / `§3 tutto` target explicitly. Ledger-only, no article edit. |
 | **Thaw** (`/r-thaw`) | `/r-thaw [unit]` | Mark a frozen part 🟡 open again so it can be revised without the advisory warning. |
 | **Status** (`/r-status`) | `/r-status` | Print the frozen/open/wip snapshot from the ledger + the next suggested intervention. Read-only. |
@@ -859,4 +864,4 @@ Run Python scripts with the project's Python venv (`PYTHON_BIN`). Bootstrap asks
 - Editing `.bib` independently — defer to the bibliography skill (e.g.
   `praxis-bibliography-citations`).
 - Anonymisation (XXX placeholders) — handle in a dedicated pass.
-- Opening PRs or sending email. Committing and pushing are allowed only on explicit user instruction, following the Git contract.
+- Opening PRs or sending email. Committing is allowed only on explicit user instruction or the mandatory handoff commit; pushing is allowed only on explicit user instruction, following the Git contract.

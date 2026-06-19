@@ -4,7 +4,9 @@ A Claude Code skill that coordinates **iterative peer-revision rounds on scienti
 
 It orchestrates the recurring tasks of academic revision — collecting reviewer feedback, proposing surgical edits, verifying citations, computing sample statistics, tracking the editorial budget, bumping versions — into a structured, file-based, idempotent workflow.
 
-The user keeps full control over git: the skill never commits, never pushes.
+The user keeps full control over normal git work. Handoff is the only automatic
+exception: the skill commits the checkpoint state with a clear message, and
+never pushes.
 
 ---
 
@@ -211,7 +213,7 @@ content and enforce these layout rules:
 
 ## Design principles
 
-- **User controls git.** The skill never commits, never stages, never pushes. It writes files; you commit.
+- **User controls git.** The skill never commits, stages, or pushes on proposal acceptance. Handoff is the exception: it creates a scoped checkpoint commit with a clear message and still never pushes.
 - **Always ask before creating.** Bootstrap, version bump, file generation — every write step asks for confirmation when ambiguous.
 - **Per-point granularity.** No mass replacements, no batched approvals. Every individual change goes through *Accetta / Modifica / Rivedi completamente / Tieni in considerazione*.
 - **State lives in markdown.** The project file, task file, and handoff checkpoint are the source of truth; sessions resume cleanly after interruption without a new bump.
