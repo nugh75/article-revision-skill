@@ -17,19 +17,20 @@ unlike the per-session task file. One row per tracked unit.
 - 🔵 `wip` — in lavorazione in questa sessione.
 - ⚪ unità non elencata = mai esaminata (untracked).
 
-**Ancoraggio:** ogni unità è identificata da sezione + numero di paragrafo +
-*incipit* (primi ~40 caratteri verbatim del paragrafo), **non** dal numero di
-riga: gli incipit sopravvivono a modifiche e bump. Le righe sono indicative.
+**Ancoraggio:** ogni unità è identificata da capitolo + sezione + numero di
+paragrafo + righe correnti + *incipit* (primi ~40 caratteri verbatim del
+paragrafo), **non** dal numero di riga da solo: gli incipit sopravvivono a
+modifiche e bump. Le righe sono obbligatorie ma indicative.
 
 ---
 
 ## Mappa stato
 
-| Unità | Sezione | Incipit (ancora) | Stato | Ultima modifica | Commenti / intenzioni |
-|---|---|---|---|---|---|
+| Unità | Capitolo | Sezione | Righe | Incipit (ancora) | Stato | Ultima modifica | Commenti / intenzioni |
+|---|---|---|---|---|---|---|---|
 <!-- una riga per unità tracciata, es.:
-| P4 | §3 Metodo | «Il campione è composto da 124…» | 🟢 frozen | 2026-06-18 1530 | — |
-| P5 | §3 Metodo | «Le risposte sono state codificate…» | 🟡 open | 2026-06-18 1532 | Verificare denominatore della percentuale; citazione mancante per il codebook |
+| P4 | Capitolo 3 — Metodo | §3.1 Campione | articles/current.md:145-153 | «Il campione è composto da 124…» | 🟢 frozen | 2026-06-18 1530 | — |
+| P5 | Capitolo 3 — Metodo | §3.1 Campione | articles/current.md:154-162 | «Le risposte sono state codificate…» | 🟡 open | 2026-06-18 1532 | Verificare denominatore della percentuale; citazione mancante per il codebook |
 -->
 
 ---
@@ -41,7 +42,7 @@ Per ogni unità 🟡 open con un'intenzione articolata, un blocco di dettaglio.
 Tieni qui ciò che durante l'iterazione si è deciso di cambiare ma non ancora
 applicato, così è sempre sotto mano.
 
-### P5 — §3 Metodo
+### P5 — Capitolo 3 — Metodo — articles/current.md:154-162
 - **Intenzione:** ricalcolare la percentuale di adesione (denominatore = rispondenti effettivi, non invitati).
 - **Origine:** commento sessione 2026-06-18, punto Reviewer A-3.
 - **Bloccato da:** `51-data-verification.md` (dato da ri-derivare).
@@ -54,6 +55,6 @@ applicato, così è sempre sotto mano.
 | Data | Azione | Unità | Da → A | Origine |
 |---|---|---|---|---|
 <!-- una riga per ogni freeze/thaw, es.:
-| 2026-06-18 1530 | freeze | P4 §3 | open → frozen | auto-offer fine paragrafo |
-| 2026-06-18 1601 | thaw | P4 §3 | frozen → open | richiesta utente /r-thaw |
+| 2026-06-18 1530 | freeze | P4 Capitolo 3 articles/current.md:145-153 | open → frozen | auto-offer fine paragrafo |
+| 2026-06-18 1601 | thaw | P4 Capitolo 3 articles/current.md:145-153 | frozen → open | richiesta utente /r-thaw |
 -->

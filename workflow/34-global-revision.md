@@ -19,9 +19,14 @@ If not already done, run `00-bootstrap.md` and `10-setup.md` to load `.env`, nor
 
 1. Read the entire article into context (skip YAML frontmatter).
 2. Parse the section structure: identify all `#`, `##`, `###` headings and their hierarchy.
-3. Count characters per section.
-4. Extract the first sentence of each section (for narrative arc analysis).
-5. Extract key terminology (defined terms, recurring concepts) for consistency check.
+3. Build the chapter map using the first numeric component of numbered headings
+   (`1`, `1.1`, `1.2.3` = Capitolo 1; `2` = Capitolo 2), and keep
+   section/subsection paths separate.
+4. Build the paragraph map with full locators:
+   `Capitolo <C> — <chapter title>; P<N> — <ARTICLE_PATH>:<L1-L2>`.
+5. Count characters per section.
+6. Extract the first sentence of each section (for narrative arc analysis).
+7. Extract key terminology (defined terms, recurring concepts) for consistency check.
 
 ## 3. Apply the Seven Lenses
 
@@ -134,7 +139,7 @@ Output the complete report as a single block:
 - **Raccomandazione:** <indicazione>
 
 ### 5. Ridondanza
-- **Paragrafi quasi-duplicati:** P12 ~ P28 (entrambi definiscono la variabile dipendente)
+- **Paragrafi quasi-duplicati:** P12 (Capitolo 3, articles/current.md:145-153) ~ P28 (Capitolo 5, articles/current.md:310-318) (entrambi definiscono la variabile dipendente)
 - **Argomenti ripetuti:** Il limite del campione appare in §3, §5 e §6
 - **Raccomandazione:** <quali consolidare>
 
@@ -258,7 +263,8 @@ For architectural changes, present as decision points. Examples:
 
 For size adjustments:
 - Present the target char count per section.
-- Show which paragraphs to cut, consolidate, or expand.
+- Show which paragraphs to cut, consolidate, or expand, always with chapter and
+  line range.
 - Use the standard decision labels: user can accept the cut of specific paragraphs, request modifications, ask for a full rewrite, or keep the issue as context.
 
 ```
@@ -267,8 +273,8 @@ For size adjustments:
 **Diagnosi:** §2 è al 31% (atteso 15-20%). Eccesso di ~3000 caratteri.
 
 **Modifiche:**
-1. [§2.1] Rimuovere la digressione su Author (2018) — 800 chars [(non essenziale per l'argomento)]
-2. [§2.3] Consolidare i tre paragrafi sulla definizione di X in uno solo — 1200 chars [(ridondante)]
+1. [Capitolo 2 — Letteratura; P8 — articles/current.md:98-106] Rimuovere la digressione su Author (2018) — 800 chars [(non essenziale per l'argomento)]
+2. [Capitolo 2 — Letteratura; P12-P14 — articles/current.md:145-176] Consolidare i tre paragrafi sulla definizione di X in uno solo — 1200 chars [(ridondante)]
 3. [§2.4] Spostare la tabella comparativa in appendice — 1000 chars [(materiale supplementare)]
 
 **Δ**: chars -3000 / words -450 · risk: medium
@@ -298,7 +304,8 @@ For global renames:
 ### Redundancy proposals (Lens 5)
 
 For deduplication:
-- Show the near-duplicate paragraphs side by side.
+- Show the near-duplicate paragraphs side by side, each with chapter and line
+  range.
 - Propose which to keep and which to cut.
 - Allow the user to choose the keepers.
 

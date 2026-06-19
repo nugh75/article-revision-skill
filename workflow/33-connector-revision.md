@@ -23,6 +23,8 @@ For every consecutive pair of body paragraphs (P<N> → P<N+1>):
 - Extract the **first sentence** of P<N+1>.
 - Skip heading lines, blockquotes, code blocks, tables.
 - Number the transition: `T<P<N>→P<N+1>>`.
+- Record each paragraph's full locator:
+  `Capitolo <C> — <chapter title>; P<N> — <ARTICLE_PATH>:<L1-L2>`.
 
 ### 2b. Extract inter-section transitions
 
@@ -85,9 +87,9 @@ Present findings as a single structured table — **not** one transition at a ti
 
 | Transizione | Relazione logica | Stato | Testo attuale | Proposta |
 |---|---|---|---|---|
-| P3→P4 | Contrasto | WEAK | «Ma d'altra parte...» | «Tuttavia...» |
-| P7→P8 | Causa/effetto | MISSING | (nessun connettore) | «Di conseguenza, ...» |
-| P12→P13 | Aggiunta | OK | «Inoltre...» | — |
+| P3 (cap. 1, righe 42-48) → P4 (cap. 1, righe 50-56) | Contrasto | WEAK | «Ma d'altra parte...» | «Tuttavia...» |
+| P7 (cap. 2, righe 88-96) → P8 (cap. 2, righe 98-105) | Causa/effetto | MISSING | (nessun connettore) | «Di conseguenza, ...» |
+| P12 (cap. 3, righe 145-153) → P13 (cap. 3, righe 155-162) | Aggiunta | OK | «Inoltre...» | — |
 
 ### Transizioni inter-sezione
 
@@ -100,15 +102,15 @@ Present findings as a single structured table — **not** one transition at a ti
 
 | Connettore | Occorrenze | Paragrafi | Raccomandazione |
 |---|---|---|---|
-| *tuttavia* | 7 | P2, P4, P5, P9, P11, P14, P18 | Ridurre a max 3; riformulare 4 |
-| *inoltre* | 5 | P3, P7, P10, P15, P20 | Ridurre a max 2; usare *per di più*, *si aggiunga che* |
+| *tuttavia* | 7 | P2 (righe 20-25), P4 (50-56), P5 (58-64), P9 (110-116), P11 (132-139), P14 (170-176), P18 (220-228) | Ridurre a max 3; riformulare 4 |
+| *inoltre* | 5 | P3 (42-48), P7 (88-96), P10 (118-126), P15 (178-185), P20 (245-252) | Ridurre a max 2; usare *per di più*, *si aggiunga che* |
 
 ### Segnaletica interna
 
 | Tipo | Riferimento | Problema | Proposta |
 |---|---|---|---|
-| Rinvio in avanti | «come vedremo più avanti» in P5 | Vago — quale sezione? | «come vedremo nel §4» |
-| Rinvio all'indietro | «come detto sopra» in P22 | Vago | «come discusso nel §2» |
+| Rinvio in avanti | «come vedremo più avanti» in P5 (articles/current.md:58-64) | Vago — quale sezione? | «come vedremo nel §4» |
+| Rinvio all'indietro | «come detto sopra» in P22 (articles/current.md:270-278) | Vago | «come discusso nel §2» |
 ```
 
 If `ARTICLE_LANG=en`, adapt labels: *Transizione* → *Transition*, *Relazione logica* → *Logical relation*, *Stato* → *Status*, etc.
@@ -127,7 +129,7 @@ Problemi di segnaletica: J
 Quali vuoi sistemare?
 - "tutte" — applica tutte le proposte
 - "transizioni" — solo le transizioni inter-paragrafo e inter-sezione
-- "P3→P4, P7→P8" — transizioni specifiche
+- "P3 righe 42-48 → P4 righe 50-56" — transizione specifica
 - "sovrautilizzati" — solo i connettori sovrautilizzati
 - "segnaletica" — solo la segnaletica interna
 - "nessuno" — salta questa modalità
@@ -151,9 +153,9 @@ For each selected item group, generate a proposal using the standard decision pa
 **Diagnosi:** <N> transizioni con problemi (MISSING, WEAK, WRONG)
 
 **Modifiche:**
-1. [P3→P4] «Ma d'altra parte» → «Tuttavia» [(WEAK → contrasto)]
-2. [P7→P8] (nessuno) → «Di conseguenza, » [(MISSING → causa/effetto)]
-3. [P14→P15] «Quindi» → «Pertanto, » [(WEAK → causa/effetto)]
+1. [P3 articles/current.md:42-48 → P4 articles/current.md:50-56] «Ma d'altra parte» → «Tuttavia» [(WEAK → contrasto)]
+2. [P7 articles/current.md:88-96 → P8 articles/current.md:98-105] (nessuno) → «Di conseguenza, » [(MISSING → causa/effetto)]
+3. [P14 articles/current.md:170-176 → P15 articles/current.md:178-185] «Quindi» → «Pertanto, » [(WEAK → causa/effetto)]
 ...
 
 **Δ**: chars +X / words +Y · risk: low
@@ -166,13 +168,13 @@ For each selected item group, generate a proposal using the standard decision pa
 ```
 ## Point <N> — Connettori: sovrautilizzo di "tuttavia" · scope: connector
 
-**Diagnosi:** 7 occorrenze (P2, P4, P5, P9, P11, P14, P18). Si raccomanda di tenerne 3 e riformulare 4.
+**Diagnosi:** 7 occorrenze (P2 20-25, P4 50-56, P5 58-64, P9 110-116, P11 132-139, P14 170-176, P18 220-228). Si raccomanda di tenerne 3 e riformulare 4.
 
 **Modifiche:**
-1. [P4] «Tuttavia...» → «Ciononostante...» [(rimpiazzo)]
-2. [P9] «Tuttavia...» → «Al contrario...» [(rimpiazzo)]
-3. [P14] «Tuttavia...» → «Nondimeno...» [(rimpiazzo)]
-4. [P18] «Tuttavia...» → riformulare la frase senza connettore [(ristrutturazione)]
+1. [P4 articles/current.md:50-56] «Tuttavia...» → «Ciononostante...» [(rimpiazzo)]
+2. [P9 articles/current.md:110-116] «Tuttavia...» → «Al contrario...» [(rimpiazzo)]
+3. [P14 articles/current.md:170-176] «Tuttavia...» → «Nondimeno...» [(rimpiazzo)]
+4. [P18 articles/current.md:220-228] «Tuttavia...» → riformulare la frase senza connettore [(ristrutturazione)]
 
 **Δ**: chars ±X / words ±Y · risk: low
 

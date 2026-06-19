@@ -31,9 +31,12 @@ paragraph, but it may be a numbered subsection or a fragment.
 
 Identify every unit by, in order:
 
-1. `§<section>` — nearest heading.
-2. `P<n>` — paragraph index within the article (same numbering as `/r-pp`).
-3. **Anchor incipit** — the first ~40 verbatim characters of the paragraph.
+1. `Capitolo <C> — <title>` — chapter from the first numeric component of the
+   numbered heading.
+2. `§<section>` — nearest full heading path, if any.
+3. `P<n>` — paragraph index within the article (same numbering as `/r-pp`).
+4. `<ARTICLE_PATH>:<L1-L2>` — current advisory line range.
+5. **Anchor incipit** — the first ~40 verbatim characters of the paragraph.
 
 Never key a unit by raw line number alone: line numbers shift on every edit and
 bump. The anchor incipit is what makes a frozen unit recognisable after the text
@@ -117,7 +120,7 @@ Triggered by `/r-freeze [unit]` or accepted from the auto-offer (§7).
 2. Set state 🟢 `frozen`, update *Ultima modifica*, clear the *Commenti /
    intenzioni* cell (or move any leftover intention to the storico as resolved).
 3. Append a storico row: `<data> | freeze | <unit> | <prev> → frozen | <origin>`.
-4. Confirm in chat (one line): `🟢 Congelato <unit> (<sezione>).`
+4. Confirm in chat (one line): `🟢 Congelato <unit> (Capitolo <C>, righe <L1-L2>).`
 
 ## 7. Auto-offer on conclusion
 
@@ -126,7 +129,7 @@ the user signals no further changes on it (e.g. "no, prossimo paragrafo",
 "next") — offer to freeze it **before** advancing:
 
 ```
-Lavoro su <unit> (<sezione>) concluso: <X> accettate, <Y> tenute in considerazione.
+Lavoro su <unit> (Capitolo <C>, righe <L1-L2>) concluso: <X> accettate, <Y> tenute in considerazione.
 Congelo questa parte come conclusa? (sì / no / più tardi)
 ```
 
@@ -171,9 +174,9 @@ Print a compact snapshot from the ledger — do not edit anything:
 ```
 ## Stato revisione — <article-slug>  (reconciled <bumped-version>)
 
-🟢 Frozen (X):   P4 §3, P9 §4, …
-🟡 Open (Y):     P5 §3 — ricalcolare %; P7 §3 — citazione mancante; …
-🔵 WIP (Z):      P12 §5
+🟢 Frozen (X):   P4 Capitolo 3 articles/current.md:145-153; P9 Capitolo 4 articles/current.md:210-218; …
+🟡 Open (Y):     P5 Capitolo 3 articles/current.md:154-162 — ricalcolare %; P7 Capitolo 3 articles/current.md:180-188 — citazione mancante; …
+🔵 WIP (Z):      P12 Capitolo 5 articles/current.md:260-268
 ⚪ Untracked:    ~N paragrafi mai esaminati
 
 Prossimo intervento suggerito: <first open unit + its intention>

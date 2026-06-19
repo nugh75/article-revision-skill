@@ -5,7 +5,8 @@ description: |
   when the user asks to apply reviewer feedback ("revise article",
   "apply reviewer X comments", "let's process the reviewer comments"),
   to bump the article to a new version, pause/resume an in-progress revision
-  via `/r-handoff` or `/r-resume`, or invokes `/article-revision` explicitly.
+  via `/r-handoff` or `/r-resume`, asks for the recommended path via
+  `/r-guide`, or invokes `/article-revision` explicitly.
   Skill assumes a project layout with `articles/`, `bibliography/
   reference.bib`, `editorial-norms/`, `revisions/`, and an `.env` file.
   For each reviewer point: shows original text + proposed change in chat,
@@ -36,7 +37,7 @@ bibliography skills around a structured revision workflow.
 | `/r-freeze` | **Congela** una parte conclusa (paragrafo/sezione/frammento) nel freeze ledger; in seguito la skill avvisa prima di toccarla (`workflow/15-freeze-ledger.md`) |
 | `/r-thaw` | **Scongela** una parte congelata: torna modificabile senza avviso (`workflow/15-freeze-ledger.md`) |
 | `/r-status` | **Stato revisione** — mappa di cosa è concluso (🟢 frozen) e cosa richiede intervento (🟡 open), dal freeze ledger (`workflow/15-freeze-ledger.md`) |
-| `/r-handoff` | **Handoff** — scrive un checkpoint riprendibile e committa lo stato senza chiudere la revisione (`workflow/06-handoff.md`) |
+| `/r-handoff` | **Handoff** — scrive checkpoint, decision log, sync current files e commit scoped senza chiudere la revisione (`workflow/06-handoff.md`) |
 | `/r-resume` | **Resume** — riprende da un task file sospeso senza nuovo bump (`workflow/06-handoff.md`) |
 | `/r-bump` | Bump article version (call `workflow/60-bump-version.md`) |
 | `/r-sheet` | Generate final revision sheet (call `workflow/70-final-sheet.md`) |
@@ -44,11 +45,12 @@ bibliography skills around a structured revision workflow.
 | `/r-gdrive` | **Google Drive Collaboration** — create/sync a shared Drive folder for colleagues; pull their feedback back as a revision source (`workflow/80-gdrive-collab.md`) |
 | `/r-approve` | **Colleague Approval** — gate accepted modifications behind colleague sign-off (Google Doc suggestions or `approvals.md`) before they count as final (`workflow/35-colleague-approval.md`) |
 | `/r-redline` | **Redline Export** — colored old-vs-new manuscript for the journal reviewer (insert = green/underline, delete = red/strikethrough) + response-to-reviewers letter (`workflow/90-redline-export.md`) |
+| `/r-guide` | **Recommended Guide** — read-only recommended full revision path: TOV, global analysis, paragraph pass, chapter handoffs, simulated reviewers (`workflow/98-guide.md`) |
 | `/r-help` | **Aiuto** — scheda di riferimento con tutti i comandi e le scorciatoie decisionali; read-only, nessun setup o bump (`workflow/99-help.md`) |
 
 ### Paragraph-by-Paragraph Modes (`/r-pp`, `/r-pp-a`)
 
-These modes perform a **proactive** revision walk over the entire article, paragraph by paragraph. The AI actively analyzes each paragraph using multiple diagnostic dimensions before proposing changes. Unlike the standard reviewer-feedback flow, this is not reactive to external feedback — it's an autonomous diagnostic process. At the end of each chapter/section, the AI must recap whether the paragraphs are organized clearly and coherently before advancing.
+These modes perform a **proactive** revision walk over the entire article, paragraph by paragraph. The AI actively analyzes each paragraph using multiple diagnostic dimensions before proposing changes. Unlike the standard reviewer-feedback flow, this is not reactive to external feedback — it's an autonomous diagnostic process. At the end of each chapter, the AI must recap whether the paragraphs are organized clearly and coherently before advancing.
 
 #### `/r-pp` — Standard Paragraph-by-Paragraph
 
@@ -66,7 +68,7 @@ For each paragraph in sequence:
 
 3. **Propose** modifications based on the AI's analysis, using the standard decision pattern.
 4. After decision on each proposal, ask: *"Ci sono altri cambiamenti in questo paragrafo?"* before advancing.
-5. At the end of each chapter/section, recap the section's unitary-concept map, paragraph progression, transitions, redundancies, and overall coherence before moving on.
+5. At the end of each chapter, recap the chapter's unitary-concept map, paragraph progression, transitions, redundancies, and overall coherence before moving on.
 6. **Advance** only on explicit command (`prossimo`, `next`, `passa al prossimo`).
 
 The user can pause with `pause`, `stop`, or `/r-handoff`; the skill records the
@@ -158,8 +160,8 @@ A focused pass that examines the article's **logical scaffolding**: connectors, 
 
 **Workflow:**
 
-1. **Parse** the article into paragraphs and sections.
-2. **Extract** every paragraph boundary (last sentence of P<N> + first sentence of P<N+1>) into a list.
+1. **Parse** the article into paragraphs, chapters, and sections; every paragraph gets the locator `Capitolo <C> — <title>; P<N> — <file>:<L1-L2>`.
+2. **Extract** every paragraph boundary (last sentence of `P<N> — <file>:<L1-L2>` + first sentence of `P<N+1> — <file>:<L3-L4>`) into a list, preserving both paragraph line ranges.
 3. **Extract** every section boundary (last paragraph of §<N> + first paragraph of §<N+1>).
 4. **Diagnose** each boundary: is the logical relationship explicit? Is the connector appropriate?
 5. **Present** findings as a diagnostic table, not one by one — the user gets a bird's-eye view:
@@ -171,9 +173,9 @@ A focused pass that examines the article's **logical scaffolding**: connectors, 
 
    | Transition | Logical relation | Current connector | Issue | Proposal |
    |---|---|---|---|---|
-   | P3→P4 | Contrast | *ma* | Weak at paragraph start | *Tuttavia* |
-   | P7→P8 | Cause/effect | (missing) | Implicit → needs connector | *Di conseguenza* |
-   | P12→P13 | Addition | *inoltre* | OK | — |
+   | P3 (cap. 1, righe 42-48) → P4 (cap. 1, righe 50-56) | Contrast | *ma* | Weak at paragraph start | *Tuttavia* |
+   | P7 (cap. 2, righe 88-96) → P8 (cap. 2, righe 98-105) | Cause/effect | (missing) | Implicit → needs connector | *Di conseguenza* |
+   | P12 (cap. 3, righe 145-153) → P13 (cap. 3, righe 155-162) | Addition | *inoltre* | OK | — |
 
    ### Inter-section transitions
 
@@ -186,10 +188,10 @@ A focused pass that examines the article's **logical scaffolding**: connectors, 
 
    | Connector | Count | In paragraphs | Recommendation |
    |---|---|---|---|
-   | *tuttavia* | 7 | P2, P4, P5, P9, P11, P14, P18 | Reduce to max 3; rephrase 4 |
+   | *tuttavia* | 7 | P2 (20-25), P4 (50-56), P5 (58-64), P9 (110-116), P11 (132-139), P14 (170-176), P18 (220-228) | Reduce to max 3; rephrase 4 |
    ```
 
-6. **Ask** the user to select which transitions to fix: *"Quali transizioni vuoi sistemare? (es. 'P3→P4, P7→P8, §2→§3' oppure 'tutte')"*
+6. **Ask** the user to select which transitions to fix: *"Quali transizioni vuoi sistemare? (es. 'P3 righe 42-48 → P4 righe 50-56', 'P7 righe 88-96 → P8 righe 98-105', '§2→§3' oppure 'tutte')"*
 7. **Propose** modifications for the selected items using the standard decision pattern (one point per transition group).
 8. **Apply** on `Accetta`, advance on command.
 
@@ -254,7 +256,7 @@ A **non-granular, high-level** revision that examines the article as a whole org
    - **Raccomandazione:** <high-level direction>
 
    ### 5. Redundancy
-   - **Paragrafi quasi-duplicati:** P12 ~ P28 (both define the dependent variable)
+   - **Paragrafi quasi-duplicati:** P12 (Capitolo 3, articles/current.md:145-153) ~ P28 (Capitolo 5, articles/current.md:310-318) (both define the dependent variable)
    - **Argomenti ripetuti:** The limitation about sample size appears in §3, §5, and §6
    - **Raccomandazione:** <which to consolidate>
 
@@ -448,7 +450,8 @@ Optional:
    decision log.
 0a. `workflow/06-handoff.md` — resumable checkpoint and resume workflow. Called
    by `pause`, `stop`, `/r-handoff`, `/r-resume`, or whenever the agent may be
-   interrupted before natural closure.
+   interrupted before natural closure. A handoff writes a checkpoint, decision
+   log entry, current-file sync, and scoped commit without closing the round.
 1. `workflow/00-bootstrap.md` — set up the revision environment if missing
    (venv with Python deps, `.bib` file, `.env` with editorial parameters
    and Zotero credentials, editorial norms file). Idempotent: skips
@@ -467,9 +470,10 @@ Optional:
    automatically** — the user controls git.
 4a. `workflow/31-paragraph-by-paragraph.md` — triggered by `/r-pp` or
     `/r-pp-a`. Walk every paragraph sequentially with AI diagnostic analysis
-    before proposing; each paragraph must have one governing concept, and each
-    chapter/section gets a coherence recap before advancing. Deep mode
-    (`/r-pp-a`) uses six-layer diagnostics.
+    before proposing; each paragraph must carry chapter and line-range
+    locators, each paragraph must have one governing concept, and each chapter
+    gets a coherence recap before advancing. Deep mode (`/r-pp-a`) uses
+    six-layer diagnostics.
 4b. `workflow/32-peer-review-simulation.md` — triggered by `/r-pr-2`.
    Generate two standalone reviewer documents in `revisions/<article-slug>/`
    (method-focused, theory-focused) plus a synthesis document. No interactive
@@ -502,9 +506,11 @@ Optional:
    (date + 24h time, so multiple bumps in the same day stay distinct).
 8. `workflow/70-final-sheet.md` — produce `revisions/<reviewer>/
    final-sheet-vN.md` with the post-revision status.
-9. `workflow/95-decision-log.md` — mandatory closure step. Record the round in
+9. `workflow/95-decision-log.md` — mandatory decision-log step. Record the round in
    `revisions/decision-log/` and update `index.md`, close the task file, then
-   call `96-sync-current.md`. The round is not closed until all three complete.
+   call `96-sync-current.md`. Also supports `mode=handoff`, where it records a
+   checkpoint without closing the task. The round is not closed until all three
+   closure-mode steps complete.
 10. `workflow/96-sync-current.md` — mandatory sync step (called by 95). Overwrites
    `articles/current.md`, `articles/current.docx`, and
    `bibliography/bibliography.docx`. Requires pandoc; uses `--citeproc` and
@@ -525,6 +531,9 @@ Collaboration / delivery steps (run on demand, not in fixed order):
   old-vs-new manuscript for the reviewer (`scripts/make_redline.py`) plus
   the point-by-point response letter. The redline is a **separate**
   deliverable; the clean submission file carries no revision marks.
+- `workflow/98-guide.md` — triggered by `/r-guide`. Prints the recommended
+  full revision path. Standalone and read-only: no bootstrap, no setup, no bump,
+  no file I/O.
 - `workflow/99-help.md` — triggered by `/r-help`. Prints the command reference
   card. Standalone and read-only: no bootstrap, no setup, no bump, no file I/O.
 
@@ -539,12 +548,37 @@ of the canonical version name. The revision workflow may use that file as the
 source, but any version bump must remove `-drive` and generate the canonical
 filename `article-v(N+1)-YYYY-MM-DD-HHMM[-anonymous].md`.
 
+## Paragraph and Chapter Locators (binding)
+
+Every time the skill identifies, discusses, stores, freezes, resumes, or
+proposes an edit for a paragraph, it must include a full locator:
+
+`Capitolo <C> — <chapter title>; Paragrafo P<N> — <ARTICLE_PATH>:<L1-L2>`
+
+- **Paragraph**: a semantic body block delimited by blank lines, excluding
+  headings, blockquotes, code blocks, and tables unless a workflow explicitly
+  says otherwise. `L1-L2` is the inclusive line range in the current Markdown
+  article file.
+- **Chapter**: a numbered Markdown heading with a number and a title. Determine
+  the chapter from the first numeric component of the heading text: `1`,
+  `1.1`, and `1.2.3` all belong to `Capitolo 1`; `2` or `2.1` starts
+  `Capitolo 2`. When the first number changes, the chapter changes.
+- **Section/subsection**: the nearest full heading path may still be shown as
+  `§...`, but it must not be confused with the chapter. A subsection `1.2`
+  remains inside `Capitolo 1`.
+- If headings are unnumbered or numbering is inconsistent, warn and use the
+  nearest heading as provisional context; still include paragraph line ranges.
+- Recompute paragraph line ranges after edits and version bumps before writing
+  handoff, freeze-ledger, task, proposal, or summary entries.
+
 ## Interaction pattern (binding)
 
 For every revision point, output exactly this shape in chat:
 
 ```
 ## Point N — <short title> · scope: <fragment|paragraph|whole article>
+
+**Unità**: <Capitolo C — title; Paragrafo P<N> — article:line-range> <!-- required when a paragraph is referenced -->
 
 **Original** (`<article>:<line-range>`)
 > <verbatim text>
@@ -612,9 +646,9 @@ When auto-mode is active:
    - Ambiguous or conflicting information that cannot be resolved from context
    - A modification with `risk: high` (structural change, potential loss of content)
    - A modification that requires a decision between two valid alternatives
-   - End of section or end of article (report summary, then ask whether to
+   - End of chapter or end of article (report summary, then ask whether to
      continue or write a handoff checkpoint)
-6. At the end of each section, output the chapter/section recap from
+6. At the end of each chapter, output the chapter recap from
    `workflow/31-paragraph-by-paragraph.md`: unitary-concept map, organization,
    coherence, transitions, redundancies, and any issue to address before
    advancing. Include the auto-mode counts in that recap:
@@ -714,9 +748,9 @@ editorial layout:
   the project file, and the final sheet are written to disk and remain there
   until the user gives an explicit git instruction.
 - **Handoff is the only automatic git exception.** `workflow/06-handoff.md`
-  stages only active-session files and creates a commit with a clear message
-  after writing the checkpoint. It never pushes and never includes unrelated
-  user changes.
+  writes a checkpoint, records a decision-log checkpoint, syncs current files,
+  stages only active-session files, and creates a commit with a clear message.
+  It never pushes and never includes unrelated user changes.
 - After each accepted change, the skill briefly notes that there are
   pending changes — without performing any git action unless explicitly asked.
 - Suggested commit message format (when the user asks): `revision(<reviewer-slug>): <point-id> — <summary>`. The skill can supply the message text in chat for the user to paste.
@@ -757,8 +791,9 @@ If the user says `pause`, `stop`, `sospendi`, `interrompi`, `/r-handoff`, or
 similar while the round is not complete, run `workflow/06-handoff.md` instead of
 the closure sequence. Handoff writes a checkpoint in the task file, marks the
 session `paused`, records the current unit/proposal/pending decisions, and
-creates a scoped git commit with a clear message before printing the exact next
-action for a future agent.
+creates a decision-log checkpoint, syncs current files, and creates a scoped git
+commit with a clear message before printing the exact next action for a future
+agent.
 
 If the user says `riprendi`, `continua`, `/r-resume`, or re-invokes a command
 after interruption, run `workflow/06-handoff.md#resume-from-handoff` during
@@ -784,7 +819,8 @@ point in the workflow:
 | **Drive collaboration** (`/r-gdrive`) | `/r-gdrive [create\|push\|sync]` | Create/sync a shared Drive folder; push the revised article + redline; pull colleague feedback into `revisions/<slug>/sources/`. No interactive decision loop — output is a source for later passes. User shares the folder. |
 | **Colleague approval** (`/r-approve`) | `/r-approve` | Gate `Accepted` points behind colleague sign-off (Doc suggestions or `approvals.md`). `approve` → mark approved; `changes` → re-propose via the decision loop; `reject` → ask user (no auto-revert). |
 | **Redline export** (`/r-redline`) | `/r-redline` | Colored old-vs-new `.docx`/`.html` for the reviewer + response-to-reviewers letter. Separate from the clean submission file. No interactive decision loop. |
-| **Handoff / Resume** (`/r-handoff`, `/r-resume`) | `/r-handoff`, `/r-resume`, `pause`, `stop`, `sospendi`, `riprendi`, `continua` | Save a resumable checkpoint in the current task file and commit the handoff state without closing/syncing; later resume that same task without a new mandatory bump. |
+| **Guide** (`/r-guide`) | `/r-guide` | Print the recommended full revision path: TOV + `/r-global` + `/r-pp-a` with chapter handoffs + closure + `/r-pr-2` QA + mini-round. Read-only, no bump. |
+| **Handoff / Resume** (`/r-handoff`, `/r-resume`) | `/r-handoff`, `/r-resume`, `pause`, `stop`, `sospendi`, `riprendi`, `continua` | Save a resumable checkpoint in the current task file, write decision log, sync current files, and commit the handoff state without closing the round; later resume that same task without a new mandatory bump. |
 | **Freeze** (`/r-freeze`) | `/r-freeze [unit]` | Mark a concluded part 🟢 frozen in the ledger. No-arg = last unit worked on; `P4` / `§3` / `§3 tutto` target explicitly. Ledger-only, no article edit. |
 | **Thaw** (`/r-thaw`) | `/r-thaw [unit]` | Mark a frozen part 🟡 open again so it can be revised without the advisory warning. |
 | **Status** (`/r-status`) | `/r-status` | Print the frozen/open/wip snapshot from the ledger + the next suggested intervention. Read-only. |

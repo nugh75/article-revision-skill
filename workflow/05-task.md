@@ -96,6 +96,10 @@ Called by `workflow/06-handoff.md`.
 4. Replace the `## Handoff / Ripresa` section using the fields defined in
    `workflow/06-handoff.md`.
 5. Write back. Do not close the task file.
+6. `workflow/06-handoff.md` then calls `95-decision-log.md` in `handoff` mode
+   and `96-sync-current.md` in `handoff` mode. Record those results as notes on
+   the `Handoff checkpoint` row; leave final `Decision log` and `Sync current
+   files` rows available for closure.
 
 ## 4. resume
 

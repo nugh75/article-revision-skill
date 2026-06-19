@@ -1,6 +1,6 @@
 # 31 — Paragraph-by-Paragraph Revision
 
-Triggered by `/r-pp` (standard) or `/r-pp-a` (deep). Performs a proactive diagnostic walk over every paragraph of the article, asking the user structured questions before proposing modifications. Every paragraph must be checked for a single governing concept; at the end of each chapter/section, run a recap on clarity, coherence, organization, and paragraph progression before advancing.
+Triggered by `/r-pp` (standard) or `/r-pp-a` (deep). Performs a proactive diagnostic walk over every paragraph of the article, asking the user structured questions before proposing modifications. Every paragraph must be checked for a single governing concept and identified by chapter plus Markdown line range; at the end of each chapter, run a recap on clarity, coherence, organization, and paragraph progression before advancing.
 
 ## 0. Determine Mode
 
@@ -62,21 +62,34 @@ every diagnostic block.
    - **Skip** headings (lines starting with `#`), blockquotes, code blocks, tables.
    - **Do not** split numbered list items — treat each item as a paragraph.
 3. Number paragraphs sequentially: `P1`, `P2`, ..., `PN`.
-4. Map each paragraph to a chapter/section:
-   - Treat a chapter as the highest body heading level below the article title that has at least two occurrences.
-   - If that cannot be detected safely, use the nearest preceding Markdown heading as `§<section>`.
-   - If the article has no headings, treat the whole article as one chapter and run the recap only before closure.
-5. Announce in chat:
+4. Record the inclusive Markdown line range for each paragraph:
+   `P<N> — <ARTICLE_PATH>:<L1-L2>`.
+5. Map each paragraph to a chapter and, separately, to its nearest section:
+   - A chapter is a numbered heading with a number and a title. Use the first
+     numeric component of the heading text: `1`, `1.1`, and `1.2.3` all belong
+     to `Capitolo 1`; `2` starts `Capitolo 2`.
+   - When the first number changes, the chapter changes.
+   - Use the first heading encountered for that first number as the chapter
+     title; keep the nearest full heading path as section/subsection context.
+   - If headings are unnumbered or inconsistent, warn and use the nearest
+     heading as provisional context; still include line ranges.
+   - If the article has no headings, treat the whole article as one provisional
+     chapter and run the recap only before closure.
+6. For every paragraph, carry this locator in memory and in task/handoff/ledger
+   entries:
+   `Capitolo <C> — <chapter-title>; Paragrafo P<N> — <ARTICLE_PATH>:<L1-L2>`.
+7. Announce in chat:
 
    ```
    Articolo: <article-path>
    Paragrafi individuati: N
-   Capitoli/sezioni individuati: C
+   Capitoli individuati: C
+   Sezioni/sottosezioni individuate: S
    Traccia globale: <none|GLOBAL_TRACE_PATH>
    Modalità: <standard|approfondita>
    Lingua rilevata: <ARTICLE_LANG>
 
-   Inizio da P1? (sì / scegli paragrafo / annulla)
+   Inizio da P1 (<ARTICLE_PATH>:<L1-L2>, Capitolo <C>)? (sì / scegli paragrafo / annulla)
    ```
 
    Wait for the user.
@@ -88,7 +101,7 @@ Before presenting each paragraph, run the freeze check (`15-freeze-ledger.md`
 to revisit it before running diagnostics:
 
 ```
-P<N> §<section> è CONGELATO (frozen il <data>) — considerato concluso.
+Capitolo <C> — <chapter-title>; P<N> (<ARTICLE_PATH>:<L1-L2>) è CONGELATO (frozen il <data>) — considerato concluso.
 Lo rivediamo lo stesso? (sì, procedi / lascia congelato e prossimo)
 ```
 
@@ -112,7 +125,9 @@ If no unitary concept can be identified, flag the paragraph as structurally weak
 ### Output Format (Standard — `/r-pp`)
 
 ```
-## P<N> — §<section-name> · righe <L1-L2>
+## Capitolo <C> — <chapter-title> · Paragrafo P<N> · <ARTICLE_PATH>:<L1-L2>
+
+**Sezione/sottosezione:** §<section-path>
 
 **Contesto** (paragrafo precedente):
 > <preceding paragraph, truncated to 200 chars if long>
@@ -148,7 +163,9 @@ Adapt to English if `ARTICLE_LANG=en`:
 ### Output Format (Deep — `/r-pp-a`)
 
 ```
-## P<N> — §<section-name> · righe <L1-L2>
+## Capitolo <C> — <chapter-title> · Paragrafo P<N> · <ARTICLE_PATH>:<L1-L2>
+
+**Sezione/sottosezione:** §<section-path>
 
 **Contesto** (paragrafo precedente):
 > <preceding paragraph, truncated to 200 chars if long>
@@ -179,6 +196,8 @@ Based on the user's diagnostic answers, generate a proposal using the standard d
 
 ```
 ## Point <N> — P<N> revision · scope: paragraph · mode: <standard|deep>
+
+**Unità**: Capitolo <C> — <chapter-title>; Paragrafo P<N> — <ARTICLE_PATH>:<L1-L2>
 
 **Original** (`<article>:<line-range>`)
 > <verbatim text>
@@ -246,17 +265,17 @@ Follow the standard response handling from `30-iterate-points.md`, section 4:
 
 **On the advance command, run the freeze auto-offer** (`15-freeze-ledger.md` §7)
 before moving to the next paragraph: offer to freeze the just-finished paragraph
-(`Congelo P<N> come concluso? (sì / no / più tardi)`). If the user declines but
+(`Congelo P<N> (<ARTICLE_PATH>:<L1-L2>, Capitolo <C>) come concluso? (sì / no / più tardi)`). If the user declines but
 named something still to do, record it via `log-comment` so the paragraph stays
 🟡 `open` with its intention in the ledger.
 
-If the next paragraph belongs to a new chapter/section, run the chapter recap
+If the next paragraph belongs to a new chapter, run the chapter recap
 (section 6) before moving on.
 
-## 6. Chapter/Section Recap
+## 6. Chapter Recap
 
-Run this step after the last paragraph of each chapter/section has been handled
-and before presenting the first paragraph of the next chapter/section. Also run
+Run this step after the last paragraph of each chapter has been handled
+and before presenting the first paragraph of the next chapter. Also run
 it for the final chapter before the revision closure summary.
 
 The recap is diagnostic first: do not edit automatically. If the recap identifies
@@ -266,16 +285,16 @@ for a transition, one point for a paragraph split, one point for section order).
 ### Output Format
 
 ```
-## Recap capitolo/sezione — §<section-name>
+## Recap capitolo — Capitolo <C> — <chapter-title>
 
-**Paragrafi coperti:** P<X>–P<Y>
+**Paragrafi coperti:** P<X> (<ARTICLE_PATH>:<Lx1-Lx2>) – P<Y> (<ARTICLE_PATH>:<Ly1-Ly2>)
 
 **Mappa dei concetti unitari:**
-- P<X>: <concept>
-- P<Y>: <concept>
+- P<X> (<Lx1-Lx2>): <concept>
+- P<Y> (<Ly1-Ly2>): <concept>
 
 **Confronto con traccia globale:**
-- <how this chapter/section aligns or conflicts with the loaded global trace>
+- <how this chapter aligns or conflicts with the loaded global trace>
 
 **Chiarezza e coerenza:**
 - Tesi/funzione del capitolo: <clear|partly clear|unclear> — <reason>
@@ -291,7 +310,7 @@ for a transition, one point for a paragraph split, one point for section order).
 
 Criteria:
 
-- The chapter/section should have a clear internal function in the article.
+- The chapter should have a clear internal function in the article.
 - Paragraphs should progress in a recognizable order, not merely accumulate.
 - Each paragraph's unitary concept should be distinct from adjacent paragraphs.
 - If two adjacent paragraphs share the same concept, propose merging or sharpening
@@ -299,15 +318,16 @@ Criteria:
 - If one paragraph carries two autonomous concepts, return to that paragraph and
   propose a split before advancing.
 - If the user names a deferred issue but does not apply it immediately, record it
-  in the freeze ledger with `log-comment` for the relevant paragraph or section.
+  in the freeze ledger with `log-comment` for the relevant paragraph or chapter.
 
 ## 7. Edge Cases
 
 - **Skip paragraph.** If the user says `salta` or `skip`, mark the paragraph as `Skipped` and advance.
 - **Handoff / pause.** If the user says `pause`, `stop`, `sospendi`,
   `interrompi`, or `/r-handoff`, call `workflow/06-handoff.md`: record the
-  current paragraph, chapter/section recap status, active global trace, pending
-  proposal, and exact next action. Do not run closure or sync.
+  current paragraph with full chapter + line-range locator, chapter recap
+  status, active global trace, pending proposal, and exact next action. Do not
+  run closure or sync.
 - **Go back.** `torna a P<N>` — jump to a specific paragraph and re-run diagnostics.
 - **Empty paragraph.** If a paragraph is truly empty or contains only whitespace, skip it silently (do not number it).
 - **Very long paragraph.** If a paragraph exceeds ~2000 chars, warn: *"Questo paragrafo è molto lungo (X caratteri). Vuoi trattarlo come unico o suddividerlo?"*

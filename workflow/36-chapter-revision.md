@@ -1,13 +1,15 @@
 # 36 — Chapter / Section Revision
 
-Triggered by `/r-chapter`. Revises a single section of the article in full
-awareness of the rest of the text: terminology, cross-references, argument
-thread, redundancy, section interfaces, and norms compliance.
+Triggered by `/r-chapter`. Revises a single numbered chapter, or a section
+inside a chapter if explicitly selected, in full awareness of the rest of the
+text: terminology, cross-references, argument thread, redundancy, section
+interfaces, and norms compliance.
 
 This mode differs from `/r-global` (no sentence-level edits; operates on the
 whole article) and from `/r-pp` (paragraph-level edits with no cross-article
-context): it operates at paragraph depth **on one section** while holding the
-entire article as reference.
+context): it operates at paragraph depth **on one numbered chapter, or on one
+explicitly selected section inside a chapter**, while holding the entire article
+as reference.
 
 ## 0. Entry Point
 
@@ -17,9 +19,9 @@ Invoked by `/r-chapter [§N | section-name]` or phrases like:
 - *"revise chapter 3 in context"*
 - *"chapter revision"*
 
-If a section identifier is provided in the command (e.g. `/r-chapter §3` or
-`/r-chapter introduction`), use it directly. Otherwise show the section list
-(step 2) and ask.
+If a chapter or section identifier is provided in the command (e.g. `/r-chapter 3`,
+`/r-chapter §3`, or `/r-chapter introduction`), use it directly. Otherwise show
+the chapter list (step 2) and ask.
 
 ## 1. Bootstrap & Setup
 
@@ -30,27 +32,27 @@ mandatory bump, and create the task file (`workflow/05-task.md` — action
 
 `05-task.md#update-step`: `Select section` → `in-progress`.
 
-## 2. Select Target Section
+## 2. Select Target Chapter/Section
 
 If not already specified:
 
-1. Parse the article. List all `#` and `##` headings with char counts:
+1. Parse the article. List numbered chapters first. A chapter changes when the
+   first number in the heading changes (`1`, `1.1`, `1.2.3` = Capitolo 1;
+   `2` = Capitolo 2). Include line ranges and char counts:
 
    ```
-   §1 — Introduction (820 chars, 4%)
-   §2 — Literature Review (3 120 chars, 15%)
-   §3 — Methodology (2 040 chars, 10%)
-   §4 — Results (4 800 chars, 23%)
-   §5 — Discussion (5 100 chars, 25%)
-   §6 — Conclusion (1 200 chars, 6%)
+   Capitolo 1 — Introduction — articles/current.md:12-96 (3 940 chars, 18%)
+     §1.1 Background — articles/current.md:34-62
+     §1.2 Contribution — articles/current.md:63-96
+   Capitolo 2 — Literature Review — articles/current.md:97-210 (8 200 chars, 31%)
    ```
 
 2. Ask:
 
-   > Quale sezione vuoi revisionare in relazione al resto dell'articolo?
-   > (Indica §N, il titolo, o il numero d'ordine.)
+   > Quale capitolo o sezione vuoi revisionare in relazione al resto dell'articolo?
+   > (Indica Capitolo N, §N, il titolo, o il numero d'ordine.)
 
-3. Wait. Accept `§N`, a heading text substring, or a number.
+3. Wait. Accept `Capitolo N`, `§N`, a heading text substring, or a number.
 
 `05-task.md#update-step`: `Select section` → `done`.
 
@@ -58,10 +60,15 @@ If not already specified:
 
 1. Read the full article into context (skip YAML frontmatter).
 2. Assign:
-   - `TARGET` = the selected section (all paragraphs between its heading and the next same-level heading).
+   - `TARGET` = the selected chapter or section (all paragraphs between its
+     heading and the next same-level heading, or for a chapter, until the first
+     heading whose first number starts the next chapter).
    - `CONTEXT` = everything else.
-3. Compute: `TARGET_CHARS` and `TARGET_PCT` (% of total article chars).
-4. Extract from CONTEXT:
+3. Compute: `TARGET_CHARS`, `TARGET_PCT` (% of total article chars), and
+   `TARGET_LINE_RANGE`.
+4. Build the paragraph locator list for every paragraph in TARGET:
+   `Capitolo <C> — <chapter-title>; Paragrafo P<N> — <ARTICLE_PATH>:<L1-L2>`.
+5. Extract from CONTEXT:
    - **Defined terms**: bold (`**term**`), italics (`*term*`), or explicit "X is defined as" patterns.
    - **Forward/backward cross-references to TARGET**: `§N`, `see section`, `as discussed in`, `as we will show`, etc.
    - **Repeated-content candidates**: paragraphs in CONTEXT with > 40% word overlap with any paragraph in TARGET.
@@ -125,8 +132,8 @@ conceptual overlap).
 ```markdown
 | Paragrafo TARGET | Sovrapposizione con | Tipo | Azione consigliata |
 |---|---|---|---|
-| P12 (sample size) | §6 r.210 | identical | consolidate → §3 only |
-| P7 (framework) | §2 r.88 | partial | shorten P7 |
+| P12 — Capitolo 3 — articles/current.md:145-153 (sample size) | §6 r.210 | identical | consolidate → §3 only |
+| P7 — Capitolo 2 — articles/current.md:98-106 (framework) | §2 r.88 | partial | shorten P7 |
 ```
 
 If no significant redundancy: "Nessuna ridondanza significativa."
@@ -154,9 +161,9 @@ structure (from `EDITORIAL_NORMS_PATH`):
 Present the complete diagnostic in chat:
 
 ```
-## Revisione Capitolo — §N <title>
+## Revisione Capitolo — Capitolo <C> <title>
 
-Sezione target: <path>:<line-range>  (<N> chars, <X>% of article)
+Target: <path>:<line-range>  (<N> chars, <X>% of article)
 
 ### Dim 1 — Terminologia
 <table>
@@ -197,7 +204,8 @@ For each selected dimension, generate revision points following the standard
 decision interaction pattern from `SKILL.md` § "Interaction pattern (binding)".
 
 Each point must:
-- Identify the specific paragraph(s) in TARGET to change.
+- Identify the specific paragraph(s) in TARGET to change with full locator:
+  `Capitolo <C> — <chapter title>; Paragrafo P<N> — <ARTICLE_PATH>:<L1-L2>`.
 - Reference the cross-article evidence that motivates the change
   (e.g. «termine "X" definito come Y in §2, usato come Z qui»).
 - Apply changes using `Edit` (surgical) or `replace_all` for global renames.

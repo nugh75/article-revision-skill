@@ -104,6 +104,12 @@ In Claude Code, invoke the skill explicitly or let it auto-trigger:
 /article-revision
 ```
 
+For the recommended full path:
+
+```
+/r-guide
+```
+
 Or implicitly:
 
 > *"Apply Elisa's comments to the article."*
@@ -216,7 +222,8 @@ content and enforce these layout rules:
 - **User controls git.** The skill never commits, stages, or pushes on proposal acceptance. Handoff is the exception: it creates a scoped checkpoint commit with a clear message and still never pushes.
 - **Always ask before creating.** Bootstrap, version bump, file generation — every write step asks for confirmation when ambiguous.
 - **Per-point granularity.** No mass replacements, no batched approvals. Every individual change goes through *Accetta / Modifica / Rivedi completamente / Tieni in considerazione*.
-- **State lives in markdown.** The project file, task file, and handoff checkpoint are the source of truth; sessions resume cleanly after interruption without a new bump.
+- **Paragraphs are anchored.** Every paragraph reference includes chapter and exact Markdown line range; chapters follow the first number of numbered headings.
+- **State lives in markdown.** The project file, task file, decision log, current-file sync, and handoff checkpoint are the source of truth; sessions resume cleanly after interruption without a new bump.
 - **Surgical edits only.** Touch what the reviewer's point requires, nothing more.
 
 ---

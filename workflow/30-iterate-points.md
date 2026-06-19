@@ -20,6 +20,15 @@ Read the relevant section(s) of the article. Identify the exact lines that the c
 - **paragraph**: the smallest coherent block (one paragraph or one numbered subsection);
 - **whole article**: walk every section, generating proposals one at a time. Never produce a single mass-replacement.
 
+When the target is or includes a paragraph, compute the full locator before
+generating the proposal:
+
+`Capitolo <C> — <chapter title>; Paragrafo P<N> — <ARTICLE_PATH>:<L1-L2>`
+
+Use the chapter rule in `SKILL.md#paragraph-and-chapter-locators-binding`: the
+first numeric component of the numbered heading determines the chapter. Keep any
+nearest subsection as additional context, but do not call it a chapter.
+
 If the change involves a citation, run `40-bibliography-check.md` for the relevant key first.
 
 If the change requires sample-description data, run `50-sample-description.md` first.
@@ -63,6 +72,8 @@ Each subsequent `Accetta` / `Modifica` / `Rivedi completamente` /
 
 ```text
 ## Point N — <short title> · scope: <fragment|paragraph|whole article>
+
+**Unità**: <Capitolo C — title; Paragrafo P<N> — article:line-range> <!-- required for paragraph scope -->
 
 **Original** (`<article>:<line-range>`)
 > <verbatim text>

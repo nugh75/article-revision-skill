@@ -41,7 +41,7 @@ status: in-progress
 - **Articolo di lavoro**: `{{ARTICLE_PATH}}`
 - **Versione di lavoro**: `{{BUMPED_VERSION}}`
 - **Fase corrente**: —
-- **Unità corrente**: —
+- **Unità corrente**: — <!-- if paragraph: Capitolo C — title; P<N> — ARTICLE_PATH:L1-L2 -->
 - **Ultima proposta mostrata**: —
 - **Decisioni già prese**: —
 - **Decisioni pendenti**: —

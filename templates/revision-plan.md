@@ -51,6 +51,8 @@ Allowed decision states:
 
 **Proposal**
 
+Unità: {{UNIT_LOCATOR}} <!-- if paragraph: Capitolo C — title; P<N> — FILE:L1-L2 -->
+
 Original (`{{FILE}}:{{LINES}}`):
 > {{ORIGINAL_TEXT}}
 

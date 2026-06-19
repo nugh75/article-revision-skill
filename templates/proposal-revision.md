@@ -5,6 +5,7 @@
 - **Version**: `{{ARTICLE_VERSION}}`
 - **Reviewer / lane**: `{{REVIEWER}}`
 - **Scope**: `{{SCOPE}}`
+- **Unit locator**: {{UNIT_LOCATOR}} <!-- if paragraph: Capitolo C — title; P<N> — FILE:L1-L2 -->
 - **Status**: `proposed`
 
 ## Original

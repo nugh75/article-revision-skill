@@ -9,7 +9,7 @@ The two files (`AGENTS.md` and `OPENCODE.md`) carry the same workflow. Edit one 
 | Command | Description |
 |---|---|
 | `/article-revision` | Full revision workflow from reviewer feedback |
-| `/r-pp` | Revisione Paragrafo per Paragrafo — optional global trace + unitary concept + 4 diagnostic questions per paragraph; recap at chapter/section boundaries |
+| `/r-pp` | Revisione Paragrafo per Paragrafo — optional global trace + unitary concept + 4 diagnostic questions per paragraph; line ranges + recap at chapter boundaries |
 | `/r-pp-a` | Revisione Paragrafo per Paragrafo Approfondita — optional global trace + 6-layer deep diagnostic, including unitary-concept control |
 | `/r-pr-2` | Dual Peer Reviewer — generate standalone reports + synthesis in `revisions/` (no interactive decision loop) |
 | `/r-conn` | Connector revision: transitions, signposting, overused connectors |
@@ -17,18 +17,19 @@ The two files (`AGENTS.md` and `OPENCODE.md`) carry the same workflow. Edit one 
 | `/r-freeze` | Freeze a concluded part in the per-article freeze ledger (advisory) |
 | `/r-thaw` | Reopen a frozen part so it can be revised without the warning |
 | `/r-status` | Print the frozen (🟢) vs open (🟡) snapshot from the freeze ledger |
-| `/r-handoff` | Write a resumable checkpoint and commit the handoff state without closing the revision round |
+| `/r-handoff` | Write checkpoint, decision log, current-file sync, and scoped commit without closing the revision round |
 | `/r-resume` | Resume from a paused task file without a new version bump |
 | `/r-bump` | Bump article version (vN → vN+1) |
 | `/r-sheet` | Generate final revision sheet |
+| `/r-guide` | Recommended full revision path (read-only, no bump) |
 | `/r-help` | Reference card of every command + decision shortcuts (read-only, no bump) |
 
 Revision commands enforce the mandatory session-start bump (`10-setup.md` step 5).
-The read-only commands `/r-help` and `/r-status`, the ledger-only commands
+The read-only commands `/r-guide`, `/r-help`, and `/r-status`, the ledger-only commands
 `/r-freeze` / `/r-thaw`, and `/r-resume` from a paused task do **not** trigger a bump.
 `pause`, `stop`, `sospendi`, and `/r-handoff` write a checkpoint and create a
-scoped handoff commit; they do not run the closure sequence, push, or sync
-current files.
+decision-log checkpoint, sync current files, and create a scoped handoff commit;
+they do not run the closure sequence or push.
 The freeze ledger (`workflow/15-freeze-ledger.md`) is checked before every
 proposal: a frozen part triggers a warning + explicit confirmation before editing.
 
@@ -37,6 +38,7 @@ Commands are registered in the project's `opencode.json` under `"command"`.
 For the complete workflow, see `AGENTS.md` in this repository. The same rules apply in opencode, including:
 
 - user-controlled git operations, with the mandatory scoped commit on handoff;
+- paragraph references always include chapter and exact Markdown line range;
 - per-point `Accetta / Modifica / Rivedi completamente / Tieni in considerazione` decisions;
 - resumable handoff checkpoints via `workflow/06-handoff.md`;
 - English workflow prompts and templates;

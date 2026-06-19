@@ -1,9 +1,9 @@
 # 06 — Handoff / Resume
 
-Creates a resumable checkpoint for an unfinished revision session, then commits
-that checkpoint and the session files changed so far. This is not revision
-closure: it does not run `95-decision-log.md`, does not sync current files, does
-not push, and does not mark the round complete.
+Creates a resumable checkpoint for an unfinished revision session, records that
+checkpoint in the decision log, syncs current files, then commits the handoff
+state. This is not revision closure: it does not close the task file, does not
+push, and does not mark the round complete.
 
 ## When to invoke
 
@@ -41,7 +41,7 @@ Update the task file:
    - **Articolo di lavoro**: <ARTICLE_PATH>
    - **Versione di lavoro**: <BUMPED_VERSION>
    - **Fase corrente**: <workflow step name>
-   - **Unità corrente**: <point id | P<N> | §N | lens | transition group>
+   - **Unità corrente**: <point id | Capitolo C — title; P<N> — ARTICLE_PATH:L1-L2 | §N | lens | transition group>
    - **Ultima proposta mostrata**: <none|sidecar path|short title>
    - **Decisioni già prese**: <brief counts and statuses>
    - **Decisioni pendenti**: <exact item numbers/categories still open>
@@ -57,9 +57,25 @@ Update the task file:
    ledger via `15-freeze-ledger.md#log-comment`; never leave deferred intentions
    only in the task file.
 
-## 2. Handoff Commit
+## 2. Decision Log + Sync
 
-After the checkpoint is written, create a git commit for the handoff state.
+After the checkpoint is written, run:
+
+1. `workflow/95-decision-log.md` with `mode=handoff`.
+2. `workflow/96-sync-current.md` via that decision-log workflow with
+   `SYNC_MODE=handoff`.
+
+The decision-log entry must use type `handoff-checkpoint`, decision `paused`,
+and include the exact `## Handoff / Ripresa` fields, especially pending
+decisions and `Prossima azione esatta`.
+
+This checkpoint log and sync are mandatory on every handoff. They do not replace
+the final closure decision log and final closure sync.
+
+## 3. Handoff Commit
+
+After the checkpoint, decision-log entry, and sync are written, create a git
+commit for the handoff state.
 
 1. From the project root, inspect the worktree:
 
@@ -75,7 +91,10 @@ After the checkpoint is written, create a git commit for the handoff state.
    - the freeze ledger;
    - proposal sidecar files, approval files, bibliography files, data-audit
      outputs, redline outputs, or source traces explicitly listed in
-     `File modificati finora` or changed by the current session.
+     `File modificati finora` or changed by the current session;
+   - the new decision-log session file and updated decision-log index;
+   - synced current files (`articles/current.md`, `articles/current.docx`,
+     `bibliography/bibliography.docx`) when generated or changed.
 
    Leave unrelated user changes unstaged and mention them in chat. If the repo
    provides a commit helper script, use it only if it preserves this same scoped
@@ -101,13 +120,15 @@ After the checkpoint is written, create a git commit for the handoff state.
 5. Handoff never pushes. `gh` may be used for repository inspection if useful,
    but pushing or opening a PR is out of scope for handoff.
 
-## 3. Chat Output
+## 4. Chat Output
 
 Output a concise handoff block:
 
 ```text
 Handoff scritto e commit creato.
 - Task file: <TASK_FILE_PATH>
+- Decision log: <session-NNN>
+- Sync current: <ok|warnings>
 - Commit: <short-hash> <subject>
 - Stato: paused
 - Ripresa: <Prossima azione esatta>
@@ -128,7 +149,7 @@ If unrelated changes were intentionally left unstaged, add:
 Non inclusi nel commit di handoff: <files>
 ```
 
-## 4. Resume From Handoff
+## 5. Resume From Handoff
 
 When the user asks to resume (`riprendi`, `resume`, `continua`, `/r-resume`, or
 re-invokes the same command in a project with a paused task file):
@@ -159,12 +180,12 @@ re-invokes the same command in a project with a paused task file):
    ambiguous, ask one clarifying question and keep the task paused until the user
    answers.
 
-## 5. Hard Rules
+## 6. Hard Rules
 
 - Handoff never replaces the mandatory closure sequence. When the user later
   closes the round, still run `95-decision-log.md` and `96-sync-current.md`.
-- Handoff must commit the checkpoint state with a clear message, but it never
-  pushes or syncs current files.
+- Handoff must write a decision-log checkpoint, sync current files, and commit
+  the checkpoint state with a clear message, but it never pushes.
 - Handoff stages only active-session files. Never include unrelated user changes
   in the handoff commit.
 - Handoff never silently discards a pending proposal. Record pending item numbers,

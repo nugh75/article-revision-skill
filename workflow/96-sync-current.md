@@ -5,7 +5,8 @@ collaborators and external tools always see a single stable pointer to the
 latest revision state.
 
 This step is called by `95-decision-log.md` immediately after the session
-entry is written. It runs even when no changes were accepted this round.
+entry is written. It runs in both `closure` mode and `handoff` mode, even when
+no changes were accepted this round.
 
 ## Files produced / overwritten
 
@@ -72,11 +73,18 @@ bibliography.docx → bibliography/bibliography.docx ✓ (<entry-count> entries)
 
 ## 5. Update Task File
 
-Call `workflow/05-task.md#update-step`: `Sync current files` → `done`.
+If `SYNC_MODE=closure`, call `workflow/05-task.md#update-step`:
+`Sync current files` → `done`.
+
+If `SYNC_MODE=handoff`, call `workflow/05-task.md#update-step`:
+`Handoff checkpoint` → `paused` with note `decision log + current files synced`;
+do not mark final `Sync current files` as done.
 
 ## 6. Final Confirmation
 
-Output a single summary line in chat:
+Output a single summary line in chat.
+
+For `closure`:
 
 ```
 Chiusura completata.
@@ -88,3 +96,16 @@ Chiusura completata.
 ```
 
 The revision session is now fully closed.
+
+For `handoff`:
+
+```
+Handoff sincronizzato.
+- articles/current.md            ✓
+- articles/current.docx          ✓ (or ⚠ pandoc missing)
+- bibliography/bibliography.docx ✓ (or ⚠ see above)
+- Decision log: session-NNN      ✓
+- Task file: <TASK_FILE_PATH>    paused
+```
+
+The revision session remains paused and resumable.
