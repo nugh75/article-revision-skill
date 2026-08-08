@@ -19,6 +19,10 @@ PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 ARTICLES_DIR="$(dirname "$ARTICLE")"
 BIB_DIR="$(dirname "$BIB")"
 
+# The bibliography lives at <project>/bibliography/, so the project root is
+# the parent of the bibliography directory.
+PROJECT_ROOT="$(cd "$BIB_DIR/.." && pwd)"
+
 CURRENT_MD="$ARTICLES_DIR/current.md"
 CURRENT_DOCX="$ARTICLES_DIR/current.docx"
 BIB_DOCX="$BIB_DIR/bibliography.docx"
@@ -122,4 +126,21 @@ MDEOF
   else
     echo "⚠ bibliography.docx generato ma sembra vuoto — controlla $BIB e lo stile CSL"
   fi
+fi
+
+# --- 4. bibliography.md + bibliography.csv ---
+GEN_SCRIPT="$PROJECT_ROOT/bibliography/generate_lists.py"
+if [[ -f "$GEN_SCRIPT" ]]; then
+  PYTHON_BIN="${PYTHON_BIN:-$PROJECT_ROOT/.venv/bin/python}"
+  if [[ -x "$PYTHON_BIN" ]]; then
+    if BIBLIOGRAPHY_BIB_PATH="$BIB" "$PYTHON_BIN" "$GEN_SCRIPT"; then
+      echo "✓ bibliography.md + bibliography.csv rigenerati da reference.bib"
+    else
+      echo "⚠ generate_lists.py fallito — bibliography.md/.csv non aggiornati"
+    fi
+  else
+    echo "⚠ $PYTHON_BIN non trovato — bibliography.md/.csv non rigenerati"
+  fi
+else
+  echo "⚠ $GEN_SCRIPT non trovato — bibliography.md/.csv non rigenerati"
 fi
