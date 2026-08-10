@@ -23,6 +23,14 @@ BIB_DIR="$(dirname "$BIB")"
 # the parent of the bibliography directory.
 PROJECT_ROOT="$(cd "$BIB_DIR/.." && pwd)"
 
+# current.md / current.docx must ALWAYS live in the articles ROOT, never
+# inside a `versions/` snapshot subdir. If the active article is under
+# `<articles>/versions/`, strip that segment so the "current" files are not
+# duplicated into the snapshot folder (regression guard).
+if [[ "$(basename "$ARTICLES_DIR")" == "versions" ]]; then
+    ARTICLES_DIR="$(dirname "$ARTICLES_DIR")"
+fi
+
 CURRENT_MD="$ARTICLES_DIR/current.md"
 CURRENT_DOCX="$ARTICLES_DIR/current.docx"
 BIB_DOCX="$BIB_DIR/bibliography.docx"

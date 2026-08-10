@@ -16,6 +16,12 @@ no changes were accepted this round.
 | `articles/current.docx` | Pandoc conversion of `current.md` | `articles/` |
 | `bibliography/bibliography.docx` | Formatted reference list from `reference.bib` | `bibliography/` |
 
+> **Invariant:** the `current.*` files always live at the articles ROOT
+> (e.g. `articles/`), **never** inside a `versions/` snapshot subdirectory.
+> `sync_current.sh` enforces this by stripping any trailing `versions/`
+> segment from the source article path, so snapshot folders never accumulate
+> duplicate `current.*` files.
+
 ## 1. Identify Sources
 
 From working memory:

@@ -33,7 +33,9 @@ Hold this in working memory for the session.
 
 ## 3. Identify Active Article
 
-Look for `articles/article-v*-*.md`. If multiple versions exist, pick the one with the highest `vN`.
+Look for `articles/article-v*-*.md` (snapshots may live in an
+`articles/versions/` subdirectory — include it in the search). If multiple
+versions exist, pick the one with the highest `vN`.
 
 If the chosen filename contains `-drive`, treat that marker as provenance only: it means the file was downloaded from Google Drive. Keep the file as the active source, but do not propagate `-drive` when creating the bumped version.
 
