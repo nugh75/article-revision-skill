@@ -136,6 +136,11 @@ This step is **not optional** in either mode. It overwrites:
 - `articles/current.docx` — pandoc conversion of `current.md`
 - `bibliography/bibliography.docx` — formatted reference list from `reference.bib`
 
+The `current.*` files are always written to the articles ROOT (`articles/`),
+never inside `articles/versions/`. `sync_current.sh` strips any trailing
+`versions/` segment from the source article path, so snapshot folders do not
+accumulate duplicate `current.*` files.
+
 If pandoc is not available, interactive `closure`/`handoff` warns and may skip
 `.docx`. `auto-closure` instead fails and cannot close successfully.
 

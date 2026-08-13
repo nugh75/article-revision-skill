@@ -20,6 +20,12 @@ Pandoc warning used by interactive closure does not apply.
 | `articles/current.docx` | Pandoc conversion of `current.md` | `articles/` |
 | `bibliography/bibliography.docx` | Formatted reference list from `reference.bib` | `bibliography/` |
 
+> **Invariant:** the `current.*` files always live at the articles ROOT
+> (e.g. `articles/`), **never** inside a `versions/` snapshot subdirectory.
+> `sync_current.sh` enforces this by stripping any trailing `versions/`
+> segment from the source article path, so snapshot folders never accumulate
+> duplicate `current.*` files.
+
 ## 1. Identify Sources
 
 From working memory:
@@ -44,7 +50,7 @@ current.md → articles/current.md ✓
 Run `scripts/sync_current.sh` which calls pandoc:
 
 ```bash
-bash scripts/sync_current.sh "$ARTICLE_PATH" "$BIBLIOGRAPHY_BIB_PATH"
+SYNC_MODE="$SYNC_MODE" bash scripts/sync_current.sh "$ARTICLE_PATH" "$BIBLIOGRAPHY_BIB_PATH"
 ```
 
 If pandoc is not installed, warn and skip (do not abort the closure):

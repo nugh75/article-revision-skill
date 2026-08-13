@@ -396,6 +396,13 @@ ledger only — never the article and never the repository state.
         └── session-NNN.md
 ```
 
+Version snapshots may be kept in an `articles/versions/` subdirectory (as in
+some projects) instead of directly under `articles/`. Whatever the layout,
+`current.md` and `current.docx` always live at the articles ROOT (e.g.
+`articles/`), never inside `articles/versions/`: `sync_current.sh` strips any
+trailing `versions/` segment from the source article path, so snapshot folders
+never accumulate duplicate `current.*` files.
+
 If any of these is missing, the skill asks the user to confirm an
 alternative path or to create it. Never invent paths silently.
 
