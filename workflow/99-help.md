@@ -23,6 +23,14 @@ names verbatim.
   /r-global           Globale — 7 lenti; può salvare traccia per /r-pp
   /r-chapter [§N]     Capitolo — una sezione nel contesto dell'intero articolo
 
+## Revisione automatica delimitata
+  /r-auto <task> --scope "<scope>" [--agents N]
+                      Task: chiarezza, stile, connettori, terminologia,
+                      citazioni, argomentazione (anche combinati)
+                      Subagent propongono; coordinatore applica; audit indipendente;
+                      final sheet + decision log + sync automatici su PASS
+  Esempio: /r-auto chiarezza,argomentazione --scope "PARTE II" --agents 3
+
 ## Diagnostica senza ciclo decisionale (genera documenti)
   /r-pr-2             Due peer reviewer simulati + sintesi → revisions/<slug>/
 
@@ -64,6 +72,7 @@ names verbatim.
   • Ogni paragrafo indicato porta capitolo + righe Markdown inizio-fine.
   • Parte congelata = avviso prima di toccarla, serve "sì, procedi".
   • Dati numerici ri-derivati dalla fonte, mai ereditati.
+  • /r-auto non autorizza tagli, riordini, nuovi claim, commit o push.
   • Norme editoriali > preferenze: i conflitti emergono in chat.
 ```
 

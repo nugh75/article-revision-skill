@@ -10,8 +10,10 @@ compatible with the `decision-log` skill.
 |---|---|---|
 | `closure` | explicit/natural revision closure | close the task file, write a final session entry, then sync current files |
 | `handoff` | `workflow/06-handoff.md` | write a checkpoint session entry, then sync current files without closing the task |
+| `auto-closure` | successful `/r-auto` audit | write the final session, run strict sync, then close the task file |
 
-Default to `closure` unless the caller explicitly says `mode=handoff`.
+Default to `closure` unless the caller explicitly says `mode=handoff` or
+`mode=auto-closure`.
 
 ## 0. Close Task File
 
@@ -28,6 +30,11 @@ In `handoff` mode, do **not** call `workflow/05-task.md#close` and do not mark
 the round complete. Read the current `## Handoff / Ripresa` section from
 `TASK_FILE_PATH` and use it as the checkpoint summary.
 
+In `auto-closure` mode, do not close the task here. Reserve the next session
+identifier, write the log and run strict sync first, then close the task in
+step 7. This keeps pending `Decision log` and `Sync current files` rows from
+being prematurely marked `skipped`.
+
 ## 1. Inputs
 
 Read:
@@ -38,6 +45,12 @@ Read:
 - any `proposal-revision-YYYY-MM-DD-HHMM.md` files created during the round;
 - in `handoff` mode: the current `## Handoff / Ripresa` checkpoint;
 - the latest `revisions/decision-log/index.md` and most recent session file.
+
+For `/r-auto`, use the auto-scope manifest, worker reports, independent audit,
+task-file counters, and final sheet instead of a revision-plan file. Treat the
+source as `simulated` internal QA. Map automatically integrated proposals to
+`accepted`, user-resolved reformulations to `modified`, and explicitly deferred
+items to `deferred`. Never describe them as journal feedback or human approval.
 
 ## 2. Determine Session Metadata
 
@@ -103,6 +116,7 @@ decision, and the short suggestion text.
 This workflow is mandatory:
 
 - at the end of every revision round (`closure` mode);
+- after a passing `/r-auto` audit (`auto-closure` mode);
 - at every handoff (`handoff` mode).
 
 In `closure` mode, the round is not considered closed until the decision log
@@ -113,19 +127,34 @@ entry and sync; the handoff is not complete until both are done.
 
 ## 6. Sync Current Files (mandatory)
 
-Immediately after writing the session entry and updating `index.md`, run
-`workflow/96-sync-current.md` with the same mode (`closure` or `handoff`).
+Immediately after writing the session entry and updating `index.md`, mark the
+task row `Decision log` as `done`, then run `workflow/96-sync-current.md` with
+the same mode (`closure`, `handoff`, or `auto-closure`).
 
 This step is **not optional** in either mode. It overwrites:
 - `articles/current.md` — copy of the active article version
 - `articles/current.docx` — pandoc conversion of `current.md`
 - `bibliography/bibliography.docx` — formatted reference list from `reference.bib`
 
-If pandoc is not available, `96-sync-current.md` warns and skips `.docx`
-generation without aborting the closure.
+If pandoc is not available, interactive `closure`/`handoff` warns and may skip
+`.docx`. `auto-closure` instead fails and cannot close successfully.
 
 In `closure` mode, add the sync result to the task file step `Sync current
 files` via `workflow/05-task.md#update-step`.
 
 In `handoff` mode, add the sync result to the task file step `Handoff
 checkpoint` as a note; leave `Sync current files` available for final closure.
+
+## 7. Finish Strict Auto-Closure
+
+In `auto-closure` mode only:
+
+1. Require `96-sync-current.md` to return `PASS`, including both DOCX
+   extracted-text checks.
+2. Mark `Sync current files` as `done` only on that `PASS`.
+3. Call `workflow/05-task.md#close`, passing the reserved session identifier.
+4. Confirm task frontmatter is `completed`, not `partial` or `failed`.
+5. Only now print the successful closure summary.
+
+On failure, leave the task `in-progress` or `partial`, mark the exact step
+`failed`, and do not print `Chiusura completata`.

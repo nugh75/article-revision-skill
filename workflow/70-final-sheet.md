@@ -11,6 +11,12 @@ Read:
 - `bibliography-audit-vN.md` if any bibliography check happened;
 - the current char/word count.
 
+For `/r-auto`, use the auto-scope manifest, worker reports, independent audit,
+and task-file counters in place of `revision-plan-vN.md`. Set
+`FEEDBACK_SOURCE=simulated` because this is internal machine-led QA, and list
+deferred/stopped items from those artifacts. Do not require or synthesize a
+revision-plan file.
+
 ## 1a. Read Feedback Provenance
 
 Read `{{FEEDBACK_SOURCE}}` from the project file's *Summary Status* (`journal` or `simulated`). It governs how the sheet is split:
@@ -91,5 +97,10 @@ Round closed. Summary:
 - bibliography: <status>
 - outstanding tasks: <short list>
 ```
+
+For `/r-auto`, do not print `Round closed` here and do not end the workflow.
+Print only the final-sheet path and return control to
+`37-scoped-auto-revision.md`; closure is reported only after decision log,
+strict sync, extracted-text verification, and task close succeed.
 
 The skill ends here. The next round starts a new project file with version vN+1, or the same N+1 if the user prefers continuing.

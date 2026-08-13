@@ -4,12 +4,12 @@ description: |
   Coordinate iterative revision of a scientific article in markdown. Trigger
   when the user asks to apply reviewer feedback ("revise article",
   "apply reviewer X comments", "let's process the reviewer comments"),
-  to bump the article to a new version, pause/resume an in-progress revision
-  via `/r-handoff` or `/r-resume`, asks for the recommended path via
-  `/r-guide`, or invokes `/article-revision` explicitly.
+  to bump a version, pause/resume via `/r-handoff` or `/r-resume`, request the
+  recommended path via `/r-guide`, run a scope-bounded revision with `/r-auto`,
+  or invoke `/article-revision` explicitly.
   Skill assumes a project layout with `articles/`, `bibliography/
   reference.bib`, `editorial-norms/`, `revisions/`, and an `.env` file.
-  For each reviewer point: shows original text + proposed change in chat,
+  For each reviewer point: shows original + proposal in chat,
   asks Accetta / Modifica / Rivedi completamente / Tieni in considerazione,
   and applies on Accetta without committing.
   Auto-detects article language (it/en) and adapts
@@ -34,6 +34,7 @@ bibliography skills around a structured revision workflow.
 | `/r-pr-2` | **Revisione Due Peer Reviewer** — simulate two independent peer reviewers; generate Standalone reviewer documents in `revisions/<article-slug>/` without interactive decision loop; the documents feed subsequent revision passes |
 | `/r-conn` | **Revisione Connettori** — analyse and polish logical connectors, transitions, and signposting between paragraphs and sections |
 | `/r-global` | **Revisione Globale** — high-level, non-granular revision: overall structure, argument coherence, section proportionality, redundancy, terminology consistency; can also save a global trace for `/r-pp` |
+| `/r-auto <task> --scope "<scope>" [--agents N]` | **Automode delimitato** — proposal-only subagents, coordinator integration, independent audit, then automatic technical closure (`workflow/37-scoped-auto-revision.md`) |
 | `/r-freeze` | **Congela** una parte conclusa (paragrafo/sezione/frammento) nel freeze ledger; in seguito la skill avvisa prima di toccarla (`workflow/15-freeze-ledger.md`) |
 | `/r-thaw` | **Scongela** una parte congelata: torna modificabile senza avviso (`workflow/15-freeze-ledger.md`) |
 | `/r-status` | **Stato revisione** — mappa di cosa è concluso (🟢 frozen) e cosa richiede intervento (🟡 open), dal freeze ledger (`workflow/15-freeze-ledger.md`) |
@@ -490,6 +491,11 @@ Optional:
    single section at paragraph depth while checking it against the rest of the
    article across six cross-article dimensions: terminology, cross-references,
    section interfaces, redundancy, argument thread, norms compliance.
+4f. `workflow/37-scoped-auto-revision.md` — triggered by `/r-auto`. Requires a
+   named task and immutable scope manifest; delegates non-overlapping,
+   proposal-only work to subagents, integrates eligible patches through the
+   coordinator, runs an independent semantic/scope audit, and performs
+   automatic technical closure on success.
 5. `workflow/40-bibliography-check.md` — when a citation is touched or new
    keys are introduced.
 6. `workflow/50-sample-description.md` — when the methodology asks for a
@@ -634,39 +640,35 @@ Optional shortcuts remain accepted for speed:
 
 ### Auto-mode
 
-Auto-mode must be **explicitly requested** by the user (e.g. "attiva auto-mode", "automatico", "continua senza chiedere"). It is **never** the default.
+Auto-mode is never inferred. Activate it only through `/r-auto` or an equally
+explicit request that names both a task and a bounded scope. Follow
+`workflow/37-scoped-auto-revision.md`.
 
-When auto-mode is active:
+Supported tasks are `chiarezza`, `stile`, `connettori`, `terminologia`,
+`citazioni`, `argomentazione`, and comma-separated combinations. Resolve the
+scope to exact paragraph IDs/ranges, a heading-bounded section/chapter/Part, or
+`intero articolo`; record an immutable line and paragraph manifest before work.
 
-1. The skill runs the same diagnostic and proposal cycle for each paragraph.
-2. Each modification is **presented in chat** using the standard format above.
-3. After presenting, the skill **automatically applies** the modification (implicit `Accetta`) and advances to the next.
-4. The skill **never waits** for user input between paragraphs.
-5. Only the following cases require pausing and asking the user:
-   - Ambiguous or conflicting information that cannot be resolved from context
-   - A modification with `risk: high` (structural change, potential loss of content)
-   - A modification that requires a decision between two valid alternatives
-   - End of chapter or end of article (report summary, then ask whether to
-     continue or write a handoff checkpoint)
-6. At the end of each chapter, output the chapter recap from
-   `workflow/31-paragraph-by-paragraph.md`: unitary-concept map, organization,
-   coherence, transitions, redundancies, and any issue to address before
-   advancing. Include the auto-mode counts in that recap:
+Subagents are proposal-only: they never edit the article or any project file.
+The coordinator alone applies eligible patches in source order. A fresh,
+independent subagent audits the integrated result against the pre-edit snapshot.
 
-```
-[Auto-mode] §<N> completato: X modifiche applicate, Y saltate. Recap: <clear|issues>.
-```
+Within the manifest, `/r-auto` authorizes low- and medium-risk edits required by
+the selected tasks, including argumentative clarification that preserves the
+existing thesis, evidence, citations, epistemic strength, examples, and section
+order. It does not authorize new claims, fabricated support, cuts, paragraph or
+section moves, global renumbering, choices between valid interpretations, or
+edits outside scope. These are stop conditions.
 
-7. At the end of the full revision, output a final summary:
+A complete `/r-auto` invocation also authorizes the mandatory session-start
+version bump, task/report files, and automatic technical closure: final sheet,
+decision log, `current.md`, `current.docx`, and `bibliography.docx`. Do not ask
+again at the end. Closure never authorizes a commit, push, Drive sync, redline,
+or colleague approval. On audit or export failure, stop with the task open or
+partial; never report closure as successful.
 
-```
-[Auto-mode] Revisione completata: N sezioni, M modifiche applicate, K saltate.
-```
-
-To **deactivate** auto-mode without suspending the round, the user says
-"manual", "manuale", or "ferma auto-mode". The skill resumes the standard
-interactive decision pattern from the current paragraph. If the user simply says
-`stop`, `pause`, or `sospendi`, treat it as `workflow/06-handoff.md`.
+`manual`, `ferma auto-mode`, `pause`, `stop`, or `sospendi` ends automatic
+execution and routes through `workflow/06-handoff.md`.
 
 ### After applying changes
 
@@ -769,12 +771,16 @@ closure and uses `workflow/06-handoff.md`.
    - `/r-conn`: all selected transitions and overused connectors fixed.
    - `/r-global`: all selected lenses have produced and received explicit decisions, or the user saved the seven-lens report as a trace for `/r-pp`.
    - `/r-chapter`: all selected cross-article dimensions fixed.
+   - `/r-auto`: every manifest unit is applied, unchanged, or explicitly
+     deferred, no stop condition awaits the user, and the independent audit
+     passes. This mode proceeds directly to its authorized automatic technical
+     closure.
 
 2. **Chiusura esplicita** — user sends a closure phrase:
    - IT: `chiudi`, `fine`, `ho finito`, `concludi`, `basta così`, `chiudiamo`
    - EN: `close`, `done`, `finish`, `end`, `I'm done`
 
-**Mandatory closure sequence (always the same):**
+**Mandatory closure sequence (interactive modes):**
 
 1. Present session summary (items processed, accepted/modified/fully revised/deferred, Δ chars, active version).
 2. Ask: *"Procedo con la chiusura? (sì / sì senza final sheet / annulla)"*
@@ -784,6 +790,8 @@ closure and uses `workflow/06-handoff.md`.
 
 Never advance to the closure sequence without user confirmation. Never skip
 `95-decision-log.md` or `96-sync-current.md` once closure is confirmed.
+Exception: a fully specified `/r-auto` invocation is prior confirmation for the
+technical closure defined in `workflow/37-scoped-auto-revision.md`.
 
 ## Handoff and Resume
 
@@ -816,6 +824,7 @@ point in the workflow:
 | **Connector revision** (`/r-conn`) | `/r-conn` | Non-content pass: examine logical connectors, inter-paragraph transitions, inter-section transitions, signposting. Diagnostic table + selective fix with explicit decisions. |
 | **Global revision** (`/r-global`) | `/r-global` | High-level, non-granular pass through seven lenses (thesis, architecture, proportionality, narrative, redundancy, terminology, norms). Diagnostic report → user either selects lenses for structural decisions or saves a trace for `/r-pp`. |
 | **Chapter revision** (`/r-chapter`) | `/r-chapter [§N]` | Paragraph-depth revision of a single section in full cross-article context. Six diagnostic dimensions: terminology, cross-references, section interfaces, redundancy, argument thread, norms compliance. Explicit decision per point. |
+| **Scoped auto revision** (`/r-auto`) | `/r-auto <task> --scope "<scope>" [--agents N]` | Automatic bounded pass for clarity, style, connectors, terminology, citations, and/or argumentation. Proposal-only subagents, coordinator integration, independent audit, and automatic technical closure. Stops on high-risk or unresolved substantive choices. |
 | **Drive collaboration** (`/r-gdrive`) | `/r-gdrive [create\|push\|sync]` | Create/sync a shared Drive folder; push the revised article + redline; pull colleague feedback into `revisions/<slug>/sources/`. No interactive decision loop — output is a source for later passes. User shares the folder. |
 | **Colleague approval** (`/r-approve`) | `/r-approve` | Gate `Accepted` points behind colleague sign-off (Doc suggestions or `approvals.md`). `approve` → mark approved; `changes` → re-propose via the decision loop; `reject` → ask user (no auto-revert). |
 | **Redline export** (`/r-redline`) | `/r-redline` | Colored old-vs-new `.docx`/`.html` for the reviewer + response-to-reviewers letter. Separate from the clean submission file. No interactive decision loop. |

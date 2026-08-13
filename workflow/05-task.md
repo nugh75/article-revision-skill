@@ -39,10 +39,12 @@ and provides the input summary for `95-decision-log.md`.
 | `/r-conn` | Parse transitions · Diagnose · Fix selected · Handoff checkpoint · Decision log · Sync current files |
 | `/r-global` | Read article · Seven lenses · Save trace or fix selected · Handoff checkpoint · Decision log · Sync current files |
 | `/r-chapter` | Select section · Load article · Cross-article analysis · Fix selected · Handoff checkpoint · Decision log · Sync current files |
+| `/r-auto` | Resolve scope manifest · Delegate proposals · Integrate patches · Independent audit · Bibliography check · Final sheet · Decision log · Sync current files |
 | `/r-redline` | Generate redline · Response letter · Handoff checkpoint · Decision log · Sync current files |
 | `/r-approve` | Load approvals · Apply outcomes · Handoff checkpoint · Decision log · Sync current files |
 
-All initial step statuses: `pending`. Steps 1 and 2 are pre-filled as `done`.
+All command-specific rows in `{{STEPS_ROWS}}` start as `pending`. The fixed
+template rows `Bootstrap & Setup` and `Version bump` are pre-filled as `done`.
 
 **File path**:
 `revisions/<article-slug>/task-<command-slug>-<bumped-version>.md`

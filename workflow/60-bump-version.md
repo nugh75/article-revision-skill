@@ -7,7 +7,9 @@ Triggered:
 - when the *accepted-since-last-bump* counter in the project file reaches `AUTO_BUMP_THRESHOLD` (default 5), and the skill proposes the bump in chat;
 - when the user explicitly asks, such as *"create v(N+1) now"*.
 
-Never bump without explicit confirmation.
+Never bump without explicit confirmation. A fully specified
+`/r-auto <task> --scope "<scope>"` command is itself explicit confirmation for
+the session-start bump; announce it, but do not ask again.
 
 ## 1. Pre-Flight Checks
 
@@ -15,7 +17,8 @@ Before bumping:
 
 - Show the count of accepted changes since the last bump and a short list of affected points.
 - Report current char/word count and budget status.
-- Ask the user to confirm the bump:
+- Ask the user to confirm the bump, except for the authorized `/r-auto`
+  session-start bump:
 
   ```text
   Ready to create a new version:
@@ -61,6 +64,11 @@ In the project file, reset `<!-- accepted_since_bump: 0 -->` and add an entry to
 - vN → v(N+1) — YYYY-MM-DD HH:MM — <K> accepted changes
 ```
 
+For `/r-auto`, a revision-plan project file may not exist yet. Keep the counter
+at zero in working memory and record the session-start bump in the task file and
+auto-scope manifest after setup; do not invent a revision-plan file solely for
+this counter.
+
 ## 4b. Carry Freeze Ledger Forward
 
 Call `workflow/15-freeze-ledger.md` — action `carry-forward`. The ledger file
@@ -73,9 +81,9 @@ contents are reconciled:
 - Any row whose anchor no longer matches → mark `⚠ stale`, list those in chat,
   and ask the user to re-point or drop them. Never drop a frozen unit silently.
 
-If no ledger exists yet (e.g. the mandatory session-start bump runs before any
-freeze), `15-freeze-ledger.md#ensure` created an empty one — carry-forward is a
-no-op beyond the frontmatter update.
+If no ledger exists yet because the session-start bump runs before setup's
+`ensure`, skip `carry-forward`; `10-setup.md` step 8 creates the ledger already
+anchored to v(N+1). Do not claim that an absent ledger was created earlier.
 
 ## 5. Notify User
 

@@ -79,6 +79,11 @@ Procedo con il bump? (sì / salta e usa vN / annulla)
 
 Only if the user says `sì`, run the bump via `60-bump-version.md`. If they say `salta e usa vN`, warn that this breaks the mandatory bump rule and ask them to confirm again. Never skip the bump silently.
 
+**`/r-auto` exception:** a fully specified `/r-auto <task> --scope "<scope>"`
+invocation is explicit prior confirmation for this session-start bump. Announce
+the bump and run it without asking again. If task or scope is missing or
+ambiguous, obtain that information before bumping.
+
 ## 6. Confirm Setup
 
 Output a one-shot summary after the bump:
@@ -96,6 +101,11 @@ Setup complete
 
 Ready. Proceed?
 ```
+
+For `/r-auto`, omit `Ready. Proceed?`; print `Automode autorizzato: continuo
+con manifest e delega.` and continue through steps 7–8 directly. After ensuring
+the ledger, invoke `37-scoped-auto-revision.md` instead of waiting for another
+instruction.
 
 ## 7. Create Task File
 
@@ -123,4 +133,4 @@ Confirm in chat (one line):
 Freeze ledger: revisions/<article-slug>/freeze-ledger.md (🟢 X frozen · 🟡 Y open)
 ```
 
-After creation, wait for the next instruction (reviewer feedback, `/r-pp`, `/r-pr-2`, `/r-conn`, `/r-global`, `/r-chapter`, `/r-status`).
+After creation, wait for the next instruction (reviewer feedback, `/r-pp`, `/r-pr-2`, `/r-conn`, `/r-global`, `/r-chapter`, `/r-status`). For `/r-auto`, do not wait: continue with `37-scoped-auto-revision.md`.

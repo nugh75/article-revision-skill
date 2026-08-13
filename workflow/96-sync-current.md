@@ -8,6 +8,10 @@ This step is called by `95-decision-log.md` immediately after the session
 entry is written. It runs in both `closure` mode and `handoff` mode, even when
 no changes were accepted this round.
 
+It also supports `auto-closure` mode. There, missing or empty DOCX output and
+failed extracted-text verification are fatal and return `FAIL`; the permissive
+Pandoc warning used by interactive closure does not apply.
+
 ## Files produced / overwritten
 
 | File | Content | Location |
@@ -45,6 +49,8 @@ bash scripts/sync_current.sh "$ARTICLE_PATH" "$BIBLIOGRAPHY_BIB_PATH"
 
 If pandoc is not installed, warn and skip (do not abort the closure):
 ```
+
+For `SYNC_MODE=auto-closure`, do not skip: return `FAIL` with `pandoc missing`.
 ⚠ pandoc non trovato — current.docx non generato.
   Installa pandoc e riesegui: bash scripts/sync_current.sh
 ```
@@ -66,6 +72,11 @@ After generation, the script checks that `bibliography.docx` contains body text
 beyond the heading. If the file is missing, empty, or contains no rendered
 references, warn explicitly; do not report the bibliography sync as successful.
 
+For `SYNC_MODE=auto-closure`, extract and inspect text from both
+`articles/current.docx` and `bibliography/bibliography.docx`. Require non-empty
+article body text and rendered bibliography entries. Also require
+`cmp -s "$ARTICLE_PATH" articles/current.md`. Any failure returns `FAIL`.
+
 Announce in chat:
 ```
 bibliography.docx → bibliography/bibliography.docx ✓ (<entry-count> entries)
@@ -79,6 +90,10 @@ If `SYNC_MODE=closure`, call `workflow/05-task.md#update-step`:
 If `SYNC_MODE=handoff`, call `workflow/05-task.md#update-step`:
 `Handoff checkpoint` → `paused` with note `decision log + current files synced`;
 do not mark final `Sync current files` as done.
+
+If `SYNC_MODE=auto-closure`, do not update or close the task here. Return a
+structured `PASS`/`FAIL` result to `95-decision-log.md`, which owns final task
+status and the success message.
 
 ## 6. Final Confirmation
 
@@ -109,3 +124,12 @@ Handoff sincronizzato.
 ```
 
 The revision session remains paused and resumable.
+
+For `auto-closure`, print no `Chiusura completata` message. Return:
+
+```text
+AUTO_SYNC_RESULT: PASS|FAIL
+current_md: PASS|FAIL
+current_docx_text: PASS|FAIL
+bibliography_docx_text: PASS|FAIL
+```
