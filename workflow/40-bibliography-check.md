@@ -46,8 +46,8 @@ The script writes a Markdown audit listing entries below the similarity threshol
 
 If the user chooses `Accetta correzione`, modify `.bib` and any inline
 occurrences in the article, count the accepted correction as one applied
-change, and invoke `07-git-checkpoint.md` if the threshold is reached. Use this
-checkpoint subject pattern:
+change, and invoke `07-git-checkpoint.md` in interactive-prompt mode when due.
+Use this checkpoint subject pattern:
 
 ```text
 revision(<slug>): bib check — <bib_key> corrected

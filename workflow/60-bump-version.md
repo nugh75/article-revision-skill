@@ -103,7 +103,8 @@ Ready to:
 
 The bump itself does not create an immediate extra Git commit. Keep the new
 version and diff in the active-session manifest; `07-git-checkpoint.md` includes
-them in the next automatic checkpoint.
+them in the next confirmed interactive checkpoint or automatic `/r-auto` or
+boundary checkpoint.
 
 ## 6. Edge Case — Destination Already Exists
 

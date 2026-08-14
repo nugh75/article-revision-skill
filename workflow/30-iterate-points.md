@@ -124,9 +124,10 @@ Optional shortcuts remain accepted for speed:
 4. Increment the *accepted-since-last-bump* counter.
 5. Increment `changes-since-git-checkpoint` by the number of accepted numbered
    modifications. After the article, project file, sidecar, and ledger state
-   are consistent, call `07-git-checkpoint.md` immediately if the counter has
-   reached `AUTO_GIT_CHECKPOINT_THRESHOLD`. The resulting scoped commit and push
-   are automatic; do not ask for confirmation.
+   are consistent, call `07-git-checkpoint.md` with
+   `mode=interactive-prompt` when its prompt conditions are met. Ask before the
+   scoped commit and push; continue only on `sì`. On `non ora`, preserve the
+   counter and follow the workflow's re-prompt rule.
 6. **Do not advance automatically.** Output:
 
    ```text
@@ -194,7 +195,7 @@ Then advance.
 
 ## 5. Edge Cases
 
-- **Multiple decisions in one user message** (for example, *"Accetta tutto tranne punto 3: tienilo in considerazione"*). Process them sequentially with the per-point logic above, then run one automatic checkpoint if the accumulated counter reaches the threshold.
+- **Multiple decisions in one user message** (for example, *"Accetta tutto tranne punto 3: tienilo in considerazione"*). Process them sequentially with the per-point logic above, then show one Git checkpoint prompt if the accumulated counter meets the prompt conditions.
 - **Character overshoot after Accetta.** Report and ask: `The overrun is now +X. Do you prefer to proceed and handle it in the final sweep, or look for a compensating cut now?`
 - **Bibliography conflict.** If the user wants a key that does not exist or has dubious metadata, defer to `40-bibliography-check.md` and do not apply until cleared.
 - **Anglicism not in whitelist** (`ARTICLE_LANG=it` only). Surface in the proposal block under `Possible exceptions`; the user decides whether to add it to the whitelist or rephrase.

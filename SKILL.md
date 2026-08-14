@@ -6,8 +6,8 @@ description: |
   `/r-resume`, `/r-guide`, or bounded `/r-auto` work. Assumes `articles/`,
   `bibliography/reference.bib`, `editorial-norms/`, `revisions/`, and `.env`.
   Shows original and proposal, asks Accetta / Modifica / Rivedi completamente /
-  Tieni in considerazione, applies accepted edits, and automatically commits
-  and pushes scoped checkpoints after a configurable number of changes.
+  Tieni in considerazione, applies accepted edits, and in interactive chat asks
+  before committing and pushing after a configurable number of changes.
   Detects article language and adapts proposal style. Excludes writing an
   article from scratch and independent `.bib` management.
 ---
@@ -429,8 +429,9 @@ Optional:
   `/r-gdrive` when the MCP Drive connector is unavailable.
 - `AUTO_BUMP_THRESHOLD` — number of accepted changes that triggers a mid-session
   bump proposal. Default: `5`.
-- `AUTO_GIT_CHECKPOINT_THRESHOLD` — number of applied changes that triggers an
-  automatic scoped commit and push. Default: `5`; independent from bumps.
+- `AUTO_GIT_CHECKPOINT_THRESHOLD` — number of applied changes that triggers a
+  commit/push confirmation prompt in interactive chat. Default: `5`;
+  independent from bumps. `/r-auto` uses the same threshold automatically.
 
 ## Python execution contract
 
@@ -456,9 +457,10 @@ Optional:
    interrupted before natural closure. A handoff writes a checkpoint, decision
    log entry, current-file sync, scoped commit, and verified push without
    closing the round.
-0b. `workflow/07-git-checkpoint.md` — automatic threshold and boundary Git
-   checkpoints. Stages only explicit active-session files, commits with normal
-   hooks, pushes to the configured upstream, and verifies the remote hash.
+0b. `workflow/07-git-checkpoint.md` — interactive threshold prompts plus
+   automatic `/r-auto` and confirmed-boundary Git checkpoints. Stages only
+   explicit active-session files, commits with normal hooks, pushes to the
+   configured upstream, and verifies the remote hash.
 1. `workflow/00-bootstrap.md` — set up the revision environment if missing
    (venv with Python deps, `.bib` file, `.env` with editorial parameters
    and Zotero credentials, editorial norms file). Idempotent: skips
@@ -700,8 +702,9 @@ the intention in the ledger (`log-comment`). Then advance.
 
 - `Accetta` (with selected numbers) → apply via Edit only the numbered
   modifications. Mark them `Accepted`, increment both the bump counter and the
-  task-file Git counter, and call `07-git-checkpoint.md` automatically when the
-  Git threshold is reached. When the bump counter reaches
+  task-file Git counter, and call `07-git-checkpoint.md` in interactive-prompt
+  mode when the Git threshold is reached. Commit and push only if the user
+  confirms. When the bump counter reaches
   `AUTO_BUMP_THRESHOLD`, suggest a version bump (see step 7). Ask for further
   changes on the same paragraph.
 - Every decision interaction must be compatible with the project's
@@ -761,9 +764,13 @@ editorial layout:
 
 ## Git contract
 
-- **Routine revision checkpoints are automatic.** Invocation of the skill
-  authorizes `workflow/07-git-checkpoint.md` to commit and push after
-  `AUTO_GIT_CHECKPOINT_THRESHOLD` applied changes, without another prompt.
+- **Interactive chat checkpoints require confirmation.** In every interactive
+  revision, whether triggered by a slash command or natural-language chat,
+  reaching `AUTO_GIT_CHECKPOINT_THRESHOLD` applied changes requires the skill
+  to ask before committing and pushing. A normal `Accetta` is not Git consent.
+- **Automatic modes and confirmed boundaries.** A fully specified `/r-auto`
+  invocation authorizes threshold checkpoints. A requested handoff or confirmed
+  closure authorizes its final flush; do not ask a second time at that boundary.
 - **Count changes precisely.** One numbered accepted modification counts as one
   change; in `/r-auto`, one integrated changed manifest unit counts as one.
 - **Flush boundaries.** Handoff and successful closure commit and push any
@@ -881,7 +888,8 @@ The closed task file contains:
 - A step-by-step status table (`done` / `skipped` / `failed`).
 - The latest `## Handoff / Ripresa` checkpoint, if the session was paused.
 - Accepted / modified / fully revised / deferred counts.
-- Automatic Git checkpoint threshold, counter, and published sequence.
+- Git checkpoint prompt threshold, counter, last prompted count, and published
+  sequence.
 - Final article char count vs limit.
 - The decision-log session identifier.
 
@@ -932,5 +940,6 @@ Run Python scripts with the project's Python venv (`PYTHON_BIN`). Bootstrap asks
 - Editing `.bib` independently — defer to the bibliography skill (e.g.
   `praxis-bibliography-citations`).
 - Anonymisation (XXX placeholders) — handle in a dedicated pass.
-- Opening PRs or sending email. Automatic Git activity is limited to the scoped
-  threshold and boundary checkpoints defined by `07-git-checkpoint.md`.
+- Opening PRs or sending email. Git activity is limited to the scoped,
+  confirmed or explicitly automated checkpoints defined by
+  `07-git-checkpoint.md`.

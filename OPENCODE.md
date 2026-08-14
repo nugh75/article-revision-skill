@@ -37,8 +37,9 @@ Commands are registered in the project's `opencode.json` under `"command"`.
 
 For the complete workflow, see `AGENTS.md` in this repository. The same rules apply in opencode, including:
 
-- automatic scoped commit/push after `AUTO_GIT_CHECKPOINT_THRESHOLD` applied
-  changes and at handoff/closure, with unrelated paths excluded;
+- a dedicated commit/push prompt after `AUTO_GIT_CHECKPOINT_THRESHOLD` applied
+  changes in interactive chat; `/r-auto`, requested handoff, and confirmed
+  closure remain automatic, with unrelated paths excluded;
 - paragraph references always include chapter and exact Markdown line range;
 - per-point `Accetta / Modifica / Rivedi completamente / Tieni in considerazione` decisions;
 - resumable handoff checkpoints via `workflow/06-handoff.md`;

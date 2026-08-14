@@ -51,8 +51,9 @@ Populate the checklist at the bottom:
 ## 4. Confirm In Chat
 
 The skill writes the project file to disk and includes it in the active-session
-manifest. It is committed and pushed automatically at the next threshold,
-handoff, or closure checkpoint. The checkpoint subject follows:
+manifest. In interactive chat, the next threshold asks before commit and push;
+a requested handoff or confirmed closure flushes it automatically. The
+checkpoint subject follows:
 
 ```text
 revision(<slug>): start — N points planned

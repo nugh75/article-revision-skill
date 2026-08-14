@@ -27,7 +27,9 @@ and provides the input summary for `95-decision-log.md`.
 - `ARTICLE_VERSION` — original version identifier (e.g. `v3`).
 - `BUMPED_VERSION` — new version identifier after the mandatory bump (e.g. `v4-2026-06-16-1430`).
 - `REVIEWER_LANE` — reviewer slug, simulated label, or `self` for proactive modes (`/r-pp`, `/r-global`, `/r-chapter`, `/r-conn`).
-- `AUTO_GIT_CHECKPOINT_THRESHOLD` — positive integer loaded by setup; default `5`.
+- `AUTO_GIT_CHECKPOINT_THRESHOLD` — positive integer loaded by setup; default
+  `5`. It is the prompt threshold in interactive chat and the automatic
+  threshold in `/r-auto`.
 
 **Step list** (rows 3..N of the `## Passi` table) by command:
 
@@ -56,7 +58,7 @@ Where `<command-slug>` strips the leading `/` (e.g. `r-pp`, `r-chapter`,
 **Template**: use `templates/task.md`. Fill all `{{...}}` placeholders.
 `{{STEPS_ROWS}}` = one table row per step listed above, all with status `pending`.
 Set the Git checkpoint frontmatter fields to the configured threshold, counter
-`0`, and sequence `0`.
+`0`, last-prompt count `0`, and sequence `0`.
 
 Confirm in chat (one line):
 ```
@@ -120,9 +122,10 @@ Called by `workflow/06-handoff.md`.
    - `Ultimo aggiornamento`: current timestamp
    - keep `Prossima azione esatta` unless the user changes it.
 5. Restore working memory from the task file fields.
-6. Restore the Git checkpoint threshold, counter, and sequence. If the previous
-   checkpoint committed locally but did not push, retry that push before
-   accepting or integrating another change.
+6. Restore the Git checkpoint threshold, counter, last-prompt count, and
+   sequence. For legacy task files without `git-checkpoint-last-prompt-count`,
+   default it to `0`. If the previous checkpoint committed locally but did not
+   push, retry that push before accepting or integrating another change.
 
 ## 5. close
 

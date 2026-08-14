@@ -8,6 +8,7 @@ started: {{TIMESTAMP}}
 status: in-progress
 git-checkpoint-threshold: {{AUTO_GIT_CHECKPOINT_THRESHOLD}}
 changes-since-git-checkpoint: 0
+git-checkpoint-last-prompt-count: 0
 git-checkpoint-sequence: 0
 ---
 
@@ -20,7 +21,7 @@ git-checkpoint-sequence: 0
 - **Lane**: `{{REVIEWER_LANE}}`
 - **Avvio sessione**: `{{TIMESTAMP}}`
 - **Stato**: `in-progress`
-- **Checkpoint Git automatico**: ogni `{{AUTO_GIT_CHECKPOINT_THRESHOLD}}` modifiche applicate
+- **Avviso checkpoint Git**: ogni `{{AUTO_GIT_CHECKPOINT_THRESHOLD}}` modifiche applicate; conferma richiesta nelle revisioni interattive
 
 ## Passi
 

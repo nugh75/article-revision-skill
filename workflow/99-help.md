@@ -69,6 +69,7 @@ names verbatim.
   • Ogni sessione inizia con bump obbligatorio (vN → vN+1).
   • Riprendere da handoff non è una nuova sessione: niente nuovo bump.
   • Handoff = checkpoint + decision log + sync + commit scoped + push verificato.
+  • In chat, dopo 5 modifiche (o soglia configurata), chiede prima di commit + push.
   • Ogni paragrafo indicato porta capitolo + righe Markdown inizio-fine.
   • Parte congelata = avviso prima di toccarla, serve "sì, procedi".
   • Dati numerici ri-derivati dalla fonte, mai ereditati.

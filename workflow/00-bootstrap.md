@@ -80,7 +80,8 @@ Optional but recommended:
 - `ARTICLE_LANG` (usually empty; auto-detected)
 - `PYTHON_BIN` (usually `.venv/bin/python`)
 - `AUTO_BUMP_THRESHOLD` (default `5`)
-- `AUTO_GIT_CHECKPOINT_THRESHOLD` (default `5`; automatic scoped commit + push)
+- `AUTO_GIT_CHECKPOINT_THRESHOLD` (default `5`; interactive commit/push prompt,
+  automatic in `/r-auto`)
 
 3. Append new keys to `.env` or create the file. Never overwrite existing values without asking.
 4. Re-load `.env` after edits and continue.

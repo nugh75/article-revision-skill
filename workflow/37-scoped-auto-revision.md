@@ -125,9 +125,10 @@ examples unless the selected task explicitly and safely requires a local change.
 Maintain counts for checked, changed, unchanged, deferred, and stopped units.
 Increment `changes-since-git-checkpoint` once per integrated changed manifest
 unit. Integrate in threshold-sized batches; before each mid-run checkpoint, run
-the bounded batch audit required by `07-git-checkpoint.md`, then commit and push
-automatically. Do not trigger mid-session bump proposals while `/r-auto` is
-running; the session-start version remains the integration target.
+the bounded batch audit required by `07-git-checkpoint.md`, then invoke it with
+`mode=auto-threshold` to commit and push without an interactive prompt. Do not
+trigger mid-session bump proposals while `/r-auto` is running; the session-start
+version remains the integration target.
 
 ## 6. Independent audit
 

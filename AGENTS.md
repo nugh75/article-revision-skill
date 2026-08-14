@@ -47,12 +47,14 @@ If the user is doing something else (writing the article from scratch, generatin
 
 ## Hard rules
 
-1. **Automatic Git checkpoints are binding.** After
-   `AUTO_GIT_CHECKPOINT_THRESHOLD` applied changes, call
-   `workflow/07-git-checkpoint.md`: stage explicit active-session paths only,
-   commit with normal hooks, push to the configured upstream, and verify the
-   remote hash without asking again. Handoff and successful closure flush the
-   remaining tail. Never include `.env` or unrelated work; never pull, rebase,
+1. **Interactive Git checkpoint prompts are binding.** After
+   `AUTO_GIT_CHECKPOINT_THRESHOLD` applied changes in chat, call
+   `workflow/07-git-checkpoint.md` in interactive-prompt mode and ask before
+   commit and push. Ordinary approval of article text is not Git consent. A
+   fully specified `/r-auto`, requested handoff, or confirmed closure authorizes
+   its scoped checkpoint without a second prompt. Stage explicit active-session
+   paths only, run normal hooks, push to the configured upstream, and verify the
+   remote hash. Never include `.env` or unrelated work; never pull, rebase,
    amend, reset, bypass hooks, or force-push automatically.
 2. **Per-point granularity.** Every revision proposal goes through the user as one atomic decision: `Accetta / Modifica / Rivedi completamente / Tieni in considerazione`. Never collapse multiple unrelated changes into one proposal.
 3. **Always ask before creating.** Bootstrap, version bump, new files: every write step that creates something requires explicit confirmation. Idempotent re-checks of already-existing artifacts need no confirmation.
@@ -108,7 +110,8 @@ Recommended:
 - `ARTICLE_STYLE_NOTES` (extra style notes loaded at setup)
 - `PYTHON_BIN` (Python interpreter for skill scripts; default `.venv/bin/python`)
 - `AUTO_BUMP_THRESHOLD` (default 5)
-- `AUTO_GIT_CHECKPOINT_THRESHOLD` (default 5; automatic scoped commit + push)
+- `AUTO_GIT_CHECKPOINT_THRESHOLD` (default 5; interactive commit/push prompt,
+  automatic in `/r-auto`)
 - `DATA_VERIFY_PATH` (root of the authoritative dataset/platform for empirical figures; enables `workflow/51-data-verification.md`)
 - `DATA_VERIFY_NOTES` (free-text pointer to master file, key column, and formula location within `DATA_VERIFY_PATH`)
 - `GDRIVE_REVIEW_FOLDER_ID` (shared Drive folder id for `/r-gdrive`; written back after `create`, reused to avoid duplicates)
@@ -124,7 +127,7 @@ See `.env.example` for the complete template.
 |---|---|---|
 | 0 | `workflow/05-task.md` | Called by `10-setup.md` (create) and `95-decision-log.md` (close); tracks steps and produces session summary |
 | 0a | `workflow/06-handoff.md` | Called by `pause`, `stop`, `/r-handoff`, `/r-resume`, or any interruption; writes/loads resumable checkpoints and triggers handoff decision log + sync |
-| 0b | `workflow/07-git-checkpoint.md` | Automatic threshold and boundary commit/push with explicit session paths and remote verification |
+| 0b | `workflow/07-git-checkpoint.md` | Interactive threshold prompt plus automatic `/r-auto` and confirmed-boundary commit/push with explicit session paths and remote verification |
 | 1 | `workflow/00-bootstrap.md` | First invocation in a new project, or whenever an artifact is missing |
 | 2 | `workflow/10-setup.md` | After bootstrap; loads `.env`, norms, bibliography, active article, detects language, creates task file, ensures freeze ledger |
 | 2a | `workflow/15-freeze-ledger.md` | Per-article freeze ledger: `ensure` (setup), advisory `check` before every proposal, `freeze`/`thaw`/`status`, `log-comment`, `carry-forward` (bump) |

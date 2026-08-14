@@ -65,4 +65,5 @@ shared Drive folder, or hand them to the user.
 ```
 
 Keep the generated redline and response files in the active-session manifest;
-the next threshold or boundary checkpoint commits and pushes them automatically.
+the next interactive threshold asks before commit and push, while a confirmed
+boundary checkpoint publishes them automatically.
