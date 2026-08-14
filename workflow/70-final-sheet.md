@@ -68,12 +68,14 @@ git log --oneline --grep "revision(<slug>):" --since "<date round started>"
 
 Format as a bulleted list under the *Change history* heading.
 
-## 6. Suggested Commit
+## 6. Automatic Closure Checkpoint
 
-The skill writes the final sheet but **does not commit**. Suggested commit message for the user:
+The skill writes the final sheet and leaves it in the active-session manifest.
+`95-decision-log.md` commits and pushes it automatically during the mandatory
+closure flush. Use this subject through `07-git-checkpoint.md`:
 
 ```text
-revision(<slug>): final sheet — round closed
+revision(<slug>): close <version>
 ```
 
 ## 7. Continue To Decision Log

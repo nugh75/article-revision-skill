@@ -57,7 +57,8 @@ When both exist, the structured `approvals.md` row wins for that point
    re-accepted.
 5. For each `reject`: present to the user — a colleague reject does not
    auto-revert. Ask `keep / revert / modify`. Only revert on explicit user
-   instruction (respect the git contract; never commit).
+   instruction. Count any newly applied article modification and invoke
+   `07-git-checkpoint.md` when the threshold is reached.
 6. Leave `pending` points untouched; list them so the user can chase
    feedback.
 
@@ -72,5 +73,5 @@ Append an **Approval log** section to the project file:
 ```
 
 Then in chat: counts (approved / changes / reject / pending) and the next
-suggested step (`/r-redline`, `/r-sheet`, or chase pending). Never commit
-automatically.
+suggested step (`/r-redline`, `/r-sheet`, or chase pending). Approval artifacts
+remain in the session manifest for the next automatic checkpoint.

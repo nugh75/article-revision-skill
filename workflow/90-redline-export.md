@@ -64,4 +64,5 @@ The skill does not email or upload. Use `/r-gdrive` to place these in the
 shared Drive folder, or hand them to the user.
 ```
 
-Never commit automatically — the user controls git.
+Keep the generated redline and response files in the active-session manifest;
+the next threshold or boundary checkpoint commits and pushes them automatically.

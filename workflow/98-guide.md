@@ -32,7 +32,7 @@ Render in `ARTICLE_LANG` if known (IT default). Keep command names verbatim.
 
 4. Handoff alla fine di ogni capitolo
    - Alla fine del capitolo: recap, eventuale freeze delle parti concluse, poi `/r-handoff`.
-   - Ogni handoff scrive checkpoint, decision log, sync current files e commit scoped.
+   - Ogni handoff scrive checkpoint, decision log, sync current files, commit scoped e push verificato.
    - La sessione resta sospesa e riprendibile con `/r-resume`.
 
 5. Chiusura della revisione
@@ -76,7 +76,7 @@ TOV + setup → /r-global → /r-pp-a con /r-handoff a fine capitolo → chiusur
 
 4. Handoff at the end of each chapter
    - At chapter end: recap, optionally freeze concluded units, then `/r-handoff`.
-   - Every handoff writes checkpoint, decision log, current-file sync, and a scoped commit.
+   - Every handoff writes checkpoint, decision log, current-file sync, a scoped commit, and a verified push.
    - The session remains paused and resumable with `/r-resume`.
 
 5. Close the revision

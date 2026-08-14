@@ -92,10 +92,8 @@ Version v(N+1) created: <NEW_PATH>
 timestamp: <YYYY-MM-DD HH:MM>
 diff: <X> changed lines · chars <signed> · words <signed>
 
-Counter reset. Pending uncommitted changes: N files.
-
-Suggested commit message, if you want to commit:
-  bump: vN → v(N+1) (<K> accepted points)
+Counter reset. Pending files will be included in the next automatic threshold,
+handoff, or closure checkpoint.
 
 Ready to:
 - continue revision on v(N+1)?
@@ -103,7 +101,9 @@ Ready to:
 - close the session?
 ```
 
-The skill **does not commit**. The suggested message is provided in chat for the user to copy if desired.
+The bump itself does not create an immediate extra Git commit. Keep the new
+version and diff in the active-session manifest; `07-git-checkpoint.md` includes
+them in the next automatic checkpoint.
 
 ## 6. Edge Case — Destination Already Exists
 

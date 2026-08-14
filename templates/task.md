@@ -6,6 +6,9 @@ bumped-version: {{BUMPED_VERSION}}
 lane: {{REVIEWER_LANE}}
 started: {{TIMESTAMP}}
 status: in-progress
+git-checkpoint-threshold: {{AUTO_GIT_CHECKPOINT_THRESHOLD}}
+changes-since-git-checkpoint: 0
+git-checkpoint-sequence: 0
 ---
 
 # Task — {{COMMAND}} · {{ARTICLE_SLUG}}
@@ -17,6 +20,7 @@ status: in-progress
 - **Lane**: `{{REVIEWER_LANE}}`
 - **Avvio sessione**: `{{TIMESTAMP}}`
 - **Stato**: `in-progress`
+- **Checkpoint Git automatico**: ogni `{{AUTO_GIT_CHECKPOINT_THRESHOLD}}` modifiche applicate
 
 ## Passi
 
@@ -32,6 +36,7 @@ status: in-progress
 - **Da considerare**: —
 - **Modificati**: —
 - **Rinviati**: —
+- **Checkpoint Git pubblicati**: —
 
 ## Handoff / Ripresa
 

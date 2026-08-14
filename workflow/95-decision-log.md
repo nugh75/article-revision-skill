@@ -43,6 +43,8 @@ Read:
 - the active project file (`revision-plan-vN.md`);
 - the final sheet, if already generated;
 - any `proposal-revision-YYYY-MM-DD-HHMM.md` files created during the round;
+- automatic checkpoint commits matching `revision(<article-slug>):` since the
+  task start, plus the current Git checkpoint counter/sequence;
 - in `handoff` mode: the current `## Handoff / Ripresa` checkpoint;
 - the latest `revisions/decision-log/index.md` and most recent session file.
 
@@ -100,6 +102,7 @@ Write these sections:
 <if a task file was closed in step 0: include its Riepilogo and Stato articolo alla chiusura here>
 <if mode=handoff: include Handoff / Ripresa fields, pending decisions, and exact next action>
 <freeze ledger snapshot: 🟢 X frozen · 🟡 Y open; list units frozen this round and any 🟡 open intentions still pending (read from revisions/<article-slug>/freeze-ledger.md)>
+<Git checkpoint snapshot: published sequence, changes waiting for the next checkpoint, and upstream>
 ```
 
 ## 4. Update Index
@@ -150,6 +153,13 @@ files` via `workflow/05-task.md#update-step`.
 In `handoff` mode, add the sync result to the task file step `Handoff
 checkpoint` as a note; leave `Sync current files` available for final closure.
 
+After a successful `closure` sync, call `07-git-checkpoint.md` with
+`mode=flush`. Include all active-session files plus the new decision log, index,
+task file, final sheet when present, and synchronized current outputs. The
+closure is not complete until the scoped commit, push, and remote verification
+succeed. In `handoff` mode, return to `06-handoff.md`, which performs its own
+flush after the checkpoint state is complete.
+
 ## 7. Finish Strict Auto-Closure
 
 In `auto-closure` mode only:
@@ -159,7 +169,9 @@ In `auto-closure` mode only:
 2. Mark `Sync current files` as `done` only on that `PASS`.
 3. Call `workflow/05-task.md#close`, passing the reserved session identifier.
 4. Confirm task frontmatter is `completed`, not `partial` or `failed`.
-5. Only now print the successful closure summary.
+5. Call `07-git-checkpoint.md` with `mode=flush` and require a successful push
+   plus remote verification.
+6. Only now print the successful closure summary.
 
 On failure, leave the task `in-progress` or `partial`, mark the exact step
 `failed`, and do not print `Chiusura completata`.

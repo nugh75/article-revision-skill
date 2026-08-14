@@ -43,7 +43,7 @@ names verbatim.
 ## Versione e chiusura
   /r-bump             Nuova versione (vN → vN+1)
   /r-sheet            Final sheet (stato post-revisione)
-  /r-handoff          Sospende: checkpoint + decision log + sync + commit
+  /r-handoff          Sospende: checkpoint + decision log + sync + commit + push
   /r-resume           Riprende da un task sospeso, senza nuovo bump
 
 ## Collaborazione ed export
@@ -62,17 +62,18 @@ names verbatim.
   Tieni in considerazione  non applica ora; registra come promemoria/traccia
   Scorciatoie: A / M / R / T
   prossimo / next        passa al punto/paragrafo successivo
-  pause / stop           handoff: checkpoint + decision log + sync + commit
+  pause / stop           handoff: checkpoint + decision log + sync + commit + push
   chiudi / fine          chiusura sessione (final sheet? + decision log + sync)
 
 ## Regole chiave
   • Ogni sessione inizia con bump obbligatorio (vN → vN+1).
   • Riprendere da handoff non è una nuova sessione: niente nuovo bump.
-  • Handoff = checkpoint + decision log + sync + commit scoped.
+  • Handoff = checkpoint + decision log + sync + commit scoped + push verificato.
   • Ogni paragrafo indicato porta capitolo + righe Markdown inizio-fine.
   • Parte congelata = avviso prima di toccarla, serve "sì, procedi".
   • Dati numerici ri-derivati dalla fonte, mai ereditati.
-  • /r-auto non autorizza tagli, riordini, nuovi claim, commit o push.
+  • /r-auto non autorizza tagli, riordini o nuovi claim; commit e push scoped
+    seguono automaticamente la soglia configurata e la chiusura.
   • Norme editoriali > preferenze: i conflitti emergono in chat.
 ```
 

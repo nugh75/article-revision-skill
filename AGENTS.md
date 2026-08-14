@@ -28,7 +28,7 @@ Trigger phrases:
 | `/r-freeze` | **Congela** una parte conclusa nel freeze ledger; in seguito la skill avvisa prima di toccarla (`workflow/15-freeze-ledger.md`) |
 | `/r-thaw` | **Scongela** una parte: torna modificabile senza avviso (`workflow/15-freeze-ledger.md`) |
 | `/r-status` | **Stato revisione** — mappa frozen (🟢) vs open (🟡) dal freeze ledger (`workflow/15-freeze-ledger.md`) |
-| `/r-handoff` | **Handoff** — write checkpoint, decision log, current-file sync, and scoped commit without closing the revision round (`workflow/06-handoff.md`) |
+| `/r-handoff` | **Handoff** — write checkpoint, decision log, current-file sync, scoped commit, and verified push without closing the revision round (`workflow/06-handoff.md`) |
 | `/r-resume` | **Resume** — resume from a paused task file without a new version bump (`workflow/06-handoff.md`) |
 | `/r-bump` | Bump article version (call `workflow/60-bump-version.md`) |
 | `/r-sheet` | Generate final revision sheet (call `workflow/70-final-sheet.md`) |
@@ -47,7 +47,13 @@ If the user is doing something else (writing the article from scratch, generatin
 
 ## Hard rules
 
-1. **The user controls normal git operations.** This skill never runs `git add`, `git commit`, `git push`, or `git stage` on proposal acceptance. Handoff is the only automatic exception: `workflow/06-handoff.md` writes a checkpoint, records a decision-log checkpoint, syncs current files, stages only active-session files, and creates a clear handoff commit. It never pushes and never includes unrelated user changes. After each accepted change, briefly note that there are pending changes and stop. If the user explicitly asks the skill to commit outside handoff, do so without `--no-verify`. If the user explicitly authorizes a push, the skill may run `git push` after confirming the target branch/remote.
+1. **Automatic Git checkpoints are binding.** After
+   `AUTO_GIT_CHECKPOINT_THRESHOLD` applied changes, call
+   `workflow/07-git-checkpoint.md`: stage explicit active-session paths only,
+   commit with normal hooks, push to the configured upstream, and verify the
+   remote hash without asking again. Handoff and successful closure flush the
+   remaining tail. Never include `.env` or unrelated work; never pull, rebase,
+   amend, reset, bypass hooks, or force-push automatically.
 2. **Per-point granularity.** Every revision proposal goes through the user as one atomic decision: `Accetta / Modifica / Rivedi completamente / Tieni in considerazione`. Never collapse multiple unrelated changes into one proposal.
 3. **Always ask before creating.** Bootstrap, version bump, new files: every write step that creates something requires explicit confirmation. Idempotent re-checks of already-existing artifacts need no confirmation.
 4. **No silent behavior.** Whenever the skill takes a non-trivial action, output a one-line acknowledgement in chat.
@@ -57,7 +63,7 @@ If the user is doing something else (writing the article from scratch, generatin
 8. **Sync current files.** At the end of every revision round, `workflow/95-decision-log.md` must call `workflow/96-sync-current.md`, which overwrites `articles/current.md`, `articles/current.docx`, and regenerates `bibliography/bibliography.docx` from `reference.bib` with citeproc. This step is mandatory and runs even when no changes were accepted. Never close a round while `bibliography.docx` is missing or appears empty without an explicit warning.
 9. **Revision closure triggers.** A round closes either when its natural perimeter is exhausted (last paragraph, last lens, saved global trace, last dimension, all reviewer points decided) OR when the user sends an explicit closure phrase (`chiudi`, `fine`, `ho finito`, `concludi` / `close`, `done`, `finish`, `end`). `pause`, `stop`, `sospendi`, and `/r-handoff` trigger handoff, not closure. In closure cases, present a summary, ask for confirmation, then run the mandatory closure sequence.
 10. **Freeze ledger.** Keep one persistent ledger per article at `revisions/<article-slug>/freeze-ledger.md` (`workflow/15-freeze-ledger.md`). Check it before every proposal: a 🟢 frozen part is *advisory* — warn (`⚠ congelata`) and require explicit `sì, procedi` before applying. When the user states a change but does not apply it this turn, record it in the ledger (🟡 open + intention) — never leave deferred intentions only in chat. Offer to freeze a unit when its work concludes.
-11. **Handoff is mandatory on interruption.** If work is interrupted before natural closure, call `workflow/06-handoff.md`: mark the task file paused, record current unit/proposal/pending decisions, write decision log, sync current files, commit the handoff state with a clear message, and print the exact next action. Resume from that task file without a new bump.
+11. **Handoff is mandatory on interruption.** If work is interrupted before natural closure, call `workflow/06-handoff.md`: mark the task file paused, record current unit/proposal/pending decisions, write decision log, sync current files, commit and push the handoff state with a clear message, and print the exact next action. Resume from that task file without a new bump.
 12. **Paragraph/chapter locator.** Every paragraph reference must include both chapter and exact line range: `Capitolo <C> — <chapter title>; Paragrafo P<N> — <article>:<L1-L2>`. A chapter is determined by the first numeric component of a numbered heading title (`1`, `1.1`, `1.2.3` all belong to Capitolo 1; `2` starts Capitolo 2). Distinguish chapter from section/subsection; `§1.2` is a subsection inside Capitolo 1, not a new chapter.
 
 ---
@@ -102,6 +108,7 @@ Recommended:
 - `ARTICLE_STYLE_NOTES` (extra style notes loaded at setup)
 - `PYTHON_BIN` (Python interpreter for skill scripts; default `.venv/bin/python`)
 - `AUTO_BUMP_THRESHOLD` (default 5)
+- `AUTO_GIT_CHECKPOINT_THRESHOLD` (default 5; automatic scoped commit + push)
 - `DATA_VERIFY_PATH` (root of the authoritative dataset/platform for empirical figures; enables `workflow/51-data-verification.md`)
 - `DATA_VERIFY_NOTES` (free-text pointer to master file, key column, and formula location within `DATA_VERIFY_PATH`)
 - `GDRIVE_REVIEW_FOLDER_ID` (shared Drive folder id for `/r-gdrive`; written back after `create`, reused to avoid duplicates)
@@ -117,11 +124,12 @@ See `.env.example` for the complete template.
 |---|---|---|
 | 0 | `workflow/05-task.md` | Called by `10-setup.md` (create) and `95-decision-log.md` (close); tracks steps and produces session summary |
 | 0a | `workflow/06-handoff.md` | Called by `pause`, `stop`, `/r-handoff`, `/r-resume`, or any interruption; writes/loads resumable checkpoints and triggers handoff decision log + sync |
+| 0b | `workflow/07-git-checkpoint.md` | Automatic threshold and boundary commit/push with explicit session paths and remote verification |
 | 1 | `workflow/00-bootstrap.md` | First invocation in a new project, or whenever an artifact is missing |
 | 2 | `workflow/10-setup.md` | After bootstrap; loads `.env`, norms, bibliography, active article, detects language, creates task file, ensures freeze ledger |
 | 2a | `workflow/15-freeze-ledger.md` | Per-article freeze ledger: `ensure` (setup), advisory `check` before every proposal, `freeze`/`thaw`/`status`, `log-comment`, `carry-forward` (bump) |
 | 3 | `workflow/20-plan-revision.md` | When user provides reviewer feedback |
-| 4 | `workflow/30-iterate-points.md` | Core loop: propose, ask, apply (no commit) |
+| 4 | `workflow/30-iterate-points.md` | Core loop: propose, ask, apply, count, and checkpoint at threshold |
 | 4a | `workflow/31-paragraph-by-paragraph.md` | Triggered by `/r-pp` or `/r-pp-a`. Per-paragraph diagnostic walk with unitary-concept control, optional global trace context, line ranges, and chapter recaps. |
 | 4b | `workflow/32-peer-review-simulation.md` | Triggered by `/r-pr-2`. Generates three standalone documents in `revisions/<article-slug>/`. No interactive decision loop. |
 | 4c | `workflow/33-connector-revision.md` | Triggered by `/r-conn`. Connector and transition polish. |
@@ -132,7 +140,7 @@ See `.env.example` for the complete template.
 | 7 | `workflow/60-bump-version.md` | Mandatory session-start bump + end of round, or after `AUTO_BUMP_THRESHOLD` accepted changes |
 | 8 | `workflow/70-final-sheet.md` | End of round (optional) |
 | 8a | `workflow/98-guide.md` | Triggered by `/r-guide`; read-only recommended full revision path |
-| 9 | `workflow/95-decision-log.md` + `96-sync-current.md` | Mandatory closure and handoff checkpoint logging: decision log + sync current files |
+| 9 | `workflow/95-decision-log.md` + `96-sync-current.md` + `07-git-checkpoint.md` | Mandatory closure logging, current-file sync, scoped commit, push, and remote verification |
 
 Each workflow file contains the full step-by-step instructions. **Read the relevant workflow file before acting.**
 
@@ -157,7 +165,7 @@ The user can pick one of three scopes:
 | **Colleague approval** (`/r-approve`) | `/r-approve` | Gate `Accepted` points behind colleague sign-off (Doc suggestions or `approvals.md`). `approve` → mark approved; `changes` → re-propose via the decision loop; `reject` → ask user (no auto-revert). |
 | **Redline export** (`/r-redline`) | `/r-redline` | Colored old-vs-new `.docx`/`.html` for the reviewer + response-to-reviewers letter. Separate from the clean submission file. No interactive decision loop. |
 | **Guide** (`/r-guide`) | `/r-guide` | Read-only recommended path: TOV + `/r-global` + `/r-pp-a` with chapter handoffs + closure + `/r-pr-2` QA + mini-round. |
-| **Handoff / Resume** (`/r-handoff`, `/r-resume`) | `/r-handoff`, `/r-resume`, `pause`, `stop`, `sospendi`, `riprendi`, `continua` | Save a resumable checkpoint in the current task file, write decision log, sync current files, and commit the handoff state without closing the round; later resume that same task without a new mandatory bump. |
+| **Handoff / Resume** (`/r-handoff`, `/r-resume`) | `/r-handoff`, `/r-resume`, `pause`, `stop`, `sospendi`, `riprendi`, `continua` | Save a resumable checkpoint in the current task file, write decision log, sync current files, then commit and push the handoff state without closing the round; later resume that same task without a new mandatory bump. |
 | **Freeze / Thaw / Status** (`/r-freeze`, `/r-thaw`, `/r-status`) | `/r-freeze [unit]`, `/r-thaw [unit]`, `/r-status` | Mark a concluded part 🟢 frozen (advisory) / reopen it 🟡 / print the frozen-vs-open snapshot. Ledger-only, no article edit. |
 
 Never collapse heterogeneous changes (citation + phrasing + structure) into one proposal. Split them into separate decisions.
@@ -219,7 +227,10 @@ Applicate modifiche <numbers>. [Restano in sospeso le modifiche <numbers>.] Ci s
 
 And **wait** for an explicit command (e.g. "no, prossimo paragrafo", "next", "passa al prossimo").
 
-On `Accetta` (selected numbers): edit the file(s), update the project file, increment the *accepted-since-last-bump* counter. **Do not commit.** Ask for further changes on the same paragraph.
+On `Accetta` (selected numbers): edit the file(s), update the project file,
+increment both the bump and Git checkpoint counters, and call
+`07-git-checkpoint.md` automatically at the configured threshold. Ask for
+further changes on the same paragraph.
 
 On `Modifica <N>: <direction>`: regenerate modification N per user direction. Re-present it.
 
@@ -259,7 +270,7 @@ Mixed rounds (a self-review layered on a real round) are split by tag: only `jou
 
 ## Data verification (binding)
 
-A numeric claim is never inherited. Whenever a proposal adds, changes, or relies on a percentage, count, mean, index, correlation, rank, or a qualitative claim contingent on a figure, `workflow/51-data-verification.md` must run **before** proposing: re-derive the figure from the authoritative source (`DATA_VERIFY_PATH` / `DATA_VERIFY_NOTES`, or a data-source section in the project's `AGENTS.md`), with an explicit criterion (column, filter, denominator, regex with word boundaries). If no source reproduces the value, the point is `Deferred` — never replaced with a plausible number. Skipping this when a figure is in scope is a binding violation, same severity as an unauthorized auto-commit.
+A numeric claim is never inherited. Whenever a proposal adds, changes, or relies on a percentage, count, mean, index, correlation, rank, or a qualitative claim contingent on a figure, `workflow/51-data-verification.md` must run **before** proposing: re-derive the figure from the authoritative source (`DATA_VERIFY_PATH` / `DATA_VERIFY_NOTES`, or a data-source section in the project's `AGENTS.md`), with an explicit criterion (column, filter, denominator, regex with word boundaries). If no source reproduces the value, the point is `Deferred` — never replaced with a plausible number. Skipping this when a figure is in scope is a binding violation, same severity as an unsafe or out-of-scope Git checkpoint.
 
 ---
 
@@ -305,7 +316,8 @@ Run Python scripts with the project's Python venv. The bootstrap asks before cre
 - Writing an article from scratch.
 - Editing `.bib` independently of a revision flow.
 - Anonymisation pass (handle separately).
-- Opening PRs or sending email. Committing is allowed only on explicit user instruction or the mandatory handoff commit; pushing is allowed only on explicit user instruction, following the Git contract.
+- Opening PRs or sending email. Automatic Git activity is limited to the scoped
+  threshold and boundary checkpoints defined by `07-git-checkpoint.md`.
 
 For these, defer to the appropriate companion skill or to the user.
 

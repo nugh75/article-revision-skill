@@ -1,22 +1,15 @@
 ---
 name: article-revision
 description: |
-  Coordinate iterative revision of a scientific article in markdown. Trigger
-  when the user asks to apply reviewer feedback ("revise article",
-  "apply reviewer X comments", "let's process the reviewer comments"),
-  to bump a version, pause/resume via `/r-handoff` or `/r-resume`, request the
-  recommended path via `/r-guide`, run a scope-bounded revision with `/r-auto`,
-  or invoke `/article-revision` explicitly.
-  Skill assumes a project layout with `articles/`, `bibliography/
-  reference.bib`, `editorial-norms/`, `revisions/`, and an `.env` file.
-  For each reviewer point: shows original + proposal in chat,
-  asks Accetta / Modifica / Rivedi completamente / Tieni in considerazione,
-  and applies on Accetta without committing.
-  Auto-detects article language (it/en) and adapts
-  the proposal style accordingly. Out of scope: writing the article from
-  scratch (use the journal-specific style skill, e.g. `praxis-article-style`),
-  managing the `.bib` directly (use `praxis-bibliography-citations` or its
-  equivalent).
+  Coordinate iterative revision of a scientific article in Markdown. Use for
+  reviewer feedback, `/article-revision`, version bumps, `/r-handoff`,
+  `/r-resume`, `/r-guide`, or bounded `/r-auto` work. Assumes `articles/`,
+  `bibliography/reference.bib`, `editorial-norms/`, `revisions/`, and `.env`.
+  Shows original and proposal, asks Accetta / Modifica / Rivedi completamente /
+  Tieni in considerazione, applies accepted edits, and automatically commits
+  and pushes scoped checkpoints after a configurable number of changes.
+  Detects article language and adapts proposal style. Excludes writing an
+  article from scratch and independent `.bib` management.
 ---
 
 # Article Revision Skill `artr`
@@ -38,7 +31,7 @@ bibliography skills around a structured revision workflow.
 | `/r-freeze` | **Congela** una parte conclusa (paragrafo/sezione/frammento) nel freeze ledger; in seguito la skill avvisa prima di toccarla (`workflow/15-freeze-ledger.md`) |
 | `/r-thaw` | **Scongela** una parte congelata: torna modificabile senza avviso (`workflow/15-freeze-ledger.md`) |
 | `/r-status` | **Stato revisione** — mappa di cosa è concluso (🟢 frozen) e cosa richiede intervento (🟡 open), dal freeze ledger (`workflow/15-freeze-ledger.md`) |
-| `/r-handoff` | **Handoff** — scrive checkpoint, decision log, sync current files e commit scoped senza chiudere la revisione (`workflow/06-handoff.md`) |
+| `/r-handoff` | **Handoff** — scrive checkpoint, decision log, sync current files, commit scoped e push senza chiudere la revisione (`workflow/06-handoff.md`) |
 | `/r-resume` | **Resume** — riprende da un task file sospeso senza nuovo bump (`workflow/06-handoff.md`) |
 | `/r-bump` | Bump article version (call `workflow/60-bump-version.md`) |
 | `/r-sheet` | Generate final revision sheet (call `workflow/70-final-sheet.md`) |
@@ -334,7 +327,7 @@ data-source section in the project's `AGENTS.md`), with an explicit criterion
 (column, filter, denominator, regex with word boundaries). If no source
 reproduces the value, the point is `Deferred` — never replaced with a
 plausible number. Skipping this when a figure is in scope is a binding
-violation, same severity as an unauthorized auto-commit.
+violation, same severity as an unsafe or out-of-scope Git checkpoint.
 
 ## Freeze ledger (advisory, persistent)
 
@@ -436,6 +429,8 @@ Optional:
   `/r-gdrive` when the MCP Drive connector is unavailable.
 - `AUTO_BUMP_THRESHOLD` — number of accepted changes that triggers a mid-session
   bump proposal. Default: `5`.
+- `AUTO_GIT_CHECKPOINT_THRESHOLD` — number of applied changes that triggers an
+  automatic scoped commit and push. Default: `5`; independent from bumps.
 
 ## Python execution contract
 
@@ -459,7 +454,11 @@ Optional:
 0a. `workflow/06-handoff.md` — resumable checkpoint and resume workflow. Called
    by `pause`, `stop`, `/r-handoff`, `/r-resume`, or whenever the agent may be
    interrupted before natural closure. A handoff writes a checkpoint, decision
-   log entry, current-file sync, and scoped commit without closing the round.
+   log entry, current-file sync, scoped commit, and verified push without
+   closing the round.
+0b. `workflow/07-git-checkpoint.md` — automatic threshold and boundary Git
+   checkpoints. Stages only explicit active-session files, commits with normal
+   hooks, pushes to the configured upstream, and verifies the remote hash.
 1. `workflow/00-bootstrap.md` — set up the revision environment if missing
    (venv with Python deps, `.bib` file, `.env` with editorial parameters
    and Zotero credentials, editorial norms file). Idempotent: skips
@@ -474,8 +473,9 @@ Optional:
    `revisions/<reviewer>/revision-plan-vN.md` from the template, with
    each point in `To decide` state.
 4. `workflow/30-iterate-points.md` — for each point, propose, ask
-   `Accetta / Modifica / Rivedi completamente / Tieni in considerazione`, apply on `Accetta`. **Never commit
-   automatically** — the user controls git.
+   `Accetta / Modifica / Rivedi completamente / Tieni in considerazione`, apply
+   on `Accetta`, increment the Git checkpoint counter, and call `07` at the
+   configured threshold.
 4a. `workflow/31-paragraph-by-paragraph.md` — triggered by `/r-pp` or
     `/r-pp-a`. Walk every paragraph sequentially with AI diagnostic analysis
     before proposing; each paragraph must carry chapter and line-range
@@ -501,8 +501,9 @@ Optional:
 4f. `workflow/37-scoped-auto-revision.md` — triggered by `/r-auto`. Requires a
    named task and immutable scope manifest; delegates non-overlapping,
    proposal-only work to subagents, integrates eligible patches through the
-   coordinator, runs an independent semantic/scope audit, and performs
-   automatic technical closure on success.
+   coordinator, runs bounded audits before threshold checkpoints plus an
+   independent whole-run semantic/scope audit, and performs automatic technical
+   closure and a final Git flush on success.
 5. `workflow/40-bibliography-check.md` — when a citation is touched or new
    keys are introduced.
 6. `workflow/50-sample-description.md` — when the methodology asks for a
@@ -521,9 +522,10 @@ Optional:
    final-sheet-vN.md` with the post-revision status.
 9. `workflow/95-decision-log.md` — mandatory decision-log step. Record the round in
    `revisions/decision-log/` and update `index.md`, close the task file, then
-   call `96-sync-current.md`. Also supports `mode=handoff`, where it records a
-   checkpoint without closing the task. The round is not closed until all three
-   closure-mode steps complete.
+   call `96-sync-current.md` and flush through `07-git-checkpoint.md`. Also
+   supports `mode=handoff`, where it records a checkpoint without closing the
+   task; `06-handoff.md` owns that mode's flush. The round is not closed until
+   log, sync, commit, push, and remote verification complete.
 10. `workflow/96-sync-current.md` — mandatory sync step (called by 95). Overwrites
    `articles/current.md`, `articles/current.docx`, and
    `bibliography/bibliography.docx`. Requires pandoc; uses `--citeproc` and
@@ -670,9 +672,11 @@ edits outside scope. These are stop conditions.
 A complete `/r-auto` invocation also authorizes the mandatory session-start
 version bump, task/report files, and automatic technical closure: final sheet,
 decision log, `current.md`, `current.docx`, and `bibliography.docx`. Do not ask
-again at the end. Closure never authorizes a commit, push, Drive sync, redline,
-or colleague approval. On audit or export failure, stop with the task open or
-partial; never report closure as successful.
+again at the end. It also authorizes the scoped threshold and boundary commits
+and pushes defined by `07-git-checkpoint.md`; Drive sync, redline, colleague
+approval, force-pushes, and unrelated Git paths remain unauthorized. On audit
+or export failure, stop with the task open or partial; never report closure as
+successful.
 
 `manual`, `ferma auto-mode`, `pause`, `stop`, or `sospendi` ends automatic
 execution and routes through `workflow/06-handoff.md`.
@@ -694,7 +698,12 @@ the intention in the ledger (`log-comment`). Then advance.
 
 ### Handling responses
 
-- `Accetta` (with selected numbers) → apply via Edit only the numbered modifications. Mark applied modifications as `Accepted` in the project file. Increment the *accepted-since-last-bump* counter. **Do not commit.** When the counter reaches `AUTO_BUMP_THRESHOLD`, suggest a version bump (see step 7). Ask for further changes on the same paragraph.
+- `Accetta` (with selected numbers) → apply via Edit only the numbered
+  modifications. Mark them `Accepted`, increment both the bump counter and the
+  task-file Git counter, and call `07-git-checkpoint.md` automatically when the
+  Git threshold is reached. When the bump counter reaches
+  `AUTO_BUMP_THRESHOLD`, suggest a version bump (see step 7). Ask for further
+  changes on the same paragraph.
 - Every decision interaction must be compatible with the project's
   `decision-log` skill. At the end of the revision round, `95-decision-log.md`
   is mandatory: the round must always be logged, even if the final outcome is
@@ -752,21 +761,24 @@ editorial layout:
 
 ## Git contract
 
-- **The user controls normal git operations.** The skill never commits, stages,
-  or pushes on proposal acceptance. Modifications to the article, the `.bib`,
-  the project file, and the final sheet are written to disk and remain there
-  until the user gives an explicit git instruction.
-- **Handoff is the only automatic git exception.** `workflow/06-handoff.md`
-  writes a checkpoint, records a decision-log checkpoint, syncs current files,
-  stages only active-session files, and creates a commit with a clear message.
-  It never pushes and never includes unrelated user changes.
-- After each accepted change, the skill briefly notes that there are
-  pending changes — without performing any git action unless explicitly asked.
-- Suggested commit message format (when the user asks): `revision(<reviewer-slug>): <point-id> — <summary>`. The skill can supply the message text in chat for the user to paste.
-- If the user explicitly asks the skill to commit on their behalf, do so
-  with `git commit` and without `--no-verify`.
-- If the user explicitly authorizes a push, confirm the target remote/branch
-  when ambiguous, then run `git push`.
+- **Routine revision checkpoints are automatic.** Invocation of the skill
+  authorizes `workflow/07-git-checkpoint.md` to commit and push after
+  `AUTO_GIT_CHECKPOINT_THRESHOLD` applied changes, without another prompt.
+- **Count changes precisely.** One numbered accepted modification counts as one
+  change; in `/r-auto`, one integrated changed manifest unit counts as one.
+- **Flush boundaries.** Handoff and successful closure commit and push any
+  remaining active-session state even below the threshold. Do not create empty
+  commits.
+- **Stage by explicit manifest only.** Never use `git add -A`, `git add .`,
+  unresolved globs, `.env`, or unrelated user paths. Unrelated staged changes
+  are a stop condition.
+- **Use the configured upstream.** Run normal hooks, never use `--no-verify`,
+  and verify the pushed hash with the remote. Never pull, merge, rebase, amend,
+  reset, or force-push automatically.
+- If a local commit succeeds but push fails, preserve it, stop the revision,
+  report the hash and error, and retry the push before accepting new changes.
+- Manual Git operations outside active-session checkpoints remain under direct
+  user control. Automatic checkpoints do not authorize PRs, tags, or releases.
 
 ## Revision closure triggers
 
@@ -793,10 +805,12 @@ closure and uses `workflow/06-handoff.md`.
 2. Ask: *"Procedo con la chiusura? (sì / sì senza final sheet / annulla)"*
 3. On confirm:
    - `workflow/70-final-sheet.md` — if user requests it
-   - `workflow/95-decision-log.md` — mandatory (closes task file + calls `96-sync-current.md`)
+   - `workflow/95-decision-log.md` — mandatory (closes task file, calls
+     `96-sync-current.md`, then flushes through `07-git-checkpoint.md`)
 
 Never advance to the closure sequence without user confirmation. Never skip
-`95-decision-log.md` or `96-sync-current.md` once closure is confirmed.
+`95-decision-log.md`, `96-sync-current.md`, or the final scoped commit/push once
+closure is confirmed.
 Exception: a fully specified `/r-auto` invocation is prior confirmation for the
 technical closure defined in `workflow/37-scoped-auto-revision.md`.
 
@@ -807,8 +821,8 @@ similar while the round is not complete, run `workflow/06-handoff.md` instead of
 the closure sequence. Handoff writes a checkpoint in the task file, marks the
 session `paused`, records the current unit/proposal/pending decisions, and
 creates a decision-log checkpoint, syncs current files, and creates a scoped git
-commit with a clear message before printing the exact next action for a future
-agent.
+commit and verified push with a clear message before printing the exact next
+action for a future agent.
 
 If the user says `riprendi`, `continua`, `/r-resume`, or re-invokes a command
 after interruption, run `workflow/06-handoff.md#resume-from-handoff` during
@@ -836,7 +850,7 @@ point in the workflow:
 | **Colleague approval** (`/r-approve`) | `/r-approve` | Gate `Accepted` points behind colleague sign-off (Doc suggestions or `approvals.md`). `approve` → mark approved; `changes` → re-propose via the decision loop; `reject` → ask user (no auto-revert). |
 | **Redline export** (`/r-redline`) | `/r-redline` | Colored old-vs-new `.docx`/`.html` for the reviewer + response-to-reviewers letter. Separate from the clean submission file. No interactive decision loop. |
 | **Guide** (`/r-guide`) | `/r-guide` | Print the recommended full revision path: TOV + `/r-global` + `/r-pp-a` with chapter handoffs + closure + `/r-pr-2` QA + mini-round. Read-only, no bump. |
-| **Handoff / Resume** (`/r-handoff`, `/r-resume`) | `/r-handoff`, `/r-resume`, `pause`, `stop`, `sospendi`, `riprendi`, `continua` | Save a resumable checkpoint in the current task file, write decision log, sync current files, and commit the handoff state without closing the round; later resume that same task without a new mandatory bump. |
+| **Handoff / Resume** (`/r-handoff`, `/r-resume`) | `/r-handoff`, `/r-resume`, `pause`, `stop`, `sospendi`, `riprendi`, `continua` | Save a resumable checkpoint in the current task file, write decision log, sync current files, then commit and push the handoff state without closing the round; later resume that same task without a new mandatory bump. |
 | **Freeze** (`/r-freeze`) | `/r-freeze [unit]` | Mark a concluded part 🟢 frozen in the ledger. No-arg = last unit worked on; `P4` / `§3` / `§3 tutto` target explicitly. Ledger-only, no article edit. |
 | **Thaw** (`/r-thaw`) | `/r-thaw [unit]` | Mark a frozen part 🟡 open again so it can be revised without the advisory warning. |
 | **Status** (`/r-status`) | `/r-status` | Print the frozen/open/wip snapshot from the ledger + the next suggested intervention. Read-only. |
@@ -867,6 +881,7 @@ The closed task file contains:
 - A step-by-step status table (`done` / `skipped` / `failed`).
 - The latest `## Handoff / Ripresa` checkpoint, if the session was paused.
 - Accepted / modified / fully revised / deferred counts.
+- Automatic Git checkpoint threshold, counter, and published sequence.
 - Final article char count vs limit.
 - The decision-log session identifier.
 
@@ -885,7 +900,7 @@ Never skip task file creation. If `TASK_FILE_PATH` is not set when `95-decision-
 
 **The `AUTO_BUMP_THRESHOLD` still applies** for mid-session bumps: after N accepted changes, the skill proposes an additional bump. This is separate from the mandatory session-start bump.
 
-**Suggested commit message for the session-start bump:**
+**Checkpoint subject containing the session-start bump:**
 ```
 bump: vN → v(N+1) (start revision session)
 ```
@@ -909,6 +924,7 @@ Run Python scripts with the project's Python venv (`PYTHON_BIN`). Bootstrap asks
 | `scripts/new_version.sh` | Bump filename to `<prefix>-v(N+1)-YYYY-MM-DD-HHMM` |
 | `scripts/diff_versions.sh` | Word-level diff between two versions |
 | `scripts/sync_current.sh` | Sync `current.md`, `current.docx`, and a non-empty citeproc-rendered `bibliography.docx` after each revision round |
+| `scripts/git_checkpoint.sh` | Scoped commit + non-force push to the current upstream with remote-hash verification |
 
 ## Skill is **not** for
 
@@ -916,4 +932,5 @@ Run Python scripts with the project's Python venv (`PYTHON_BIN`). Bootstrap asks
 - Editing `.bib` independently — defer to the bibliography skill (e.g.
   `praxis-bibliography-citations`).
 - Anonymisation (XXX placeholders) — handle in a dedicated pass.
-- Opening PRs or sending email. Committing is allowed only on explicit user instruction or the mandatory handoff commit; pushing is allowed only on explicit user instruction, following the Git contract.
+- Opening PRs or sending email. Automatic Git activity is limited to the scoped
+  threshold and boundary checkpoints defined by `07-git-checkpoint.md`.

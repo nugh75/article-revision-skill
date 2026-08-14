@@ -122,7 +122,11 @@ Optional shortcuts remain accepted for speed:
    numbers, pending items, and status (`accepted` if all accepted, `partial`
    otherwise).
 4. Increment the *accepted-since-last-bump* counter.
-5. **Do not commit.**
+5. Increment `changes-since-git-checkpoint` by the number of accepted numbered
+   modifications. After the article, project file, sidecar, and ledger state
+   are consistent, call `07-git-checkpoint.md` immediately if the counter has
+   reached `AUTO_GIT_CHECKPOINT_THRESHOLD`. The resulting scoped commit and push
+   are automatic; do not ask for confirmation.
 6. **Do not advance automatically.** Output:
 
    ```text
@@ -190,7 +194,7 @@ Then advance.
 
 ## 5. Edge Cases
 
-- **Multiple decisions in one user message** (for example, *"Accetta tutto tranne punto 3: tienilo in considerazione"*). Process them sequentially with the per-point logic above. Still no auto-commit.
+- **Multiple decisions in one user message** (for example, *"Accetta tutto tranne punto 3: tienilo in considerazione"*). Process them sequentially with the per-point logic above, then run one automatic checkpoint if the accumulated counter reaches the threshold.
 - **Character overshoot after Accetta.** Report and ask: `The overrun is now +X. Do you prefer to proceed and handle it in the final sweep, or look for a compensating cut now?`
 - **Bibliography conflict.** If the user wants a key that does not exist or has dubious metadata, defer to `40-bibliography-check.md` and do not apply until cleared.
 - **Anglicism not in whitelist** (`ARTICLE_LANG=it` only). Surface in the proposal block under `Possible exceptions`; the user decides whether to add it to the whitelist or rephrase.
@@ -203,7 +207,11 @@ Then advance.
 
 ## 6. State Persistence
 
-The accepted-since-bump counter and per-point decision state live entirely inside the `revision-plan-vN.md` file. On every `Accetta`, `Modifica`, `Rivedi completamente`, or `Tieni in considerazione`, rewrite the relevant section of that file. This way, an interrupted session resumes cleanly: when the skill is re-invoked, it reads the project file and continues from the first point still in `To decide` state.
+The accepted-since-bump counter and per-point decision state live inside the
+`revision-plan-vN.md` file. Git checkpoint state lives in `TASK_FILE_PATH`.
+On every `Accetta`, `Modifica`, `Rivedi completamente`, or
+`Tieni in considerazione`, update the applicable state file so an interrupted
+session resumes cleanly.
 
 ## 7. Revision Closure
 

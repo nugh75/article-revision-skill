@@ -4,9 +4,10 @@ A Claude Code skill that coordinates **iterative peer-revision rounds on scienti
 
 It orchestrates the recurring tasks of academic revision — collecting reviewer feedback, proposing surgical edits, verifying citations, computing sample statistics, tracking the editorial budget, bumping versions — into a structured, file-based, idempotent workflow.
 
-The user keeps full control over normal git work. Handoff is the only automatic
-exception: the skill commits the checkpoint state with a clear message, and
-never pushes.
+The skill creates scoped Git checkpoints automatically after a configurable
+number of applied changes and pushes them to the current upstream. It flushes
+remaining session state at handoff and closure while leaving unrelated work
+untouched.
 
 ---
 
@@ -20,6 +21,8 @@ For each reviewer point (or arbitrary revision request) the skill:
 4. Waits for `Accetta / Modifica / Rivedi completamente / Tieni in considerazione`.
 5. On accept: applies the diff, updates the *project file* (the persistent revision plan), bumps a counter.
 6. After N accepted changes, **proposes** (never forces) a versioned snapshot of the article: `<prefix>-v(N+1)-YYYY-MM-DD-HHMM[-anonymous].md`.
+7. After `AUTO_GIT_CHECKPOINT_THRESHOLD` applied changes, commits only explicit
+   session files and pushes automatically; handoff and closure flush the tail.
 
 It also handles:
 
@@ -93,6 +96,7 @@ Recommended:
 - `ARTICLE_LANG` — force language detection (default: auto).
 - `PYTHON_BIN` — Python interpreter for skill scripts (default: `.venv/bin/python`).
 - `AUTO_BUMP_THRESHOLD` — how many accepted changes before the skill proposes a version bump (default: 5).
+- `AUTO_GIT_CHECKPOINT_THRESHOLD` — how many applied changes before an automatic scoped commit and push (default: 5).
 
 ---
 
@@ -166,6 +170,9 @@ The skill is driven by the markdown files in `workflow/`, executed in order:
 | File | Purpose |
 |---|---|
 | `00-bootstrap.md` | Create venv, `.bib`, `.env`, norms file if missing |
+| `05-task.md` | Persist session and Git-checkpoint state |
+| `06-handoff.md` | Pause/resume with sync, scoped commit, and verified push |
+| `07-git-checkpoint.md` | Threshold/boundary commit and push contract |
 | `10-setup.md` | Load configuration and active article |
 | `20-plan-revision.md` | Parse reviewer feedback into a project file |
 | `30-iterate-points.md` | The core loop: propose, ask, apply, log |
@@ -186,6 +193,7 @@ The skill is driven by the markdown files in `workflow/`, executed in order:
 | `scripts/sample_stats.py` | Per-cohort stats from `.xlsx`/`.csv` via YAML mapping |
 | `scripts/new_version.sh` | Bump filename to `<prefix>-v(N+1)-YYYY-MM-DD-HHMM` |
 | `scripts/diff_versions.sh` | Word-level diff between two versions |
+| `scripts/git_checkpoint.sh` | Scoped commit, upstream push, and remote-hash verification |
 
 ---
 
@@ -219,7 +227,9 @@ content and enforce these layout rules:
 
 ## Design principles
 
-- **User controls git.** The skill never commits, stages, or pushes on proposal acceptance. Handoff is the exception: it creates a scoped checkpoint commit with a clear message and still never pushes.
+- **Automatic, scoped Git history.** The skill commits and pushes every
+  configured number of applied changes, plus at handoff and closure. It stages
+  explicit session paths only, runs hooks, and never force-pushes.
 - **Always ask before creating.** Bootstrap, version bump, file generation — every write step asks for confirmation when ambiguous.
 - **Per-point granularity.** No mass replacements, no batched approvals. Every individual change goes through *Accetta / Modifica / Rivedi completamente / Tieni in considerazione*.
 - **Paragraphs are anchored.** Every paragraph reference includes chapter and exact Markdown line range; chapters follow the first number of numbered headings.

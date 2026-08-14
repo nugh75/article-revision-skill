@@ -17,7 +17,7 @@ The two files (`AGENTS.md` and `OPENCODE.md`) carry the same workflow. Edit one 
 | `/r-freeze` | Freeze a concluded part in the per-article freeze ledger (advisory) |
 | `/r-thaw` | Reopen a frozen part so it can be revised without the warning |
 | `/r-status` | Print the frozen (🟢) vs open (🟡) snapshot from the freeze ledger |
-| `/r-handoff` | Write checkpoint, decision log, current-file sync, and scoped commit without closing the revision round |
+| `/r-handoff` | Write checkpoint, decision log, current-file sync, scoped commit, and verified push without closing the revision round |
 | `/r-resume` | Resume from a paused task file without a new version bump |
 | `/r-bump` | Bump article version (vN → vN+1) |
 | `/r-sheet` | Generate final revision sheet |
@@ -28,8 +28,8 @@ Revision commands enforce the mandatory session-start bump (`10-setup.md` step 5
 The read-only commands `/r-guide`, `/r-help`, and `/r-status`, the ledger-only commands
 `/r-freeze` / `/r-thaw`, and `/r-resume` from a paused task do **not** trigger a bump.
 `pause`, `stop`, `sospendi`, and `/r-handoff` write a checkpoint and create a
-decision-log checkpoint, sync current files, and create a scoped handoff commit;
-they do not run the closure sequence or push.
+decision-log checkpoint, sync current files, then create and push a scoped
+handoff commit; they do not run the closure sequence.
 The freeze ledger (`workflow/15-freeze-ledger.md`) is checked before every
 proposal: a frozen part triggers a warning + explicit confirmation before editing.
 
@@ -37,7 +37,8 @@ Commands are registered in the project's `opencode.json` under `"command"`.
 
 For the complete workflow, see `AGENTS.md` in this repository. The same rules apply in opencode, including:
 
-- user-controlled git operations, with the mandatory scoped commit on handoff;
+- automatic scoped commit/push after `AUTO_GIT_CHECKPOINT_THRESHOLD` applied
+  changes and at handoff/closure, with unrelated paths excluded;
 - paragraph references always include chapter and exact Markdown line range;
 - per-point `Accetta / Modifica / Rivedi completamente / Tieni in considerazione` decisions;
 - resumable handoff checkpoints via `workflow/06-handoff.md`;

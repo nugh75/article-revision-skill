@@ -17,7 +17,8 @@ Each reviewer point is evaluated separately. For each point:
 
 1. The `article-revision` skill shows the original text and the proposed change in chat.
 2. The user decides: `Accetta` / `Modifica` / `Rivedi completamente` / `Tieni in considerazione`.
-3. On `Accetta`: the change is applied to the article file. The skill does not commit.
+3. On `Accetta`: apply the change, increment the task-file Git counter, and
+   run the automatic scoped commit/push when its threshold is reached.
 4. On `Modifica`: the skill regenerates the selected modification according to the user's direction and repeats from step 1.
 5. On `Rivedi completamente`: the skill regenerates the whole proposal from the original text.
 6. On `Tieni in considerazione`: the point remains in the project file as deferred/context. No file edit is made.

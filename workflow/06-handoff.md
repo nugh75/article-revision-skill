@@ -2,8 +2,8 @@
 
 Creates a resumable checkpoint for an unfinished revision session, records that
 checkpoint in the decision log, syncs current files, then commits the handoff
-state. This is not revision closure: it does not close the task file, does not
-push, and does not mark the round complete.
+state and pushes it to the configured upstream. This is not revision closure:
+it does not close the task file and does not mark the round complete.
 
 ## When to invoke
 
@@ -72,10 +72,12 @@ decisions and `Prossima azione esatta`.
 This checkpoint log and sync are mandatory on every handoff. They do not replace
 the final closure decision log and final closure sync.
 
-## 3. Handoff Commit
+## 3. Handoff Commit and Push
 
-After the checkpoint, decision-log entry, and sync are written, create a git
-commit for the handoff state.
+After the checkpoint, decision-log entry, and sync are written, call
+`workflow/07-git-checkpoint.md` with `mode=flush`. Handoff must publish all
+remaining active-session state even when the change counter is below the normal
+threshold.
 
 1. From the project root, inspect the worktree:
 
@@ -84,7 +86,8 @@ commit for the handoff state.
    git diff --name-only
    ```
 
-2. Stage only files that belong to the active revision session:
+2. Build the explicit session-file manifest using the rules in
+   `07-git-checkpoint.md`. It normally includes:
    - `TASK_FILE_PATH`;
    - `ARTICLE_PATH`;
    - the active revision plan/project file;
@@ -96,17 +99,14 @@ commit for the handoff state.
    - synced current files (`articles/current.md`, `articles/current.docx`,
      `bibliography/bibliography.docx`) when generated or changed.
 
-   Leave unrelated user changes unstaged and mention them in chat. If the repo
-   provides a commit helper script, use it only if it preserves this same scoped
-   staging rule and runs a normal `git commit`.
+   Leave unrelated user changes unstaged and mention them in chat.
 
-3. Commit without bypassing hooks:
+3. Run the checkpoint helper without bypassing hooks:
 
    ```bash
-   git add -- <session files>
-   git commit -m "handoff(<article-slug>): pause <command> at <unit>" \
-     -m "Checkpoint: <what was completed or generated so far>" \
-     -m "Next: <Prossima azione esatta>"
+   scripts/git_checkpoint.sh \
+     --message "revision(<article-slug>): handoff — <unit>" \
+     -- <session files>
    ```
 
    The subject must identify the article slug, command, and current unit. The
@@ -114,22 +114,22 @@ commit for the handoff state.
    `--no-verify`.
 
 4. If there are no changes after writing the checkpoint, do not create an empty
-   commit unless the user explicitly asks for one. Report that there was nothing
-   to commit.
+   commit. Report that there was nothing to commit.
 
-5. Handoff never pushes. `gh` may be used for repository inspection if useful,
-   but pushing or opening a PR is out of scope for handoff.
+5. On success, verify the pushed commit against the remote branch and record
+   the short hash in chat. Do not ask for commit or push permission. Opening a
+   PR remains out of scope.
 
 ## 4. Chat Output
 
 Output a concise handoff block:
 
 ```text
-Handoff scritto e commit creato.
+Handoff scritto, commit creato e push verificato.
 - Task file: <TASK_FILE_PATH>
 - Decision log: <session-NNN>
 - Sync current: <ok|warnings>
-- Commit: <short-hash> <subject>
+- Commit: <short-hash> <subject> → <remote>/<branch>
 - Stato: paused
 - Ripresa: <Prossima azione esatta>
 ```
@@ -184,8 +184,8 @@ re-invokes the same command in a project with a paused task file):
 
 - Handoff never replaces the mandatory closure sequence. When the user later
   closes the round, still run `95-decision-log.md` and `96-sync-current.md`.
-- Handoff must write a decision-log checkpoint, sync current files, and commit
-  the checkpoint state with a clear message, but it never pushes.
+- Handoff must write a decision-log checkpoint, sync current files, then commit
+  and push the checkpoint state through `07-git-checkpoint.md`.
 - Handoff stages only active-session files. Never include unrelated user changes
   in the handoff commit.
 - Handoff never silently discards a pending proposal. Record pending item numbers,

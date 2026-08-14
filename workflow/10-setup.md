@@ -14,7 +14,13 @@ Required keys:
 - `BIBLIOGRAPHY_BIB_PATH`
 - `EDITORIAL_NORMS_PATH`
 
-Optional: `ARTICLE_LANG`, `ARTICLE_STYLE_NOTES`, `CROSSREF_USER_AGENT`, `OPENALEX_USER_AGENT`, Zotero keys, `PYTHON_BIN`, `DATA_VERIFY_PATH`, `DATA_VERIFY_NOTES`.
+Optional: `ARTICLE_LANG`, `ARTICLE_STYLE_NOTES`, `CROSSREF_USER_AGENT`, `OPENALEX_USER_AGENT`, Zotero keys, `PYTHON_BIN`, `DATA_VERIFY_PATH`, `DATA_VERIFY_NOTES`, `AUTO_BUMP_THRESHOLD`, `AUTO_GIT_CHECKPOINT_THRESHOLD`.
+
+Load `AUTO_GIT_CHECKPOINT_THRESHOLD`, defaulting to `5`. Require a positive
+integer. Before revision writes begin, verify that the project is on a named Git
+branch with one configured upstream. This is a read-only setup check for the
+automatic checkpoint contract in `07-git-checkpoint.md`; do not push during
+setup. If the Git state is ambiguous, stop before the first edit.
 
 If `DATA_VERIFY_PATH` is set (root of the authoritative dataset/platform for the article's empirical figures), hold it and `DATA_VERIFY_NOTES` in working memory: `workflow/51-data-verification.md` uses them to re-derive any numeric claim instead of inheriting it.
 
@@ -100,6 +106,7 @@ Setup complete
 - Limit: <N> {chars|words}
 - Current count: <M> ({over|under} by X)
 - Bibliography: <path> (Y entries)
+- Git checkpoints: every <AUTO_GIT_CHECKPOINT_THRESHOLD> applied changes → <upstream>
 
 Ready. Proceed?
 ```

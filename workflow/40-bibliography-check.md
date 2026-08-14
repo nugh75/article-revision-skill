@@ -44,7 +44,10 @@ The script writes a Markdown audit listing entries below the similarity threshol
 **Decisione sulla proposta?** Accetta correzione / Modifica metadata / Rivedi completamente / Tieni invariato con commento
 ```
 
-If the user chooses `Accetta correzione`, modify `.bib` and any inline occurrences in the article. Suggested commit message, if the user asks:
+If the user chooses `Accetta correzione`, modify `.bib` and any inline
+occurrences in the article, count the accepted correction as one applied
+change, and invoke `07-git-checkpoint.md` if the threshold is reached. Use this
+checkpoint subject pattern:
 
 ```text
 revision(<slug>): bib check — <bib_key> corrected
@@ -62,7 +65,9 @@ Default is conservative: **fix metadata, keep the key**, and document the remap 
 
 ## 5. Wrap
 
-After all flagged entries are decided, update the audit file with final decisions. Suggested commit message:
+After all flagged entries are decided, update the audit file with final
+decisions and keep it in the active-session manifest. Use this checkpoint
+subject pattern:
 
 ```text
 revision(<slug>): bib audit — N entries reviewed

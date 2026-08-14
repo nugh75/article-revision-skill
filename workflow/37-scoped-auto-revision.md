@@ -25,10 +25,11 @@ A fully specified invocation authorizes:
 - the task file, worker reports, audit report, final sheet, decision log, and
   current exports;
 - automatic application of eligible edits inside scope;
-- technical closure after a passing audit.
+- technical closure after a passing audit;
+- threshold-based scoped Git checkpoints and their automatic pushes.
 
-It does not authorize commits, pushes, Drive writes, redlines, colleague
-approval, or bibliography enrichment outside the selected task.
+It does not authorize Drive writes, redlines, colleague approval, bibliography
+enrichment outside the selected task, force-pushes, or unrelated Git paths.
 
 ## 2. Setup and immutable scope manifest
 
@@ -122,8 +123,11 @@ tokens, headings, blank-line/paragraph structure, and theoretically relevant
 examples unless the selected task explicitly and safely requires a local change.
 
 Maintain counts for checked, changed, unchanged, deferred, and stopped units.
-Do not trigger mid-session bump proposals while `/r-auto` is running; the
-session-start version remains the integration target.
+Increment `changes-since-git-checkpoint` once per integrated changed manifest
+unit. Integrate in threshold-sized batches; before each mid-run checkpoint, run
+the bounded batch audit required by `07-git-checkpoint.md`, then commit and push
+automatically. Do not trigger mid-session bump proposals while `/r-auto` is
+running; the session-start version remains the integration target.
 
 ## 6. Independent audit
 
@@ -165,9 +169,15 @@ the user's initial `/r-auto` authorization is sufficient. Do not ask again.
 4. Verify `articles/current.md` matches the active version byte-for-byte and
    inspect extracted text from both generated DOCX files. File size alone is
    not sufficient.
-5. Report technical closure successful only if decision log, task close,
-   Markdown sync, required DOCX exports, and content checks pass.
+5. Require `95-decision-log.md` auto-closure to return the final checkpoint
+   hash, upstream, and successful remote verification. Its flush includes final
+   sheet, decision log, task file, current exports, manifest, reports, audit,
+   article, and other active-session files.
+6. Report technical closure successful only if decision log, task close,
+   Markdown sync, required DOCX exports, content checks, commit, push, and
+   remote verification pass.
 
-If closure or export verification fails, mark the relevant task step `failed`
-or leave the session `partial`, report the exact artifact, and stop without
-commit or push.
+If audit, closure, or export verification fails before the flush, mark the
+relevant task step `failed` or leave the session `partial`, report the exact
+artifact, and do not create the closure checkpoint. If commit or push fails,
+preserve any local commit and stop under `07-git-checkpoint.md` recovery rules.

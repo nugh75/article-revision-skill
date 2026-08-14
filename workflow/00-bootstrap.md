@@ -80,6 +80,7 @@ Optional but recommended:
 - `ARTICLE_LANG` (usually empty; auto-detected)
 - `PYTHON_BIN` (usually `.venv/bin/python`)
 - `AUTO_BUMP_THRESHOLD` (default `5`)
+- `AUTO_GIT_CHECKPOINT_THRESHOLD` (default `5`; automatic scoped commit + push)
 
 3. Append new keys to `.env` or create the file. Never overwrite existing values without asking.
 4. Re-load `.env` after edits and continue.
@@ -97,6 +98,7 @@ To complete the environment I need these values. Reply by number, or leave blank
 5. Zotero — user_id, api_key, group_id (comma-separated):
 6. Python interpreter (default `.venv/bin/python`):
 7. Auto-bump threshold (default 5):
+8. Automatic Git checkpoint threshold (default 5):
 ```
 
 ## Step D — Editorial Norms File

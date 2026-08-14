@@ -256,7 +256,9 @@ The user may decide by category: `Accetta logica`, `Modifica tono: <direzione>`,
 
 Follow the standard response handling from `30-iterate-points.md`, section 4:
 
-- **Accetta** → edit file, increment counter, ask "Ci sono altri cambiamenti in questo paragrafo?".
+- **Accetta** → edit file, increment the bump and Git checkpoint counters, run
+  `07-git-checkpoint.md` at threshold, then ask "Ci sono altri cambiamenti in
+  questo paragrafo?".
 - **Modifica** → regenerate modification N per direction.
 - **Rivedi completamente** → regenerate the full proposal from the original paragraph.
 - **Tieni in considerazione** → record the note as deferred/context; no file edits.
