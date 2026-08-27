@@ -384,7 +384,7 @@ Criteria:
    Procedo con la chiusura?
      1. Final sheet (/r-sheet)  — facoltativo
      2. Decision log            — obbligatorio
-     3. Sync current files      — obbligatorio
+     3. Sync derived exports    — obbligatorio
    (sì / sì senza final sheet / annulla)
    ```
 

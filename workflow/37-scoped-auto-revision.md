@@ -13,7 +13,7 @@ broaden one another.
 ## Authorization
 
 A complete command authorizes the first-edit bump, task/report files, eligible
-scoped edits, independent audit, decision log, and local current exports.
+scoped edits, independent audit, decision log, and local derived exports.
 
 Only `--git` authorizes threshold commits, the final commit, and push. Record
 `GIT_AUTHORIZED=true|false` before any work. The command never authorizes Drive,

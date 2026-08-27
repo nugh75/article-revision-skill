@@ -1,141 +1,85 @@
-# 96 — Sync Current Files
+# 96 — Sync Derived Exports
 
-Mandatory post-decision-log step. Aligns the three "current" files so that
-collaborators and external tools always see a single stable pointer to the
-latest revision state.
+Mandatory post-decision-log step. The active article is already the authoritative
+Markdown source: it is the canonical `article-vN-…md` file with the highest
+numeric `N` in `articles/versions/`. This step creates only derived exports; it
+never creates or updates an `articles/current.md` copy.
 
-This step is called by `95-decision-log.md` immediately after the session
-entry is written. It runs in both `closure` mode and `handoff` mode, even when
-no changes were accepted this round.
+Run after both closure and explicit handoff, including rounds with no accepted
+text edits. In `auto-closure`, missing, empty, or unverifiable DOCX output is
+fatal and returns `FAIL`.
 
-It also supports `auto-closure` mode. There, missing or empty DOCX output and
-failed extracted-text verification are fatal and return `FAIL`; the permissive
-Pandoc warning used by interactive closure does not apply.
+## Outputs
 
-## Files produced / overwritten
+| File | Content |
+|---|---|
+| `articles/current.docx` | Word export generated directly from the active article |
+| `bibliography/bibliography.docx` | Formatted references from `reference.bib` |
+| `bibliography/bibliography.md` and `.csv` | Project lists, outside strict auto-closure |
 
-| File | Content | Location |
-|---|---|---|
-| `articles/current.md` | Copy of the active article version | `articles/` |
-| `articles/current.docx` | Pandoc conversion of `current.md` | `articles/` |
-| `bibliography/bibliography.docx` | Formatted reference list from `reference.bib` | `bibliography/` |
+`current.docx` is a disposable export and always lives in `articles/`, never in
+`articles/versions/`.
 
-> **Invariant:** the `current.*` files always live at the articles ROOT
-> (e.g. `articles/`), **never** inside a `versions/` snapshot subdirectory.
-> `sync_current.sh` enforces this by stripping any trailing `versions/`
-> segment from the source article path, so snapshot folders never accumulate
-> duplicate `current.*` files.
+## 1. Identify sources
 
-## 1. Identify Sources
+Load from working memory:
 
-From working memory:
-
-- `ARTICLE_PATH` — path to the active (bumped) article file.
-- `BIBLIOGRAPHY_BIB_PATH` — from `.env`.
+- `ARTICLE_PATH` — canonical path of the active article version;
+- `BIBLIOGRAPHY_BIB_PATH` — configured bibliography source;
 - `PYTHON_BIN` — project Python interpreter.
 
-## 2. Sync `current.md`
+Before exporting, require that `ARTICLE_PATH` exists and still resolves to the
+highest numeric version. A stale or frozen source returns `FAIL`.
 
-```bash
-cp "$ARTICLE_PATH" articles/current.md
-```
+## 2. Generate exports
 
-Overwrite unconditionally. Announce in chat:
-```
-current.md → articles/current.md ✓
-```
-
-## 3. Generate `current.docx`
-
-Run `scripts/sync_current.sh` which calls pandoc:
+Run:
 
 ```bash
 SYNC_MODE="$SYNC_MODE" bash scripts/sync_current.sh "$ARTICLE_PATH" "$BIBLIOGRAPHY_BIB_PATH"
 ```
 
-If pandoc is not installed, warn and skip (do not abort the closure):
-```
+The script passes `ARTICLE_PATH` directly to Pandoc. If
+`editorial-norms/reference.docx` or a CSL file exists, it applies them.
 
-For `SYNC_MODE=auto-closure`, do not skip: return `FAIL` with `pandoc missing`.
-⚠ pandoc non trovato — current.docx non generato.
-  Installa pandoc e riesegui: bash scripts/sync_current.sh
-```
+Interactive `closure` and `handoff` may warn and continue when Pandoc is absent.
+`auto-closure` must fail with `pandoc missing`.
 
-If a `--reference-doc` file exists at `editorial-norms/reference.docx`, pass it
-to pandoc for journal-compliant formatting.
+For `bibliography.docx`, require rendered body text beyond its heading. In
+`auto-closure`, also require non-empty extracted body text from
+`articles/current.docx`. Never report an export as synchronized when its check
+failed.
 
-## 4. Generate `bibliography.docx`
+## 3. Update the task
 
-The same `scripts/sync_current.sh` call handles this. It converts `reference.bib`
-to a formatted reference list using:
+- `closure`: set `Sync derived exports` to `done`.
+- `handoff`: set `Handoff checkpoint` to `paused` with note
+  `decision log + derived exports synchronized`; keep the final
+  `Sync derived exports` row open.
+- `auto-closure`: return the structured result to `95-decision-log.md`; that
+  workflow owns final task status.
 
-1. Pandoc with `--citeproc`, `nocite: @*`, and an explicit `refs` block so every
-   BibTeX entry is rendered even when the article does not cite it directly.
-2. CSL if a `.csl` file is found in `editorial-norms/`.
-3. `editorial-norms/reference.docx` if present, for journal-compliant Word layout.
-
-After generation, the script checks that `bibliography.docx` contains body text
-beyond the heading. If the file is missing, empty, or contains no rendered
-references, warn explicitly; do not report the bibliography sync as successful.
-
-For `SYNC_MODE=auto-closure`, extract and inspect text from both
-`articles/current.docx` and `bibliography/bibliography.docx`. Require non-empty
-article body text and rendered bibliography entries. Also require
-`cmp -s "$ARTICLE_PATH" articles/current.md`. Any failure returns `FAIL`.
-
-Announce in chat:
-```
-bibliography.docx → bibliography/bibliography.docx ✓ (<entry-count> entries)
-```
-
-## 5. Update Task File
-
-If `SYNC_MODE=closure`, call `workflow/05-task.md#update-step`:
-`Sync current files` → `done`.
-
-If `SYNC_MODE=handoff`, call `workflow/05-task.md#update-step`:
-`Handoff checkpoint` → `paused` with note `decision log + current files synced`;
-do not mark final `Sync current files` as done.
-
-If `SYNC_MODE=auto-closure`, do not update or close the task here. Return a
-structured `PASS`/`FAIL` result to `95-decision-log.md`, which owns final task
-status and the success message.
-
-## 6. Final Confirmation
-
-Output a single summary line in chat.
+## 4. Report
 
 For `closure`:
 
-```
+```text
 Chiusura completata.
-- articles/current.md          ✓
-- articles/current.docx        ✓ (or ⚠ pandoc missing)
-- bibliography/bibliography.docx ✓ (or ⚠ see above)
-- Decision log: session-NNN    ✓
-- Task file: <TASK_FILE_PATH>  ✓
+- active article source             ✓ <ARTICLE_PATH>
+- articles/current.docx             ✓ (or ⚠ pandoc missing)
+- bibliography/bibliography.docx    ✓ (or ⚠ see above)
+- Decision log: session-NNN         ✓
+- Task file: <TASK_FILE_PATH>       ✓
 ```
 
-The revision session is now fully closed.
+For `handoff`, use `Handoff sincronizzato`, report the same source and exports,
+and mark the task `paused`.
 
-For `handoff`:
-
-```
-Handoff sincronizzato.
-- articles/current.md            ✓
-- articles/current.docx          ✓ (or ⚠ pandoc missing)
-- bibliography/bibliography.docx ✓ (or ⚠ see above)
-- Decision log: session-NNN      ✓
-- Task file: <TASK_FILE_PATH>    paused
-```
-
-The revision session remains paused and resumable.
-
-For `auto-closure`, print no `Chiusura completata` message. Return:
+For `auto-closure`, print no completion message. Return:
 
 ```text
 AUTO_SYNC_RESULT: PASS|FAIL
-current_md: PASS|FAIL
+active_article: PASS|FAIL
 current_docx_text: PASS|FAIL
 bibliography_docx_text: PASS|FAIL
 ```

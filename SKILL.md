@@ -119,7 +119,7 @@ Supported tasks: `chiarezza`, `stile`, `connettori`, `terminologia`,
 `citazioni`, and `argomentazione`.
 
 - A complete `/r-auto` authorizes the first-edit bump, scoped low/medium-risk
-  edits, reports, independent audit, decision log, and local current exports.
+  edits, reports, independent audit, decision log, and local derived exports.
 - It does not authorize new claims, unverified evidence, substantive cuts,
   paragraph or section moves, frozen material, or choices between defensible
   interpretations.

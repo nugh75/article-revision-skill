@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-# sync_current.sh — align current.md, current.docx, bibliography.docx
+# sync_current.sh — regenerate the derived exports (current.docx, bibliography.docx)
+# from the active article version. No current.md copy exists: the active version
+# in articles/versions/ is the single authoritative source.
 # Usage: bash scripts/sync_current.sh <article-path> <bib-path>
 # Called by workflow/96-sync-current.md at the end of every revision session.
 
@@ -19,19 +21,48 @@ STRICT_SYNC=false
 ARTICLES_DIR="$(dirname "$ARTICLE")"
 BIB_DIR="$(dirname "$BIB")"
 
+# Export only from the canonical active source. A handoff resumed after a bump
+# must not silently regenerate current.docx from a now-frozen version.
+ARTICLE_NAME="$(basename "$ARTICLE")"
+if [[ ! -f "$ARTICLE" || "$(basename "$ARTICLES_DIR")" != "versions" \
+   || ! "$ARTICLE_NAME" =~ ^article-v([0-9]+)-.+\.md$ ]]; then
+  echo "⚠ sorgente articolo non canonica: $ARTICLE"
+  exit 1
+fi
+ARTICLE_VERSION=$((10#${BASH_REMATCH[1]}))
+MAX_VERSION=-1
+MAX_COUNT=0
+shopt -s nullglob
+for candidate in "$ARTICLES_DIR"/article-v*.md; do
+  candidate_name="$(basename "$candidate")"
+  if [[ "$candidate_name" =~ ^article-v([0-9]+)-.+\.md$ ]]; then
+    candidate_version=$((10#${BASH_REMATCH[1]}))
+    if (( candidate_version > MAX_VERSION )); then
+      MAX_VERSION=$candidate_version
+      MAX_COUNT=1
+    elif (( candidate_version == MAX_VERSION )); then
+      ((MAX_COUNT += 1))
+    fi
+  fi
+done
+shopt -u nullglob
+if (( ARTICLE_VERSION != MAX_VERSION || MAX_COUNT != 1 )); then
+  echo "⚠ la sorgente non è l'unica versione attiva: $ARTICLE"
+  exit 1
+fi
+
 # The bibliography lives at <project>/bibliography/, so the project root is
 # the parent of the bibliography directory.
 PROJECT_ROOT="$(cd "$BIB_DIR/.." && pwd)"
 
-# current.md / current.docx must ALWAYS live in the articles ROOT, never
-# inside a `versions/` snapshot subdir. If the active article is under
-# `<articles>/versions/`, strip that segment so the "current" files are not
-# duplicated into the snapshot folder (regression guard).
+# current.docx must ALWAYS live in the articles ROOT, never inside a
+# `versions/` snapshot subdir. If the active article is under
+# `<articles>/versions/`, strip that segment so the export is not duplicated
+# into the snapshot folder (regression guard).
 if [[ "$(basename "$ARTICLES_DIR")" == "versions" ]]; then
     ARTICLES_DIR="$(dirname "$ARTICLES_DIR")"
 fi
 
-CURRENT_MD="$ARTICLES_DIR/current.md"
 CURRENT_DOCX="$ARTICLES_DIR/current.docx"
 BIB_DOCX="$BIB_DIR/bibliography.docx"
 
@@ -60,11 +91,8 @@ docx_body_has_text() {
   [[ "$body" =~ [[:alnum:]] ]]
 }
 
-# --- 1. current.md ---
-cp "$ARTICLE" "$CURRENT_MD"
-echo "✓ current.md  → $CURRENT_MD"
-
-# --- 2. current.docx ---
+# --- 1. current.docx ---
+# Pandoc legge direttamente la versione attiva: nessuna copia current.md.
 if ! command -v pandoc &>/dev/null; then
   echo "⚠ pandoc non trovato — current.docx non generato"
   echo "  Installa pandoc e riesegui: bash scripts/sync_current.sh $ARTICLE $BIB"
@@ -86,7 +114,7 @@ else
   CSL_FILE="$(find_first_csl)"
   [[ -n "$CSL_FILE" ]] && PANDOC_OPTS+=(--csl "$CSL_FILE")
 
-  pandoc "${PANDOC_OPTS[@]}" -o "$CURRENT_DOCX" "$CURRENT_MD"
+  pandoc "${PANDOC_OPTS[@]}" -o "$CURRENT_DOCX" "$ARTICLE"
   if $STRICT_SYNC && ! docx_body_has_text "$CURRENT_DOCX"; then
     echo "⚠ current.docx generato ma senza corpo testuale verificabile"
     exit 1
@@ -94,7 +122,7 @@ else
   echo "✓ current.docx → $CURRENT_DOCX"
 fi
 
-# --- 3. bibliography.docx ---
+# --- 2. bibliography.docx ---
 if ! command -v pandoc &>/dev/null; then
   echo "⚠ pandoc non trovato — bibliography.docx non generato"
   $STRICT_SYNC && exit 1
@@ -148,9 +176,9 @@ MDEOF
   fi
 fi
 
-# --- 4. bibliography.md + bibliography.csv ---
-# Strict /r-auto closure authorizes only the current files and bibliography
-# DOCX, so leave these project-specific derivatives untouched in that mode.
+# --- 3. bibliography.md + bibliography.csv ---
+# Strict /r-auto closure authorizes only the derived DOCX exports, so leave
+# these project-specific derivatives untouched in that mode.
 if [[ "${SYNC_MODE:-closure}" != "auto-closure" ]]; then
   GEN_SCRIPT="$PROJECT_ROOT/bibliography/generate_lists.py"
   if [[ -f "$GEN_SCRIPT" ]]; then

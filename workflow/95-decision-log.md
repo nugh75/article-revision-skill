@@ -5,8 +5,8 @@ not create a decision log merely because the conversation ended.
 
 ## Modes
 
-- `closure`: close the task, write the final session entry, and sync current
-  files after the user confirms local closure.
+- `closure`: close the task, write the final session entry, and generate derived
+  exports after the user confirms local closure.
 - `handoff`: write a checkpoint session entry and sync without closing the task;
   used only for explicit `/r-handoff`.
 - `auto-closure`: write the final automatic session, run strict sync, and close
@@ -28,9 +28,10 @@ review or human approval.
 ## Sync
 
 Call `96-sync-current.md` using the same closure mode. It updates
-`articles/current.md`, `articles/current.docx`, and
-`bibliography/bibliography.docx`. Interactive closure may report unavailable
-DOCX tooling; auto-closure requires the configured strict checks.
+`articles/current.docx` directly from the active version and regenerates
+`bibliography/bibliography.docx`. It never creates a Markdown pointer copy.
+Interactive closure may report unavailable DOCX tooling; auto-closure requires
+the configured strict checks.
 
 Close the task only after the required local sync succeeds. On failure, keep it
 partial/in-progress and report the failed artifact.

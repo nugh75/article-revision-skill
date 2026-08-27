@@ -6,7 +6,7 @@ does not imply Git publication.
 ## Invocation modes
 
 - Natural `pause`, `stop`, `sospendi`, or `interrompi`: pause locally.
-- `/r-handoff`: write the local checkpoint, decision-log checkpoint, and current
+- `/r-handoff`: write the local checkpoint, decision-log checkpoint, and derived
   exports when a tracked task exists.
 - `/r-handoff --git` or an explicit `commit e push`: do the same local work,
   then call `07-git-checkpoint.md` with authorized flush mode.

@@ -36,18 +36,18 @@ have none. The file tracks applied work and provides the input summary for
 
 | Command | Steps (in order) |
 |---|---|
-| `/article-revision` | Plan revision · Iterate points · Bibliography check · Handoff checkpoint · Final sheet · Decision log · Sync current files |
-| `/r-pp` | Parse paragraphs · Walk P1..PN · Bibliography check · Handoff checkpoint · Final sheet · Decision log · Sync current files |
-| `/r-pp-a` | Parse paragraphs · Walk P1..PN (deep) · Bibliography check · Handoff checkpoint · Final sheet · Decision log · Sync current files |
-| `/r-pr-2` | Generate Reviewer A · Generate Reviewer B · Synthesize · Handoff checkpoint · Decision log · Sync current files |
-| `/r-conn` | Parse transitions · Diagnose · Fix selected · Handoff checkpoint · Decision log · Sync current files |
-| `/r-structure` | Inventory units · Map current/proposed architecture · Apply accepted structure · Preservation audit · Handoff checkpoint · Decision log · Sync current files |
-| `/r-redundancy` | Build proposition map · Classify clusters · Apply accepted decisions · Preservation audit · Handoff checkpoint · Decision log · Sync current files |
-| `/r-global` | Read article · Seven lenses · Save trace or fix selected · Handoff checkpoint · Decision log · Sync current files |
-| `/r-chapter` | Select section · Load article · Cross-article analysis · Fix selected · Handoff checkpoint · Decision log · Sync current files |
-| `/r-auto` | Resolve scope manifest · Delegate proposals · Integrate patches · Independent audit · Bibliography check · Final sheet · Decision log · Sync current files |
-| `/r-redline` | Generate redline · Response letter · Handoff checkpoint · Decision log · Sync current files |
-| `/r-approve` | Load approvals · Apply outcomes · Handoff checkpoint · Decision log · Sync current files |
+| `/article-revision` | Plan revision · Iterate points · Bibliography check · Handoff checkpoint · Final sheet · Decision log · Sync derived exports |
+| `/r-pp` | Parse paragraphs · Walk P1..PN · Bibliography check · Handoff checkpoint · Final sheet · Decision log · Sync derived exports |
+| `/r-pp-a` | Parse paragraphs · Walk P1..PN (deep) · Bibliography check · Handoff checkpoint · Final sheet · Decision log · Sync derived exports |
+| `/r-pr-2` | Generate Reviewer A · Generate Reviewer B · Synthesize · Handoff checkpoint · Decision log · Sync derived exports |
+| `/r-conn` | Parse transitions · Diagnose · Fix selected · Handoff checkpoint · Decision log · Sync derived exports |
+| `/r-structure` | Inventory units · Map current/proposed architecture · Apply accepted structure · Preservation audit · Handoff checkpoint · Decision log · Sync derived exports |
+| `/r-redundancy` | Build proposition map · Classify clusters · Apply accepted decisions · Preservation audit · Handoff checkpoint · Decision log · Sync derived exports |
+| `/r-global` | Read article · Seven lenses · Save trace or fix selected · Handoff checkpoint · Decision log · Sync derived exports |
+| `/r-chapter` | Select section · Load article · Cross-article analysis · Fix selected · Handoff checkpoint · Decision log · Sync derived exports |
+| `/r-auto` | Resolve scope manifest · Delegate proposals · Integrate patches · Independent audit · Bibliography check · Final sheet · Decision log · Sync derived exports |
+| `/r-redline` | Generate redline · Response letter · Handoff checkpoint · Decision log · Sync derived exports |
+| `/r-approve` | Load approvals · Apply outcomes · Handoff checkpoint · Decision log · Sync derived exports |
 
 All command-specific rows in `{{STEPS_ROWS}}` start as `pending`. The fixed
 template rows `Bootstrap & Setup` and `Version bump` are pre-filled as `done`

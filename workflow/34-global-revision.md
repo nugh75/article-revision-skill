@@ -156,7 +156,7 @@ Output the complete report as a single block:
 - **Raccomandazione:** <indicazione>
 
 ### 5. Ridondanza
-- **Cluster candidati:** P12 (Capitolo 3, articles/current.md:145-153) ~ P28 (Capitolo 5, articles/current.md:310-318) — <proposizione condivisa>
+- **Cluster candidati:** P12 (Capitolo 3, <ARTICLE_PATH>:145-153) ~ P28 (Capitolo 5, <ARTICLE_PATH>:310-318) — <proposizione condivisa>
 - **Differenze da preservare:** <evidenza, funzione, condizioni o nessuna>
 - **Classificazione preliminare:** <tipo o da verificare>
 - **Raccomandazione:** <scope per /r-redundancy oppure nessun approfondimento>
@@ -293,8 +293,8 @@ For size adjustments:
 **Diagnosi:** §2 è al 31% (atteso 15-20%). Eccesso di ~3000 caratteri.
 
 **Modifiche:**
-1. [Capitolo 2 — Letteratura; P8 — articles/current.md:98-106] Rimuovere la digressione su Author (2018) — 800 chars [(non essenziale per l'argomento)]
-2. [Capitolo 2 — Letteratura; P12-P14 — articles/current.md:145-176] Consolidare i tre paragrafi sulla definizione di X in uno solo — 1200 chars [(ridondante)]
+1. [Capitolo 2 — Letteratura; P8 — <ARTICLE_PATH>:98-106] Rimuovere la digressione su Author (2018) — 800 chars [(non essenziale per l'argomento)]
+2. [Capitolo 2 — Letteratura; P12-P14 — <ARTICLE_PATH>:145-176] Consolidare i tre paragrafi sulla definizione di X in uno solo — 1200 chars [(ridondante)]
 3. [§2.4] Spostare la tabella comparativa in appendice — 1000 chars [(materiale supplementare)]
 
 **Δ**: chars -3000 / words -450 · risk: medium
@@ -385,7 +385,7 @@ Follow standard `30-iterate-points.md`, section 4, with one addition:
    Procedo con la chiusura?
      1. Final sheet (/r-sheet)  — facoltativo
      2. Decision log            — obbligatorio
-     3. Sync current files      — obbligatorio
+     3. Sync derived exports    — obbligatorio
    (sì / sì senza final sheet / annulla)
    ```
 

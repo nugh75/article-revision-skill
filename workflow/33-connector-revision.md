@@ -114,8 +114,8 @@ Present findings as a single structured table — **not** one transition at a ti
 
 | Tipo | Riferimento | Problema | Proposta |
 |---|---|---|---|
-| Rinvio in avanti | «come vedremo più avanti» in P5 (articles/current.md:58-64) | Vago — quale sezione? | «come vedremo nel §4» |
-| Rinvio all'indietro | «come detto sopra» in P22 (articles/current.md:270-278) | Vago | «come discusso nel §2» |
+| Rinvio in avanti | «come vedremo più avanti» in P5 (<ARTICLE_PATH>:58-64) | Vago — quale sezione? | «come vedremo nel §4» |
+| Rinvio all'indietro | «come detto sopra» in P22 (<ARTICLE_PATH>:270-278) | Vago | «come discusso nel §2» |
 ```
 
 If `ARTICLE_LANG=en`, adapt labels: *Transizione* → *Transition*, *Relazione logica* → *Logical relation*, *Stato* → *Status*, etc.
@@ -158,9 +158,9 @@ For each selected item group, generate a proposal using the standard decision pa
 **Diagnosi:** <N> transizioni con problemi (MISSING, WEAK, WRONG)
 
 **Modifiche:**
-1. [P3 articles/current.md:42-48 → P4 articles/current.md:50-56] «Ma d'altra parte» → «Tuttavia» [(WEAK → contrasto)]
-2. [P7 articles/current.md:88-96 → P8 articles/current.md:98-105] (nessuno) → «Di conseguenza, » [(MISSING → causa/effetto)]
-3. [P14 articles/current.md:170-176 → P15 articles/current.md:178-185] «Quindi» → «Pertanto, » [(WEAK → causa/effetto)]
+1. [P3 <ARTICLE_PATH>:42-48 → P4 <ARTICLE_PATH>:50-56] «Ma d'altra parte» → «Tuttavia» [(WEAK → contrasto)]
+2. [P7 <ARTICLE_PATH>:88-96 → P8 <ARTICLE_PATH>:98-105] (nessuno) → «Di conseguenza, » [(MISSING → causa/effetto)]
+3. [P14 <ARTICLE_PATH>:170-176 → P15 <ARTICLE_PATH>:178-185] «Quindi» → «Pertanto, » [(WEAK → causa/effetto)]
 ...
 
 **Δ**: chars +X / words +Y · risk: low
@@ -176,10 +176,10 @@ For each selected item group, generate a proposal using the standard decision pa
 **Diagnosi:** 7 occorrenze (P2 20-25, P4 50-56, P5 58-64, P9 110-116, P11 132-139, P14 170-176, P18 220-228). Si raccomanda di tenerne 3 e riformulare 4.
 
 **Modifiche:**
-1. [P4 articles/current.md:50-56] «Tuttavia...» → «Ciononostante...» [(rimpiazzo)]
-2. [P9 articles/current.md:110-116] «Tuttavia...» → «Al contrario...» [(rimpiazzo)]
-3. [P14 articles/current.md:170-176] «Tuttavia...» → «Nondimeno...» [(rimpiazzo)]
-4. [P18 articles/current.md:220-228] «Tuttavia...» → riformulare la frase senza connettore [(ristrutturazione)]
+1. [P4 <ARTICLE_PATH>:50-56] «Tuttavia...» → «Ciononostante...» [(rimpiazzo)]
+2. [P9 <ARTICLE_PATH>:110-116] «Tuttavia...» → «Al contrario...» [(rimpiazzo)]
+3. [P14 <ARTICLE_PATH>:170-176] «Tuttavia...» → «Nondimeno...» [(rimpiazzo)]
+4. [P18 <ARTICLE_PATH>:220-228] «Tuttavia...» → riformulare la frase senza connettore [(ristrutturazione)]
 
 **Δ**: chars ±X / words ±Y · risk: low
 
@@ -229,7 +229,7 @@ Follow standard `30-iterate-points.md`, section 4. After applying, ask: *"Ci son
    Procedo con la chiusura?
      1. Final sheet (/r-sheet)  — facoltativo
      2. Decision log            — obbligatorio
-     3. Sync current files      — obbligatorio
+     3. Sync derived exports    — obbligatorio
    (sì / sì senza final sheet / annulla)
    ```
 

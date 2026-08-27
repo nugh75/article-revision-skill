@@ -46,10 +46,10 @@ If not already specified:
    `2` = Capitolo 2). Include line ranges and char counts:
 
    ```
-   Capitolo 1 — Introduction — articles/current.md:12-96 (3 940 chars, 18%)
-     §1.1 Background — articles/current.md:34-62
-     §1.2 Contribution — articles/current.md:63-96
-   Capitolo 2 — Literature Review — articles/current.md:97-210 (8 200 chars, 31%)
+   Capitolo 1 — Introduction — <ARTICLE_PATH>:12-96 (3 940 chars, 18%)
+     §1.1 Background — <ARTICLE_PATH>:34-62
+     §1.2 Contribution — <ARTICLE_PATH>:63-96
+   Capitolo 2 — Literature Review — <ARTICLE_PATH>:97-210 (8 200 chars, 31%)
    ```
 
 2. Ask:
@@ -142,8 +142,8 @@ actually duplicates or contradicts a proposition.
 ```markdown
 | Paragrafo TARGET | Candidato in CONTEXT | Proposizione condivisa | Informazione distinta | Tipo | Azione consigliata |
 |---|---|---|---|---|---|
-| P12 — Capitolo 3 — articles/current.md:145-153 | §6 r.210 | <claim> | nessuna | true duplicate | audit `/r-redundancy` |
-| P7 — Capitolo 2 — articles/current.md:98-106 | §2 r.88 | <claim> | nuova fonte e funzione di recap | same claim with new evidence | KEEP |
+| P12 — Capitolo 3 — <ARTICLE_PATH>:145-153 | §6 r.210 | <claim> | nessuna | true duplicate | audit `/r-redundancy` |
+| P7 — Capitolo 2 — <ARTICLE_PATH>:98-106 | §2 r.88 | <claim> | nuova fonte e funzione di recap | same claim with new evidence | KEEP |
 ```
 
 If no significant redundancy: "Nessuna ridondanza significativa."
@@ -264,7 +264,7 @@ Handle `Accetta`, `Modifica`, `Rivedi completamente`, and
    Procedo con la chiusura?
      1. Final sheet (/r-sheet)  — facoltativo
      2. Decision log            — obbligatorio
-     3. Sync current files      — obbligatorio
+     3. Sync derived exports    — obbligatorio
    (sì / sì senza final sheet / annulla)
    ```
 

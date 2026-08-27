@@ -29,8 +29,8 @@ modifiche e bump. Le righe sono obbligatorie ma indicative.
 | Unità | Capitolo | Sezione | Righe | Incipit (ancora) | Stato | Ultima modifica | Commenti / intenzioni |
 |---|---|---|---|---|---|---|---|
 <!-- una riga per unità tracciata, es.:
-| P4 | Capitolo 3 — Metodo | §3.1 Campione | articles/current.md:145-153 | «Il campione è composto da 124…» | 🟢 frozen | 2026-06-18 1530 | — |
-| P5 | Capitolo 3 — Metodo | §3.1 Campione | articles/current.md:154-162 | «Le risposte sono state codificate…» | 🟡 open | 2026-06-18 1532 | Verificare denominatore della percentuale; citazione mancante per il codebook |
+| P4 | Capitolo 3 — Metodo | §3.1 Campione | <ARTICLE_PATH>:145-153 | «Il campione è composto da 124…» | 🟢 frozen | 2026-06-18 1530 | — |
+| P5 | Capitolo 3 — Metodo | §3.1 Campione | <ARTICLE_PATH>:154-162 | «Le risposte sono state codificate…» | 🟡 open | 2026-06-18 1532 | Verificare denominatore della percentuale; citazione mancante per il codebook |
 -->
 
 ---
@@ -42,7 +42,7 @@ Per ogni unità 🟡 open con un'intenzione articolata, un blocco di dettaglio.
 Tieni qui ciò che durante l'iterazione si è deciso di cambiare ma non ancora
 applicato, così è sempre sotto mano.
 
-### P5 — Capitolo 3 — Metodo — articles/current.md:154-162
+### P5 — Capitolo 3 — Metodo — <ARTICLE_PATH>:154-162
 - **Intenzione:** ricalcolare la percentuale di adesione (denominatore = rispondenti effettivi, non invitati).
 - **Origine:** commento sessione 2026-06-18, punto Reviewer A-3.
 - **Bloccato da:** `51-data-verification.md` (dato da ri-derivare).
@@ -55,6 +55,6 @@ applicato, così è sempre sotto mano.
 | Data | Azione | Unità | Da → A | Origine |
 |---|---|---|---|---|
 <!-- una riga per ogni freeze/thaw, es.:
-| 2026-06-18 1530 | freeze | P4 Capitolo 3 articles/current.md:145-153 | open → frozen | auto-offer fine paragrafo |
-| 2026-06-18 1601 | thaw | P4 Capitolo 3 articles/current.md:145-153 | frozen → open | richiesta utente /r-thaw |
+| 2026-06-18 1530 | freeze | P4 Capitolo 3 <ARTICLE_PATH>:145-153 | open → frozen | auto-offer fine paragrafo |
+| 2026-06-18 1601 | thaw | P4 Capitolo 3 <ARTICLE_PATH>:145-153 | frozen → open | richiesta utente /r-thaw |
 -->
