@@ -1,145 +1,57 @@
-# 10 — Setup
+# 10 — Read-Only Setup
 
-Run after `00-bootstrap.md`. It loads configuration into the session and identifies the active article. Do **not** repeat it in the same session unless the user changes project or article.
+Load revision context without creating a version or task file. Run after
+bootstrap only when required infrastructure already exists or its creation has
+been separately approved.
 
-## 1. Locate `.env`
+## Load context
 
-Walk up from the current working directory until a `.env` file is found, or the filesystem root is reached. If none is found, ask:
+1. Locate `.env` from the current directory upward. Read the configured article
+   language, editorial limits, norms path, bibliography path, data-verification
+   pointers, and checkpoint thresholds.
+2. Read the applicable editorial norms and bibliography metadata.
+3. Identify the active Markdown manuscript by the highest `vN`, including an
+   `articles/versions/` directory. Treat `-drive` as provenance, not part of a
+   future canonical filename.
+4. Detect the body language unless `ARTICLE_LANG` overrides it.
+5. Read an existing freeze ledger without updating it. If absent, report that
+   units are currently untracked; do not create the ledger during diagnosis.
 
-> I cannot find a `.env` in the project root. Do you want me to create one with default values? (character limit, `.bib` path, norms path)
+If a paused task exists and the user asked to resume, call
+`06-handoff.md#resume`. If a paused task exists but the request is clearly a new
+read-only audit, leave it untouched.
 
-Required keys:
+## Setup summary
 
-- `EDITORIAL_LIMIT_CHARS` (or `EDITORIAL_LIMIT_WORDS`)
-- `BIBLIOGRAPHY_BIB_PATH`
-- `EDITORIAL_NORMS_PATH`
+Report article path/version, language, norms, length budget, bibliography, and
+freeze snapshot. For diagnosis or proposals, continue read-only: no bump, task
+file, sidecar, ledger update, sync, commit, or push.
 
-Optional: `ARTICLE_LANG`, `ARTICLE_STYLE_NOTES`, `CROSSREF_USER_AGENT`, `OPENALEX_USER_AGENT`, Zotero keys, `PYTHON_BIN`, `DATA_VERIFY_PATH`, `DATA_VERIFY_NOTES`, `AUTO_BUMP_THRESHOLD`, `AUTO_GIT_CHECKPOINT_THRESHOLD`.
+## Select the write transition
 
-Load `AUTO_GIT_CHECKPOINT_THRESHOLD`, defaulting to `5`. Require a positive
-integer. Before revision writes begin, verify that the project is on a named Git
-branch with one configured upstream. This is a read-only setup check for the Git
-checkpoint contract in `07-git-checkpoint.md`; do not push during setup. If the
-Git state is ambiguous, stop before the first edit.
+If the user explicitly named a target file/version and requested one bounded
+application without versioning or session tracking, set
+`EXECUTION_MODE=direct-apply` and call `11-direct-apply.md`. Do not enter the
+tracked transition below.
 
-If `DATA_VERIFY_PATH` is set (root of the authoritative dataset/platform for the article's empirical figures), hold it and `DATA_VERIFY_NOTES` in working memory: `workflow/51-data-verification.md` uses them to re-derive any numeric claim instead of inheriting it.
+For reviewer rounds, iterative revision, accepted structural changes, requested
+versioning, ledger/task work, or explicit tracking, set
+`EXECUTION_MODE=tracked-round`. A named target does not make a structural move,
+reordering, split, merge, or cut eligible for direct application; route it
+through `13-content-structure.md`.
 
-## 2. Read Editorial Norms
+## Transition to a tracked edit
 
-Open the file at `EDITORIAL_NORMS_PATH`. Identify:
+When the user first accepts a file edit in `tracked-round` mode:
 
-- length cap (chars or words);
-- citation style (APA author-year, Pandoc keys, IEEE numeric, etc.);
-- quotation marks;
-- italics rules;
-- expected section structure;
-- bibliography format.
+1. Revalidate the source and freeze state.
+2. Call `60-bump-version.md mode=first-edit`.
+3. Call `05-task.md action=create` with the new version.
+4. Call `15-freeze-ledger.md action=ensure` and reconcile it to that version.
+5. Apply the accepted edit.
 
-Hold this in working memory for the session.
+A complete `/r-auto <task> --scope "<scope>"` is prior authorization for this
+first-edit transition. It still does not authorize Git unless `--git` is present.
 
-## 3. Identify Active Article
-
-Look for `articles/article-v*-*.md` (snapshots may live in an
-`articles/versions/` subdirectory — include it in the search). If multiple
-versions exist, pick the one with the highest `vN`.
-
-If the chosen filename contains `-drive`, treat that marker as provenance only: it means the file was downloaded from Google Drive. Keep the file as the active source, but do not propagate `-drive` when creating the bumped version.
-
-If `articles/` does not exist, search the project root and likely directories (`docs/`, `drafts/`, `revisions/`) for files matching `article-v*-*.md`. Report the candidate to the user before continuing.
-
-## 4. Detect Article Language
-
-Read up to 1,000 chars of body text, skipping frontmatter and first headings. Score language using function words for candidate languages.
-
-Pick the higher score. Tie-breaker: ask the user. The result is `ARTICLE_LANG`. If `.env` declares `ARTICLE_LANG`, that always wins.
-
-## 5. Mandatory Session Bump
-
-**Every new revision session MUST start with a version bump.** After setup confirms the active article:
-
-First check whether this is a resume, not a new session:
-
-1. Search `revisions/<article-slug>/task-*-*.md` for frontmatter
-   `status: paused` or `status: in-progress`.
-2. If one exists and the user asked to resume (`riprendi`, `continua`,
-   `/r-resume`, same command after interruption), call
-   `workflow/06-handoff.md#resume-from-handoff`.
-3. On resume, do **not** run a new bump, do **not** create a new task file, and
-   continue from the task file's `## Handoff / Ripresa`.
-4. If a paused/in-progress task exists but the user did not clearly ask for a
-   new session, show the newest candidate and ask whether to resume it or start
-   a new session. Do not bump until that choice is clear.
-
-If this is a new session:
-
-1. Call `60-bump-version.md` to create v(N+1) from the current vN.
-2. Do **not** proceed to any revision workflow until the bump is confirmed and completed.
-3. If the session already created a bump earlier (detectable via `accepted_since_bump: 0` + today's date entry in project file), skip — do not double-bump.
-
-In chat, after the setup summary, immediately ask:
-
-```text
-Setup complete.
-
-Bump obbligatorio: vN → v(N+1) prima di iniziare la revisione.
-Procedo con il bump? (sì / salta e usa vN / annulla)
-```
-
-Only if the user says `sì`, run the bump via `60-bump-version.md`. If they say `salta e usa vN`, warn that this breaks the mandatory bump rule and ask them to confirm again. Never skip the bump silently.
-
-**`/r-auto` exception:** a fully specified `/r-auto <task> --scope "<scope>"`
-invocation is explicit prior confirmation for this session-start bump. Announce
-the bump and run it without asking again. If task or scope is missing or
-ambiguous, obtain that information before bumping.
-
-## 6. Confirm Setup
-
-Output a one-shot summary after the bump:
-
-```text
-Setup complete
-
-- Article: <path>
-- Version: vN-YYYY-MM-DD → v(N+1)-YYYY-MM-DD-HHMM (bump effettuato)
-- Language: <it|en|...> (<auto|env>)
-- Norms: <path>
-- Limit: <N> {chars|words}
-- Current count: <M> ({over|under} by X)
-- Bibliography: <path> (Y entries)
-- Git checkpoints: prompt every <AUTO_GIT_CHECKPOINT_THRESHOLD> applied changes → <upstream> (`/r-auto`: automatic)
-
-Ready. Proceed?
-```
-
-For `/r-auto`, omit `Ready. Proceed?`; print `Automode autorizzato: continuo
-con manifest e delega.` and continue through steps 7–8 directly. After ensuring
-the ledger, invoke `37-scoped-auto-revision.md` instead of waiting for another
-instruction.
-
-## 7. Create Task File
-
-Immediately after the bump is confirmed, call `workflow/05-task.md` — action
-`create` — passing:
-
-- `COMMAND` from the slash command or trigger phrase used this session.
-- `ARTICLE_PATH`, `ARTICLE_SLUG`, `ARTICLE_VERSION`, `BUMPED_VERSION` from working memory.
-- `REVIEWER_LANE` from the revision plan or `self` for proactive modes.
-
-The task file path is stored as `TASK_FILE_PATH` in working memory.
-
-## 8. Ensure Freeze Ledger
-
-Call `workflow/15-freeze-ledger.md` — action `ensure`. This creates
-`revisions/<article-slug>/freeze-ledger.md` from `templates/freeze-ledger.md` if
-absent, otherwise loads it and updates `reconciled-version`/`updated` to the
-bumped version. Store `FREEZE_LEDGER_PATH` in working memory.
-
-From here on, the ledger governs the advisory check before every proposal
-(`15-freeze-ledger.md` §4–5) and records frozen/open units and their intentions.
-Confirm in chat (one line):
-
-```text
-Freeze ledger: revisions/<article-slug>/freeze-ledger.md (🟢 X frozen · 🟡 Y open)
-```
-
-After creation, wait for the next instruction (reviewer feedback, `/r-pp`, `/r-pr-2`, `/r-conn`, `/r-global`, `/r-chapter`, `/r-status`). For `/r-auto`, do not wait: continue with `37-scoped-auto-revision.md`.
+Before an authorized Git action, perform the branch/upstream preflight from
+`07-git-checkpoint.md`; Git state does not block read-only diagnosis.

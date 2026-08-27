@@ -1,116 +1,57 @@
-# 07 — Git Checkpoint Prompt and Execution
+# 07 — Explicit Git Checkpoint
 
-When applied changes accumulate during an interactive chat, ask before creating
-and pushing a scoped Git checkpoint. `/r-auto` threshold checkpoints and flushes
-at a user-requested handoff or confirmed closure remain automatic because those
-actions already carry explicit Git authorization.
+Create and push a scoped checkpoint only after Git authorization distinct from
+approval of manuscript text.
 
-## Configuration and state
+## Authorization
 
-- `AUTO_GIT_CHECKPOINT_THRESHOLD` is a positive integer; default `5`.
-- One **change** is one numbered modification applied in an interactive flow.
-  In `/r-auto`, one integrated changed manifest unit counts as one change.
-- Store these fields in `TASK_FILE_PATH` frontmatter:
-  `changes-since-git-checkpoint`, `git-checkpoint-sequence`,
-  `git-checkpoint-threshold`, and `git-checkpoint-last-prompt-count`.
-- Keep this counter independent from `accepted_since_bump` and
-  `AUTO_BUMP_THRESHOLD`.
+Valid authorization is one of:
 
-## When to invoke
+- the user answers `sì` to the dedicated threshold prompt;
+- the user explicitly requests `commit e push`;
+- `/r-handoff --git`;
+- a fully specified `/r-auto ... --git`.
 
-For interactive chat workflows, invoke with `mode=interactive-prompt` after the
-article and all associated session records are consistent, when both conditions
-hold:
+`Accetta`, `applica`, `chiudi`, `fine`, `pause`, `stop`, `/r-handoff`, and a
+plain `/r-auto` are not Git authorization.
 
-- `changes-since-git-checkpoint >= git-checkpoint-threshold`; and
-- `changes-since-git-checkpoint - git-checkpoint-last-prompt-count >=
-  git-checkpoint-threshold`.
+## Interactive threshold
 
-Show this prompt and wait:
+`AUTO_GIT_CHECKPOINT_THRESHOLD` defaults to `5`. After that many applied
+changes, show and wait:
 
 ```text
 Si sono accumulate <N> modifiche dall'ultimo checkpoint Git.
-Vuoi che crei ora un commit circoscritto ai file di questa sessione e faccia il push su <upstream>? (sì / non ora)
+Vuoi creare un commit circoscritto ai file della sessione e fare push su <upstream>? (sì / non ora)
 ```
 
-- `sì` → continue with the confirmed threshold execution below.
-- `non ora` → set `git-checkpoint-last-prompt-count` to the current counter,
-  preserve all changes and continue. Ask again only after another threshold's
-  worth of changes accumulates.
-- An explicit later request such as `fai commit e push` counts as `sì` even if
-  the next prompt threshold has not yet been reached.
+On `non ora`, preserve local work and prompt again only after another threshold
+of changes. Never block safe local revision merely because publication was
+deferred.
 
-For `/r-auto`, invoke with `mode=auto-threshold` as soon as the counter reaches
-the threshold; do not prompt.
+## Authorized automatic mode
 
-Invoke with `mode=flush` after handoff sync or successful closure sync, even
-when the counter is below the threshold. Do not create an empty commit.
+Only `/r-auto ... --git` may use `mode=auto-authorized` at thresholds and final
+closure without another prompt. Plain `/r-auto` keeps all changes local.
 
-For `/r-auto`, integrate at most the remaining number of units before the next
-threshold. Before each mid-run checkpoint, run a bounded audit on that batch
-using the scope, preservation, citation/number, and `git diff --check`
-invariants from `37-scoped-auto-revision.md`. Push only after that audit passes.
-The final independent whole-run audit remains mandatory.
+## Manifest and preflight
 
-## Session file manifest
+Build an explicit list containing only files created or changed by the active
+revision round: article version, task, plan, ledger changes, bibliography/data
+audits, auto reports, decision log, final sheet, and synchronized exports when
+applicable.
 
-Build an explicit path list. Include only files created or changed by the
-active revision session:
+- Exclude `.env`, unrelated paths, and unresolved globs.
+- Never use `git add -A` or `git add .`.
+- Stop if unrelated paths are already staged.
+- Require a named branch and one configured upstream.
+- Run the relevant semantic/scope checks and `git diff --check` before staging.
 
-- `TASK_FILE_PATH` and `ARTICLE_PATH`;
-- the active revision plan/project file;
-- freeze ledger and proposal sidecars changed by this session;
-- bibliography/data audits or bibliography files changed by this session;
-- `/r-auto` manifest, worker reports, and audit reports;
-- decision-log files, final sheet, and synchronized current exports only after
-  the workflow that creates them has completed.
+Run `scripts/git_checkpoint.sh` with the explicit manifest and normal hooks.
+Verify a successful push by comparing `HEAD` with `git ls-remote`.
 
-Never include `.env`, repository-wide globs, or unrelated user files. Never use
-`git add -A`, `git add .`, or an unresolved wildcard.
+On failure, preserve files and any local commit. Report the exact error. Never
+pull, merge, rebase, amend, reset, force-push, or bypass hooks automatically.
 
-## Preflight and execution
-
-1. Confirm `TASK_FILE_PATH` exists and the threshold is a positive integer.
-2. Confirm the current branch has one unambiguous upstream. Do not infer a new
-   remote or branch and do not create one automatically.
-3. If unrelated paths are already staged, stop before changing the index.
-4. For a confirmed interactive threshold or `mode=auto-threshold`, increment
-   `git-checkpoint-sequence` and reset `changes-since-git-checkpoint` and
-   `git-checkpoint-last-prompt-count` to `0` in the task file before committing.
-   For `mode=flush`, increment the sequence only if session files actually
-   differ from `HEAD`; reset a non-zero counter and the last-prompt count before
-   committing. If the task already has a filled `## Riepilogo`, update
-   `Checkpoint Git pubblicati` to the new sequence before committing.
-5. Run the deterministic helper from the project root:
-
-   ```bash
-   /absolute/path/to/article-revision/scripts/git_checkpoint.sh \
-     --repo <project-root> \
-     --message "revision(<article-slug>): checkpoint <sequence> — <N> changes" \
-     -- <explicit-session-file>...
-   ```
-
-   Use `revision(<article-slug>): handoff — <unit>` for a handoff flush and
-   `revision(<article-slug>): close <version>` for a closure flush.
-
-6. Parse the helper output. On `status=pushed`, report the short hash and
-   `<remote>/<branch>` in one line and continue. The interactive confirmation,
-   `/r-auto` invocation, or boundary confirmation already supplied permission.
-7. On `status=noop`, restore any counter/sequence changed solely for this
-   attempt and continue.
-8. If the commit succeeds but push or remote verification fails, preserve the
-   local commit, stop the revision workflow, and report the hash plus exact
-   failure. On resume, retry that push before accepting new changes.
-9. On any preflight, hook, staging, fetch, or commit failure, restore the task
-   counter if it was not committed, leave all content intact, and stop. Never
-   pull, merge, rebase, amend, reset, force-push, or bypass hooks automatically.
-
-## Hard rules
-
-- Scope safety outranks checkpoint frequency: never absorb unrelated work.
-- A successful push must be verified by comparing `HEAD` with `git ls-remote`.
-- Checkpoints do not authorize PRs, tags, releases, Drive writes, or changes
-  outside the revision session.
-- Never treat ordinary chat approval of article text as approval to commit and
-  push. Interactive threshold checkpoints require the dedicated Git prompt.
-- Ambiguous or unsafe Git state is a stop condition even after confirmation.
+Git authorization never extends to PRs, tags, releases, Drive actions, or
+unrelated files.

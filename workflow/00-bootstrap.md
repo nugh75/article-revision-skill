@@ -1,6 +1,9 @@
 # 00 — Bootstrap
 
-Run **first** when the skill is invoked. This step is idempotent: if all artifacts are already in place, it exits quickly and proceeds to `10-setup.md`.
+Run only when a selected operation needs missing infrastructure. Read-only
+diagnosis can proceed with the files that already exist and must not trigger
+bootstrap writes. When bootstrap is needed, ask before every creation or
+installation and then continue to `10-setup.md`.
 
 The bootstrap establishes the revision environment: Python venv with required packages, `.bib` file, `.env` with editorial parameters and credentials, and editorial norms file. Each creation step asks the user first; never write files silently.
 
@@ -80,8 +83,8 @@ Optional but recommended:
 - `ARTICLE_LANG` (usually empty; auto-detected)
 - `PYTHON_BIN` (usually `.venv/bin/python`)
 - `AUTO_BUMP_THRESHOLD` (default `5`)
-- `AUTO_GIT_CHECKPOINT_THRESHOLD` (default `5`; interactive commit/push prompt,
-  automatic in `/r-auto`)
+- `AUTO_GIT_CHECKPOINT_THRESHOLD` (default `5`; dedicated interactive
+  commit/push prompt, automatic only in `/r-auto ... --git`)
 
 3. Append new keys to `.env` or create the file. Never overwrite existing values without asking.
 4. Re-load `.env` after edits and continue.
@@ -99,7 +102,7 @@ To complete the environment I need these values. Reply by number, or leave blank
 5. Zotero — user_id, api_key, group_id (comma-separated):
 6. Python interpreter (default `.venv/bin/python`):
 7. Auto-bump threshold (default 5):
-8. Automatic Git checkpoint threshold (default 5):
+8. Git checkpoint prompt threshold (default 5):
 ```
 
 ## Step D — Editorial Norms File

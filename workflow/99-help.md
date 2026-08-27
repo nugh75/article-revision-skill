@@ -1,93 +1,44 @@
 # 99 — Help
 
-Triggered by `/r-help` (or "aiuto", "help", "comandi", "che comandi ci sono").
+Triggered by `/r-help`. Print only this read-only card.
 
-**Standalone and read-only.** Do *not* run bootstrap, setup, or the mandatory
-bump. Do not read or write any file. Just print the reference card below, then
-wait. It is a quick reference, not a workflow step.
+```text
+# article-revision
 
-Render the card in `ARTICLE_LANG` if known (IT default for this project); the
-structure is identical in EN. Adapt only the prose labels, keep the command
-names verbatim.
+Diagnosi e proposte — nessun bump o file
+  /r-audit [scope]     Audit generale in sola lettura
+  /r-structure [scope] Mappa idee/unità e propone una struttura conservativa
+  /r-global            Architettura, ridondanza, terminologia, norme
+  /r-pp | /r-pp-a      Paragrafi, standard o approfondito
+  /r-conn              Connettori e transizioni
+  /r-chapter [§N]      Capitolo/sezione nel contesto complessivo
 
-## Card (IT)
-
-```
-# article-revision (artr) — comandi
-
-## Revisione (decisione esplicita per modifica)
-  /article-revision   Revisione completa dai commenti di un revisore
-  /r-pp               Paragrafo per paragrafo — traccia globale opzionale + 4 dimensioni
-  /r-pp-a             Paragrafo per paragrafo APPROFONDITA — traccia globale + 6 dimensioni
-  /r-conn             Connettori, transizioni, segnali logici (no contenuto)
-  /r-global           Globale — 7 lenti; può salvare traccia per /r-pp
-  /r-chapter [§N]     Capitolo — una sezione nel contesto dell'intero articolo
-
-## Revisione automatica delimitata
+Applicazione
+  file/versione nominata + "applica"
+                       Modifica diretta; nessun bump, task, ledger o sync
+  revisione tracciata  Alla prima modifica crea versione, task e ledger
+  struttura accettata  Sempre revisione tracciata; mai modifica diretta o auto
   /r-auto <task> --scope "<scope>" [--agents N]
-                      Task: chiarezza, stile, connettori, terminologia,
-                      citazioni, argomentazione (anche combinati)
-                      Subagent propongono; coordinatore applica; audit indipendente;
-                      final sheet + decision log + sync automatici su PASS
-  Esempio: /r-auto chiarezza,argomentazione --scope "PARTE II" --agents 3
+                       Modifica automatica locale + audit indipendente
+  /r-auto ... --git    Come sopra, con commit/push autorizzati
 
-## Diagnostica senza ciclo decisionale (genera documenti)
-  /r-pr-2             Due peer reviewer simulati + sintesi → revisions/<slug>/
+Stato
+  /r-freeze | /r-thaw | /r-status
+  /r-handoff           Checkpoint locale, nessun Git
+  /r-handoff --git     Checkpoint locale + commit/push
+  /r-resume            Riprende il task esistente
 
-## Freeze ledger (parti concluse vs da rivedere)
-  /r-freeze [unit]    Congela una parte conclusa (🟢). No-arg = ultima lavorata;
-                      es. /r-freeze P4 · /r-freeze §3 · /r-freeze §3 tutto
-  /r-thaw [unit]      Scongela: torna modificabile senza avviso
-  /r-status           Mappa: 🟢 frozen · 🟡 open · 🔵 wip + prossimo intervento
+Chiusura
+  chiudi / fine        Decision log e sync locale dopo conferma
+  commit e push        Pubblica il manifest circoscritto della sessione
 
-## Versione e chiusura
-  /r-bump             Nuova versione (vN → vN+1)
-  /r-sheet            Final sheet (stato post-revisione)
-  /r-handoff          Sospende: checkpoint + decision log + sync + commit + push
-  /r-resume           Riprende da un task sospeso, senza nuovo bump
-
-## Collaborazione ed export
-  /r-gdrive [create|push|sync]  Cartella Drive condivisa; feedback colleghi
-  /r-approve          Approvazione colleghi prima del "definitivo"
-  /r-redline          Manoscritto colorato old-vs-new + lettera ai revisori
-
-  /r-guide            Percorso consigliato completo (read-only)
-  /r-help             Questa scheda
-
-## Decisioni sulle proposte
-  Accetta                  applica tutte le modifiche del punto
-  Accetta 1,3              applica solo le modifiche 1 e 3
-  Modifica 4: ...          cambia la modifica 4 secondo la tua indicazione
-  Rivedi completamente     rigenera la proposta da capo
-  Tieni in considerazione  non applica ora; registra come promemoria/traccia
-  Scorciatoie: A / M / R / T
-  prossimo / next        passa al punto/paragrafo successivo
-  pause / stop           handoff: checkpoint + decision log + sync + commit + push
-  chiudi / fine          chiusura sessione (final sheet? + decision log + sync)
-
-## Regole chiave
-  • Ogni sessione inizia con bump obbligatorio (vN → vN+1).
-  • Riprendere da handoff non è una nuova sessione: niente nuovo bump.
-  • Handoff = checkpoint + decision log + sync + commit scoped + push verificato.
-  • In chat, dopo 5 modifiche (o soglia configurata), chiede prima di commit + push.
-  • Ogni paragrafo indicato porta capitolo + righe Markdown inizio-fine.
-  • Parte congelata = avviso prima di toccarla, serve "sì, procedi".
-  • Dati numerici ri-derivati dalla fonte, mai ereditati.
-  • /r-auto non autorizza tagli, riordini o nuovi claim; commit e push scoped
-    seguono automaticamente la soglia configurata e la chiusura.
-  • Norme editoriali > preferenze: i conflitti emergono in chat.
+Regole chiave
+  • Diagnosi e proposte restano read-only.
+  • Una proposta strutturale contabilizza tutte le unità; tagli e fusioni richiedono approvazione separata.
+  • Nelle revisioni tracciate il bump nasce alla prima modifica applicata.
+  • Accettare testo, fermarsi o chiudere non equivale a consenso Git.
+  • Le istruzioni esplicite dell'autore prevalgono; le eccezioni alle norme si registrano.
+  • Costrutti, prove, citazioni, numeri e forza epistemica vanno preservati o verificati.
 ```
 
-## Card (EN)
-
-Same structure, English labels. Keep command names identical.
-
-## After printing
-
-End with one line:
-```
-Dettaglio di un comando? Scrivi p.es. "spiega /r-global".
-```
-
-Then wait. If the user asks for detail on a specific command, summarise the
-relevant workflow file (do not execute it).
+End with: `Vuoi una diagnosi, una mappa strutturale, una modifica diretta a un file nominato o una revisione tracciata?`

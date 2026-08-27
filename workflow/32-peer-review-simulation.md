@@ -16,7 +16,11 @@ If the user says "simula tre reviewer", adapt — add a third persona on the fly
 
 ## 1. Bootstrap & Setup
 
-If not already done, run `00-bootstrap.md` and `10-setup.md` to load `.env`, norms, bibliography, active article, and detect `ARTICLE_LANG`. **Note:** `10-setup.md` step 5 enforces a mandatory version bump before any revision work begins — do not skip it.
+Run `00-bootstrap.md` only if required and separately approved, then
+`10-setup.md` read-only. `/r-pr-2` may write its explicitly requested reviewer
+reports, but it does not bump or edit the manuscript and does not imply Git.
+It does not create a tracked manuscript-edit task; any report progress remains
+local to the requested artifact.
 
 ## 2. Confirm Output Directory
 

@@ -1,113 +1,37 @@
-# 60 — Bump Version
+# 60 — Create a Working Version
 
-Triggered:
+Create a new manuscript version when the first approved edit of a tracked round
+is about to be applied, when `/r-auto` begins, or when the user explicitly asks
+for `/r-bump`. Read-only diagnosis never bumps.
 
-- **mandatory session-start bump** — every new revision session MUST bump before any edits. Handed off from `10-setup.md` step 5. Do not skip, do not defer.
-- when the user signals the end of a revision round, such as *"close this version"*;
-- when the *accepted-since-last-bump* counter in the project file reaches `AUTO_BUMP_THRESHOLD` (default 5), and the skill proposes the bump in chat;
-- when the user explicitly asks, such as *"create v(N+1) now"*.
+`direct-apply` never calls this workflow. An explicit request to edit a named
+version in place controls unless the user also asks to start a tracked round.
 
-Never bump without explicit confirmation. A fully specified
-`/r-auto <task> --scope "<scope>"` command is itself explicit confirmation for
-the session-start bump; announce it, but do not ask again.
+## Authorization
 
-## 1. Pre-Flight Checks
+- `mode=first-edit`: the explicit acceptance of the proposed file edit
+  authorizes the version copy needed to apply it. Announce the action.
+- `/r-auto` with task and scope authorizes its first working version.
+- `/r-bump` or an extra mid-round bump requires explicit confirmation.
 
-Before bumping:
+No bump authorizes commit or push.
 
-- Show the count of accepted changes since the last bump and a short list of affected points.
-- Report current char/word count and budget status.
-- Ask the user to confirm the bump, except for the authorized `/r-auto`
-  session-start bump:
+## Create
 
-  ```text
-  Ready to create a new version:
-  - <K> accepted changes since the last bump
-  - points: <list>
-  - count: <M> chars (<over|under> by <N>)
+Run `scripts/new_version.sh <current-article-path>` through the approved project
+environment. The new name is
+`<prefix>-v(N+1)-YYYY-MM-DD-HHMM[-anonymous].md`; remove a source `-drive`
+provenance token and preserve `-anonymous`.
 
-  Proceed? (yes / no / show points again)
-  ```
+At the first-edit boundary, create the version before modifying it. Then create
+the task file and reconcile the freeze ledger through `10-setup.md`.
 
-- If points are still `To decide`, mention them: `There are <X> points still open. Do you want to force the bump (points remain in the project file) or close them first?`
+For an additional mid-round bump, summarize accepted changes, open points, and
+the length budget before asking. Carry ledger anchors forward; mark unmatched
+anchors stale rather than dropping them.
 
-## 2. Run Bump Script
+Do not create an immediate Git checkpoint. The new version belongs to the local
+active-session manifest until Git is separately authorized.
 
-```bash
-NEW_PATH=$(scripts/new_version.sh <current-article-path>)
-```
-
-The script:
-
-- copies the current file with incremented `vN+1` and current timestamp `YYYY-MM-DD-HHMM`;
-- if the source filename contains `-drive`, treats it as a Google Drive download marker and removes it from the bumped filename;
-- preserves the `-anonymous` suffix if present;
-- prints the new path on stdout.
-
-Resulting filename pattern: `article-v(N+1)-YYYY-MM-DD-HHMM[-anonymous].md`. Multiple bumps in the same day get distinct files because the time differs.
-
-## 3. Generate Diff Summary
-
-```bash
-scripts/diff_versions.sh --auto $NEW_PATH > revisions/<slug>/diff-vN-to-v(N+1).md
-```
-
-The diff lists what changed between the previous file and the new one. Useful for the *Change history* section of the final sheet.
-
-## 4. Reset Counter
-
-In the project file, reset `<!-- accepted_since_bump: 0 -->` and add an entry to a *Bump history* section at the bottom:
-
-```markdown
-## Bump History
-
-- vN → v(N+1) — YYYY-MM-DD HH:MM — <K> accepted changes
-```
-
-For `/r-auto`, a revision-plan project file may not exist yet. Keep the counter
-at zero in working memory and record the session-start bump in the task file and
-auto-scope manifest after setup; do not invent a revision-plan file solely for
-this counter.
-
-## 4b. Carry Freeze Ledger Forward
-
-Call `workflow/15-freeze-ledger.md` — action `carry-forward`. The ledger file
-path is stable (`revisions/<article-slug>/freeze-ledger.md`), so only its
-contents are reconciled:
-
-- Re-anchor every row against v(N+1) by matching the anchor incipit; refresh the
-  advisory line ranges.
-- Update frontmatter `reconciled-version` → v(N+1) and `updated`.
-- Any row whose anchor no longer matches → mark `⚠ stale`, list those in chat,
-  and ask the user to re-point or drop them. Never drop a frozen unit silently.
-
-If no ledger exists yet because the session-start bump runs before setup's
-`ensure`, skip `carry-forward`; `10-setup.md` step 8 creates the ledger already
-anchored to v(N+1). Do not claim that an absent ledger was created earlier.
-
-## 5. Notify User
-
-```text
-Version v(N+1) created: <NEW_PATH>
-timestamp: <YYYY-MM-DD HH:MM>
-diff: <X> changed lines · chars <signed> · words <signed>
-
-Counter reset. Pending files will be included in the next automatic threshold,
-handoff, or closure checkpoint.
-
-Ready to:
-- continue revision on v(N+1)?
-- generate the final sheet (`70-final-sheet.md`)?
-- close the session?
-```
-
-The bump itself does not create an immediate extra Git commit. Keep the new
-version and diff in the active-session manifest; `07-git-checkpoint.md` includes
-them in the next confirmed interactive checkpoint or automatic `/r-auto` or
-boundary checkpoint.
-
-## 6. Edge Case — Destination Already Exists
-
-If `article-v(N+1)-YYYY-MM-DD-HHMM[-anonymous].md` already exists, which is unlikely with minute-level resolution, the script aborts. Ask:
-
-> A file with the same timestamp already exists. Should I wait a minute and retry? (yes / cancel)
+If the timestamped destination already exists, stop and ask whether to retry
+with a new timestamp.

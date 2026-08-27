@@ -43,7 +43,8 @@ generating the proposal:
 	  before running the decision loop. If the user declines, skip the unit and advance.
 - 🟡 `open` → if the row carries an intention, fold it into the diagnosis so the
   proposal addresses what was already noted.
-- 🔵 `wip` / untracked → proceed; mark the unit `wip` while working.
+- 🔵 `wip` / untracked → proceed. Mark it `wip` only after a tracked round and
+  ledger exist; diagnosis alone does not create or update state.
 
 ## 2. Generate Proposal
 
@@ -56,14 +57,14 @@ Apply:
 
 Never collapse multiple separate concerns into a single proposal. If the same paragraph needs both citation correction and phrasing change, present two consecutive proposals, each with its own decision.
 
-If a single proposal still contains **more than one numbered modification**
-(for example, several refusi in the same paragraph or multiple tightly related
-surface edits), write a sidecar proposal file before presenting it in chat:
+If a single proposal contains more than one numbered modification, keep the
+complete proposal in chat. Write a sidecar only when the user explicitly asks
+to save it or after the first accepted edit has created a tracked round:
 
 `revisions/<reviewer>/proposal-revision-YYYY-MM-DD-HHMM.md`
 
-Use `templates/proposal-revision.md`. The file must mirror the exact chat
-proposal and act as the persisted proposal to follow during the decision loop.
+Use `templates/proposal-revision.md`. The file mirrors the exact chat proposal
+and acts as persisted state only after writing it is authorized.
 Each subsequent `Accetta` / `Modifica` / `Rivedi completamente` /
 `Tieni in considerazione` updates the same file's
 `Decision Trail` and status.
@@ -116,19 +117,29 @@ Optional shortcuts remain accepted for speed:
 
 ### Accetta (selected numbers or all)
 
-1. Apply via Edit on the article only the modifications accepted by the user. If some modifications were deferred or left pending, apply only the accepted ones.
-2. Update the project file: each accepted modification → `Accepted`.
-3. If a sidecar proposal file exists for this point, update it: accepted item
+1. Select the execution mode if it was not already fixed:
+   - `direct-apply` → call `11-direct-apply.md` for the accepted wording, report
+     the verified target, and return from this response branch without running
+     the tracked-round steps below;
+   - `tracked-round` → if `TASK_FILE_PATH` is absent, run the first-edit
+     transition in `10-setup.md`, then recompute locators against the new
+     working version.
+2. In a tracked round, apply via Edit on the working article only the modifications accepted by the
+   user. If some modifications were deferred or pending, apply only the
+   accepted ones.
+3. Update an existing project file, or create the prepared plan now if this is
+   a reviewer round: each accepted modification → `Accepted`.
+4. If a sidecar proposal file exists for this point, update it: accepted item
    numbers, pending items, and status (`accepted` if all accepted, `partial`
    otherwise).
-4. Increment the *accepted-since-last-bump* counter.
-5. Increment `changes-since-git-checkpoint` by the number of accepted numbered
+5. Increment the *accepted-since-last-bump* counter.
+6. Increment `changes-since-git-checkpoint` by the number of accepted numbered
    modifications. After the article, project file, sidecar, and ledger state
    are consistent, call `07-git-checkpoint.md` with
    `mode=interactive-prompt` when its prompt conditions are met. Ask before the
    scoped commit and push; continue only on `sì`. On `non ora`, preserve the
    counter and follow the workflow's re-prompt rule.
-6. **Do not advance automatically.** Output:
+7. **Do not advance automatically.** Output:
 
    ```text
    Applicate modifiche <numbers>. [Restano in sospeso le modifiche <numbers>.] Ci sono altri cambiamenti da fare in questo paragrafo?
@@ -136,19 +147,22 @@ Optional shortcuts remain accepted for speed:
 
    Wait for an explicit command from the user.
 
-7. If the counter has reached `AUTO_BUMP_THRESHOLD`, after the user signals to advance, propose a bump (call `60-bump-version.md`).
+8. If the counter reaches `AUTO_BUMP_THRESHOLD`, offer an additional bump after
+   the user signals to advance. Do not couple it to Git.
 
 ### Tieni in considerazione (selected numbers or all)
 
-1. Mark the selected modifications as `Deferred` in the project file with the
-   user's note/reason. If no numbers are provided, mark the whole point
-   `Deferred`.
-2. If a sidecar proposal file exists for this point, update the deferred item
+1. If `TASK_FILE_PATH` exists, mark the selected modifications as `Deferred` in
+   the project file with the user's note/reason. If no numbers are provided,
+   mark the whole point `Deferred`. Without a tracked round, retain the decision
+   in chat unless the user explicitly asks to save it.
+2. If a tracked sidecar proposal file exists for this point, update the deferred item
    numbers and keep status `partial` unless all items were deferred, in which
    case set `deferred`.
 3. No file edits for those modifications.
-4. If the note describes an intention for the current unit, record it in the
-   freeze ledger via `log-comment` so the reminder survives outside chat.
+4. If a tracked ledger exists, record an intention for the current unit via
+   `log-comment`. Without one, offer to save the note but do not write it
+   implicitly.
 5. **Do not advance automatically.** Output:
 
    ```text
@@ -181,7 +195,9 @@ Only advance when the user gives an explicit command:
 - "next"
 - "prossimo"
 
-**Before advancing, run the freeze auto-offer** (`15-freeze-ledger.md` §7):
+**Before advancing in a tracked round, run the freeze auto-offer**
+(`15-freeze-ledger.md` §7). In a diagnostic-only pass, advance without changing
+the ledger.
 
 - If the unit's work concluded cleanly, offer to freeze it:
   `Lavoro su <unit> concluso: <X> accettate, <Y> tenute in considerazione. Congelo questa parte come conclusa? (sì / no / più tardi)`.
@@ -199,20 +215,20 @@ Then advance.
 - **Character overshoot after Accetta.** Report and ask: `The overrun is now +X. Do you prefer to proceed and handle it in the final sweep, or look for a compensating cut now?`
 - **Bibliography conflict.** If the user wants a key that does not exist or has dubious metadata, defer to `40-bibliography-check.md` and do not apply until cleared.
 - **Anglicism not in whitelist** (`ARTICLE_LANG=it` only). Surface in the proposal block under `Possible exceptions`; the user decides whether to add it to the whitelist or rephrase.
-- **Handoff / pause.** If the user says `pause`, `stop`, `sospendi`,
-  `interrompi`, or `/r-handoff`, call `workflow/06-handoff.md` immediately.
-  Do not run closure, sync, or final-sheet steps.
+- **Handoff / pause.** Natural pause/stop updates only an existing local task
+  checkpoint. Explicit `/r-handoff` may also log and sync locally. Neither
+  authorizes Git without `--git` or `commit e push`.
 - **Whole article scope.** Walk the article section by section. The user can
   pause at any moment via the handoff workflow and resume later from the same
   point.
 
 ## 6. State Persistence
 
-The accepted-since-bump counter and per-point decision state live inside the
-`revision-plan-vN.md` file. Git checkpoint state lives in `TASK_FILE_PATH`.
-On every `Accetta`, `Modifica`, `Rivedi completamente`, or
-`Tieni in considerazione`, update the applicable state file so an interrupted
-session resumes cleanly.
+After a tracked round starts, the accepted-since-bump counter and per-point
+state live in `revision-plan-vN.md`, and Git prompt state lives in
+`TASK_FILE_PATH`. Before that boundary, proposals and reformulations remain in
+chat unless the user explicitly asks to save them. Only applied edits or
+authorized saved artifacts create persistent session state.
 
 ## 7. Revision Closure
 
@@ -244,6 +260,10 @@ session resumes cleanly.
    (sì / sì senza final sheet / annulla)
    ```
 
-3. Su conferma:
+3. Su conferma, se `TASK_FILE_PATH` esiste:
    - Se richiesto: `workflow/70-final-sheet.md`
-   - `workflow/95-decision-log.md`  ← chiude il task file e sincronizza i file correnti
+   - `workflow/95-decision-log.md`  ← chiude localmente il task e sincronizza i file correnti
+   - chiedere separatamente se pubblicare con commit e push
+   Se non esiste un task, distinguere:
+   - `direct-apply` → riepilogare file e verifica, senza log, sync o Git state;
+   - `chat-only` → terminare con il riepilogo diagnostico senza creare file.

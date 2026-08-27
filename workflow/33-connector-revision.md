@@ -12,7 +12,12 @@ Invoked by `/r-conn` or phrases like:
 
 ## 1. Bootstrap & Setup
 
-If not already done, run `00-bootstrap.md` and `10-setup.md` to load `.env`, norms, bibliography, active article, and detect `ARTICLE_LANG`. **Note:** `10-setup.md` step 5 enforces a mandatory version bump — do not skip it.
+Run `00-bootstrap.md` only if required and separately approved, then
+`10-setup.md` read-only. The diagnostic table does not bump; the first accepted
+connector edit enters the tracked lifecycle.
+Any task-update instruction in this workflow is conditional on
+`TASK_FILE_PATH` already existing; before the first accepted edit, keep progress
+only in working memory.
 
 ## 2. Parse Article Into Transitions
 
@@ -228,6 +233,9 @@ Follow standard `30-iterate-points.md`, section 4. After applying, ask: *"Ci son
    (sì / sì senza final sheet / annulla)
    ```
 
-3. Su conferma:
+3. Su conferma, solo se esiste un round tracciato (`TASK_FILE_PATH`):
    - Se richiesto: `workflow/70-final-sheet.md`
-   - `workflow/95-decision-log.md`  ← chiude il task file e sincronizza i file correnti
+   - `workflow/95-decision-log.md`  ← chiude localmente il task e sincronizza
+   - chiedere separatamente se pubblicare con Git
+
+Una diagnosi dei connettori senza modifiche termina in chat e non crea file.

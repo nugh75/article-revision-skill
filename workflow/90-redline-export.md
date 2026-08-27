@@ -64,6 +64,6 @@ The skill does not email or upload. Use `/r-gdrive` to place these in the
 shared Drive folder, or hand them to the user.
 ```
 
-Keep the generated redline and response files in the active-session manifest;
-the next interactive threshold asks before commit and push, while a confirmed
-boundary checkpoint publishes them automatically.
+Keep the generated redline and response files in the active-session manifest.
+The next dedicated Git prompt may publish them; closure or handoff alone does
+not authorize commit or push.

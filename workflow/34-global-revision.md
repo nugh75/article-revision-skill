@@ -13,7 +13,13 @@ Invoked by `/r-global` or phrases like:
 
 ## 1. Bootstrap & Setup
 
-If not already done, run `00-bootstrap.md` and `10-setup.md` to load `.env`, norms, bibliography, active article, and detect `ARTICLE_LANG`. **Note:** `10-setup.md` step 5 enforces a mandatory version bump — do not skip it.
+Run `00-bootstrap.md` only if required and separately approved, then
+`10-setup.md` read-only. The seven-lens diagnosis does not bump. Saving a trace
+requires confirmation but still does not create a manuscript version; the first
+accepted manuscript edit enters the tracked lifecycle.
+Any task-update instruction in this workflow is conditional on
+`TASK_FILE_PATH` already existing; before the first accepted edit, keep progress
+only in working memory.
 
 ## 2. Read Full Article
 
@@ -37,39 +43,49 @@ Generate a structured diagnostic report. Present all seven lenses as a single, c
 1. Locate the thesis/contribution statement. Typically in the introduction (last paragraph) or in a dedicated subsection.
 2. Evaluate:
    - **Is it explicit?** Does a single sentence state what the article contributes?
-   - **Is it falsifiable?** Could it be wrong? Or is it too vague to test?
+   - **Is it answerable or contestable?** Is it precise enough for the article's
+     theoretical, empirical, interpretive, or design contribution? Require
+     falsifiability only for claims that the study actually presents as
+     testable hypotheses.
    - **Is it positioned?** Does it reference the gap it fills?
 3. If missing or weak, flag with a specific recommendation.
 
-### Lens 2 — Argument Architecture
+### Lens 2 — Argument and Content Architecture
 
-1. Map each section to its role in the overall argument:
-   - §1: What does the introduction establish?
-   - §2: What theoretical ground does the literature review lay?
-   - §3: What does the method section set up?
-   - §4: What do the results show?
-   - §5: How does the discussion interpret the results?
-   - §6: How does the conclusion close the loop?
-2. Identify logical leaps (A → C without B) and missing steps.
-3. Flag contradictions between sections (e.g. §2 defines X one way, §5 uses X differently).
+1. Map every section to its actual primary role: governing claim, supporting
+   claim, definition, evidence, example, bridge, implication, or limitation.
+   Do not infer an IMRaD role solely from section number.
+2. Identify each section's main claim, required support, and relation to the
+   preceding and following sections.
+3. Identify logical leaps (A → C without B), orphaned ideas, duplicate
+   functions, overloaded units, and missing steps.
+4. Flag contradictions between sections (e.g. §2 defines X one way, §5 uses X
+   differently).
 
 ### Lens 3 — Section Proportionality
 
 1. Calculate the character count and percentage of total for each section.
-2. Compare against expected proportions for the article type:
+2. Compare against explicit journal limits or project norms first. When those
+   are absent, the following article-type proportions may be reported only as
+   orientation, not as pass/fail thresholds:
    - **Empirical (IMRaD):** Intro 10-15%, Literature/Hypotheses 15-20%, Method 15-20%, Results 20-25%, Discussion 20-25%, Conclusion 5-10%.
    - **Theoretical:** Intro 10-15%, Body (split by argument steps) 65-75%, Conclusion 10-15%.
    - **Review:** Intro 5-10%, Thematic sections (balanced) 75-85%, Conclusion 10-15%.
-3. Flag sections that are >5% over or under the expected range.
+3. Flag a section only when its size impairs its argumentative function or
+   violates an explicit norm. A numerical deviation alone is not a defect.
 
-### Lens 4 — Narrative Arc
+### Lens 4 — Argumentative Progression
 
-1. Evaluate the article's storytelling structure:
-   - **Apertura (Opening):** Does the first paragraph hook the reader? Is the research question clear?
-   - **Tensione (Tension):** Does the gap/problem create genuine intellectual tension?
-   - **Climax (Climax):** Do the findings deliver on the promise? Is the key result prominent?
-   - **Risoluzione (Resolution):** Does the conclusion close the loop? Does it return to the opening question?
-2. Flag weak transitions in the narrative (e.g. findings section reads like a list, not a story).
+1. Evaluate the article's argumentative progression:
+   - **Orientation:** Does the opening establish the problem, scope, and reader
+     expectations appropriate to the genre? Do not require a rhetorical hook.
+   - **Problem or gap:** Is the reason for the inquiry explicit and supported?
+   - **Response:** Do theory, method, evidence, or analysis address that reason
+     in a traceable sequence?
+   - **Implication:** Does the conclusion state what follows without exceeding
+     the evidence and reconnect to the governing question?
+2. Flag transitions that lack a real logical relation. Do not add storytelling
+   formulas where the genre calls for a different progression.
 
 ### Lens 5 — Redundancy
 
@@ -106,7 +122,7 @@ Output the complete report as a single block:
 ### 1. Chiarezza della tesi
 - **Dov'è la tesi?** §1, riga X: «<quote>»
 - **È esplicita?** Sì / Parzialmente / No
-- **È falsificabile?** Sì / No — <motivazione>
+- **È valutabile nel genere adottato?** Sì / Parzialmente / No — <motivazione>
 - **Raccomandazione:** <indicazione concreta>
 
 ### 2. Architettura argomentativa
@@ -122,20 +138,17 @@ Output the complete report as a single block:
 - **Contraddizioni:** <elenco>
 
 ### 3. Proporzionalità delle sezioni
-| Sezione | Caratteri | % del totale | Atteso | Stato |
+| Sezione | Caratteri | % del totale | Norma o riferimento | Valutazione funzionale |
 |---|---|---|---|---|
-| §1 Intro | 3200 | 12% | 10-15% | OK |
-| §2 Letteratura | 8200 | 31% | 15-20% | ⚠️ Sovradimensionata |
-| §3 Metodo | 4100 | 16% | 15-20% | OK |
-| §4 Risultati | 5200 | 20% | 20-25% | ⚠️ Leggermente sotto |
-| §5 Discussione | 4100 | 16% | 20-25% | ⚠️ Sotto |
-| §6 Conclusione | 1400 | 5% | 5-10% | OK |
+| §1 Intro | 3200 | 12% | nessuna norma esplicita | adeguata allo scopo |
+| §2 Letteratura | 8200 | 31% | orientamento 15-20%, non vincolante | verificare due funzioni duplicate |
+| §3 Metodo | 4100 | 16% | norma rivista: max 5000 caratteri | conforme |
 
-### 4. Arco narrativo
-- **Apertura:** <valutazione>
-- **Tensione:** <valutazione — il gap motiva lo studio?>
-- **Climax:** <valutazione — i risultati mantengono la promessa?>
-- **Risoluzione:** <valutazione — la conclusione chiude il cerchio?>
+### 4. Progressione argomentativa
+- **Orientamento:** <problema, scopo e aspettative del lettore>
+- **Problema o gap:** <è esplicito e sostenuto?>
+- **Risposta:** <la sequenza di teoria, metodo, evidenza o analisi è tracciabile?>
+- **Implicazione:** <la conclusione segue dalle evidenze e torna alla domanda?>
 - **Raccomandazione:** <indicazione>
 
 ### 5. Ridondanza
@@ -176,14 +189,14 @@ or equivalent:
 2. Prepare a standalone trace file at:
 
    ```
-   revisions/<article-slug>/sources/global-trace-<bumped-version>.md
+   revisions/<article-slug>/sources/global-trace-<source-version-or-date>.md
    ```
 
 3. Before creating the file, show the exact path and ask:
 
    ```
    Creo la traccia globale per la revisione paragrafo per paragrafo?
-   File: revisions/<article-slug>/sources/global-trace-<bumped-version>.md
+   File: revisions/<article-slug>/sources/global-trace-<source-version-or-date>.md
    (sì / no)
    ```
 
@@ -191,8 +204,8 @@ or equivalent:
    write the trace file. The trace is a revision source, not an accepted change.
    It must not be included in response-to-reviewers material unless the user
    later applies concrete changes derived from it.
-5. Update the task file: `Seven lenses` → `done`; `Save trace or fix selected`
-   → `done` with note `global trace saved for /r-pp`.
+5. If a tracked task exists, update it. A trace-only diagnostic does not create
+   a task file merely to record completion.
 6. Ask whether to close the round or continue with selected global fixes:
 
    ```
@@ -206,7 +219,7 @@ or equivalent:
 source: global
 status: active
 article: <article-path>
-article_version: <bumped-version>
+article_version: <source article version, or unversioned>
 created: <YYYY-MM-DD>
 use_as_trace_for:
   - /r-pp
@@ -254,7 +267,9 @@ For each lens the user selects:
 
 ### Structural proposals (Lenses 1, 2, 4)
 
-For architectural changes, present as decision points. Examples:
+For architectural changes, run the read-only inventory and mapping phase of
+`13-content-structure.md`. Present the current and proposed architecture plus a
+preservation manifest before individual decision points. Examples:
 - **Restructure:** "Move the hypotheses from §2.3 into §1 (introduction) to establish the thesis earlier."
 - **Reorder:** "Swap §4 and §5: present discussion before detailed results tables."
 - **Add:** "Insert a transition paragraph between §2 and §3 explaining how the literature gap motivates the method."
@@ -314,14 +329,22 @@ For deduplication:
 Follow standard `30-iterate-points.md`, section 4, with one addition:
 
 - For global modifications (e.g. `replaceAll` renames), after `Accetta`, verify the change with a grep to confirm all occurrences were updated.
-- After applying structural changes (section reordering), re-read the article and confirm no broken cross-references (e.g. "as discussed in §4" now points to the wrong section).
+- Structural acceptances always enter the tracked application phase of
+  `13-content-structure.md`; do not pass them through direct apply or automatic
+  mode. After application, re-read the article and confirm no broken
+  cross-references (e.g. "as discussed in §4" now points to the wrong section).
 
 ## 8. Edge Cases
 
 - **Single-section article.** Still run the seven lenses. Scope adapts naturally.
 - **No structural issues found.** Announce: *"L'architettura dell'articolo è solida. Tutte e sette le lenti non rilevano problemi strutturali."* Offer to proceed to `/r-pp` for granular revision.
-- **Trace-only round.** If the user saves the diagnostic as trace and applies no global modifications, close the round normally; the mandatory decision log and current-file sync still run.
-- **Massive restructuring needed.** If the diagnostic identifies >5 structural issues, warn: *"Questa revisione comporta cambiamenti strutturali significativi. Consiglio di procedere una lente alla volta per non perdere il controllo."*
+- **Trace-only round.** If the user saves the diagnostic as a trace and applies
+  no manuscript modifications, report the saved path and close without task,
+  decision log, current-file sync, or Git.
+- **Massive restructuring needed.** If the proposal touches multiple sections
+  or creates interdependent decisions, recommend approving one coherent
+  structural cluster at a time and verify the preservation manifest after each
+  cluster.
 - **Contradiction with reviewer feedback.** If reviewer feedback was previously processed via `/article-revision` and the global revision identifies a contradictory recommendation, surface the conflict explicitly: *"⚠️ Il Reviewer A ha chiesto di espandere §2, ma la lente 3 (proporzionalità) suggerisce di ridurlo. Quale direzione preferisci?"*
 - **Character budget.** Structural changes (cuts, moves, adds) have large character impact. Track the cumulative Δ after each accept and compare against `EDITORIAL_LIMIT_CHARS`.
 - **Handoff / pause.** If the user says `pause`, `stop`, `sospendi`,
@@ -361,6 +384,10 @@ Follow standard `30-iterate-points.md`, section 4, with one addition:
    (sì / sì senza final sheet / annulla)
    ```
 
-3. Su conferma:
+3. Su conferma, solo se esiste un round tracciato (`TASK_FILE_PATH`):
    - Se richiesto: `workflow/70-final-sheet.md`
-   - `workflow/95-decision-log.md`  ← chiude il task file e sincronizza i file correnti
+   - `workflow/95-decision-log.md`  ← chiude localmente il task e sincronizza
+   - chiedere separatamente se pubblicare con Git
+
+Una diagnosi globale o una traccia senza modifiche al manoscritto non richiede
+task, decision log, sync o Git.

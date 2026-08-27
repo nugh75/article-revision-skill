@@ -21,7 +21,7 @@ git-checkpoint-sequence: 0
 - **Lane**: `{{REVIEWER_LANE}}`
 - **Avvio sessione**: `{{TIMESTAMP}}`
 - **Stato**: `in-progress`
-- **Avviso checkpoint Git**: ogni `{{AUTO_GIT_CHECKPOINT_THRESHOLD}}` modifiche applicate; conferma richiesta nelle revisioni interattive
+- **Avviso checkpoint Git**: ogni `{{AUTO_GIT_CHECKPOINT_THRESHOLD}}` modifiche applicate; commit e push richiedono autorizzazione Git separata
 
 ## Passi
 

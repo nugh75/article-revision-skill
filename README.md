@@ -1,251 +1,80 @@
 # article-revision
 
-A Claude Code skill that coordinates **iterative peer-revision rounds on scientific articles** written in Markdown.
+An auditable Markdown workflow for revising scientific articles and theses.
+The runtime contract is `SKILL.md`; operational details live in `workflow/`.
 
-It orchestrates the recurring tasks of academic revision — collecting reviewer feedback, proposing surgical edits, verifying citations, computing sample statistics, tracking the editorial budget, bumping versions — into a structured, file-based, idempotent workflow.
+## Core behavior
 
-In interactive chat, the skill asks before creating and pushing a scoped Git
-checkpoint after a configurable number of applied changes. `/r-auto` runs those
-threshold checkpoints automatically. Handoff and confirmed closure flush the
-remaining session state while leaving unrelated work untouched.
+- Diagnosis and proposals are read-only. They do not create a version, task,
+  ledger entry, export, commit, or push.
+- Idea organization and content-architecture maps are read-only by default.
+  Applying a structural reorganization always uses a tracked round and accounts
+  for every source unit.
+- A bounded edit to an explicitly named file/version can run in direct-apply
+  mode: edit and verify that target only, with no bump, task, ledger, or sync.
+- A tracked reviewer or iterative round creates the working version, task file,
+  and freeze ledger before its first edit.
+- `Accetta` authorizes the stated text edit only.
+- Interactive Git checkpoints always require a dedicated confirmation.
+- Plain `/r-auto` performs bounded local edits and verification. Only
+  `/r-auto ... --git`, `/r-handoff --git`, or an explicit `commit e push`
+  authorizes publication.
+- Pause and ordinary `/r-handoff` remain local and resumable.
 
----
+## Main commands
 
-## What it does
+| Command | Purpose |
+|---|---|
+| `/r-audit [scope]` | Read-only conceptual, prose, citation, or data audit |
+| `/r-structure [scope]` | Read-only content map and preservation-first structural proposal |
+| `/r-global` | Seven-lens whole-manuscript diagnosis |
+| `/r-pp`, `/r-pp-a` | Paragraph-by-paragraph diagnosis and approved edits |
+| `/r-conn` | Connector and transition review |
+| `/r-chapter` | Chapter or section revision in whole-text context |
+| `/r-pr-2` | Standalone simulated peer-review reports |
+| `/r-auto <task> --scope "<scope>" [--agents N] [--git]` | Bounded automatic revision |
+| `/r-handoff [--git]`, `/r-resume` | Pause or resume a tracked round |
+| `/r-guide`, `/r-help` | Read-only guidance and command reference |
 
-For each reviewer point (or arbitrary revision request) the skill:
+The full list is in `workflow/99-help.md`.
 
-1. Loads the relevant section of the article, the bibliography, and the journal's editorial norms.
-2. Generates a **proposal** that respects the norms and the article's style.
-3. Shows in chat a fixed block: *Original + Proposal + Δ chars/words + Norms respected + Decision*.
-4. Waits for `Accetta / Modifica / Rivedi completamente / Tieni in considerazione`.
-5. On accept: applies the diff, updates the *project file* (the persistent revision plan), bumps a counter.
-6. After N accepted changes, **proposes** (never forces) a versioned snapshot of the article: `<prefix>-v(N+1)-YYYY-MM-DD-HHMM[-anonymous].md`.
-7. After `AUTO_GIT_CHECKPOINT_THRESHOLD` applied changes, asks before committing
-   explicit session files and pushing in interactive chat; `/r-auto`, requested
-   handoff, and confirmed closure remain automatic.
+## Expected project inputs
 
-It also handles:
-
-- **Bibliography verification** against Crossref + OpenAlex (catching fictitious or wrong references).
-- **Sample-description statistics** generated from `.xlsx`/`.csv` data sources.
-- **Granularity**: revisions can target a single sentence, a paragraph, or the whole article.
-- **Auto language detection** (it/en) — adapts the proposal style accordingly. Workflow docs stay in English; article proposals are written in the article language.
-
----
-
-## Installation
-
-This is a Claude Code skill: it lives at `.claude/skills/article-revision/` inside a project.
-
-```bash
-# from your project root
-mkdir -p .claude/skills
-cd .claude/skills
-git clone https://github.com/nugh75/article-revision.git
-```
-
-Then create the project Python virtual environment for the scripts, or let the skill ask to create it on first run:
-
-```bash
-python3 -m venv .venv
-.venv/bin/python -m pip install --upgrade pip
-.venv/bin/python -m pip install -r .claude/skills/article-revision/requirements.txt
-```
-
-If `.venv/` is missing, the bootstrap asks whether to create it. If you refuse,
-the skill asks before using system Python and stores the selected interpreter in
-session memory as `PYTHON_BIN`. It never falls back to `python3` silently.
-
----
-
-## Project layout the skill expects
-
-```
+```text
 <project-root>/
-├── .env                              # editorial limits, paths, Zotero, etc.
-├── .claude/skills/article-revision/  # this skill
-├── articles/                         # or another path; auto-detected
-│   └── article-vN-YYYY-MM-DD[-anonymous].md
-├── bibliography/
-│   └── reference.bib
+├── .env
+├── articles/
+├── bibliography/reference.bib
 ├── editorial-norms/
-│   └── norms-<journal>.md
-├── data/                             # optional: sample-description sources
 └── revisions/
-    └── <reviewer-slug>/
-        ├── revision-plan-vN.md
-        └── final-sheet-vN.md
 ```
 
-If anything is missing the skill's bootstrap step (`workflow/00-bootstrap.md`) walks the user through creating it. Nothing is created silently.
+Bootstrap (`workflow/00-bootstrap.md`) runs only when an operation needs missing
+infrastructure. It asks before creating files, directories, or a virtual
+environment. Read-only audits use the material already available.
 
----
-
-## `.env` keys
-
-See `.env.example` for the full list. Required:
-
-- `EDITORIAL_LIMIT_CHARS` (or `EDITORIAL_LIMIT_WORDS`)
-- `EDITORIAL_NORMS_PATH`
-- `BIBLIOGRAPHY_BIB_PATH`
-
-Recommended:
-
-- `CROSSREF_USER_AGENT`, `OPENALEX_USER_AGENT` — for the bibliography online verification scripts.
-- `ZOTERO_USER_ID`, `ZOTERO_API_KEY`, `ZOTERO_GROUP_ID` — for Zotero sync.
-- `ARTICLE_LANG` — force language detection (default: auto).
-- `PYTHON_BIN` — Python interpreter for skill scripts (default: `.venv/bin/python`).
-- `AUTO_BUMP_THRESHOLD` — how many accepted changes before the skill proposes a version bump (default: 5).
-- `AUTO_GIT_CHECKPOINT_THRESHOLD` — how many applied changes before the interactive commit/push prompt; automatic in `/r-auto` (default: 5).
-
----
-
-## Usage
-
-In Claude Code, invoke the skill explicitly or let it auto-trigger:
-
-```
-/article-revision
-```
-
-For the recommended full path:
-
-```
-/r-guide
-```
-
-Or implicitly:
-
-> *"Apply Elisa's comments to the article."*
-> *"Revise paragraph 3."*
-> *"Create version 10 of the file."*
-
-The first call walks through bootstrap; subsequent calls jump straight to the relevant workflow step.
-
----
-
-## Multi-tool support
-
-The skill works natively with **Claude Code** through `SKILL.md` (auto-discovered in `.claude/skills/`).
-
-For other agents, two equivalent entry-point files describe the same workflow:
-
-- `AGENTS.md` — cross-tool standard, read by Claude Code, opencode, OpenAI Codex CLI, Aider, Cline, and most agentic tools.
-- `OPENCODE.md` — opencode-specific (legacy convention), kept in sync with `AGENTS.md`.
-
-To activate the skill in a project that uses opencode or codex, symlink (or copy) the relevant file to the project root:
-
-```bash
-# from the consuming project root
-ln -s .claude/skills/article-revision/AGENTS.md   AGENTS.md
-ln -s .claude/skills/article-revision/OPENCODE.md OPENCODE.md
-```
-
-If the project already has an `AGENTS.md` / `OPENCODE.md`, merge by appending a single line that delegates to the skill:
-
-```markdown
-## article-revision
-See .claude/skills/article-revision/AGENTS.md for the full workflow.
-```
-
-Both files reference the same `workflow/` and `scripts/`; the experience is identical across agents.
-
----
+See `.env.example` for configuration. Use the project virtual environment for
+Python scripts; the workflow never silently falls back to system Python.
 
 ## Companion skills
 
-`article-revision` is the **orchestration layer**. Two existing companion skills cover deeper concerns:
+- `wayfinder` audits definitions, idea roles, construct boundaries, relations,
+  and content architecture.
+- `scrittura` organizes source material and drafts prose without implicit file
+  changes.
+- `tone-of-voice` performs the final academic-style and paragraph-readability
+  pass without changing established terminology, structure, or evidence.
 
-- a *journal-style skill* enforcing editorial norms (e.g. `praxis-article-style` for QTimes);
-- a *bibliography skill* managing the `.bib` (e.g. `praxis-bibliography-citations`).
+`article-revision` owns tracked application, versioning, closure, and optional
+Git publication.
 
-Both are optional. Without them, the skill falls back on the journal-norms file and the static `bib_check.py` / `bib_verify_online.py` scripts.
+## Installation
 
----
-
-## Workflow files
-
-The skill is driven by the markdown files in `workflow/`, executed in order:
-
-| File | Purpose |
-|---|---|
-| `00-bootstrap.md` | Create venv, `.bib`, `.env`, norms file if missing |
-| `05-task.md` | Persist session and Git-checkpoint state |
-| `06-handoff.md` | Pause/resume with sync, scoped commit, and verified push |
-| `07-git-checkpoint.md` | Threshold/boundary commit and push contract |
-| `10-setup.md` | Load configuration and active article |
-| `20-plan-revision.md` | Parse reviewer feedback into a project file |
-| `30-iterate-points.md` | The core loop: propose, ask, apply, log |
-| `40-bibliography-check.md` | Static + online citation verification |
-| `50-sample-description.md` | Compute sociodemographic statistics from raw data |
-| `60-bump-version.md` | Snapshot to `vN+1` with timestamp |
-| `70-final-sheet.md` | Produce the round's status sheet |
-
----
-
-## Scripts
-
-| File | What it does |
-|---|---|
-| `scripts/char_count.py` | Char/word count with section-exclusion and budget check |
-| `scripts/bib_check.py` | Static cross-check between citations and `.bib` |
-| `scripts/bib_verify_online.py` | Crossref + OpenAlex similarity scoring (cache included) |
-| `scripts/sample_stats.py` | Per-cohort stats from `.xlsx`/`.csv` via YAML mapping |
-| `scripts/new_version.sh` | Bump filename to `<prefix>-v(N+1)-YYYY-MM-DD-HHMM` |
-| `scripts/diff_versions.sh` | Word-level diff between two versions |
-| `scripts/git_checkpoint.sh` | Scoped commit, upstream push, and remote-hash verification |
-
----
-
-## Word documents
-
-The skill is Markdown-first, but projects may contain `.docx` sources or need a
-Word export at the end of a revision round. In that case, preserve the article
-content and enforce these layout rules:
-
-- Use real Word heading styles for titles and section headings.
-- Keep all body text black.
-- Keep headings black unless journal norms specify otherwise.
-- Do not add blank paragraphs between body paragraphs.
-- Use style spacing before/after headings to create margins between headings and body text.
-- Avoid manual blank lines during `.docx` ↔ Markdown conversion.
-- Treat formatting changes as revision points that still require `Accetta / Modifica / Rivedi completamente / Tieni in considerazione`.
-
----
-
-## Templates
-
-| File | Used for |
-|---|---|
-| `templates/revision-plan.md` | Per-reviewer planning document |
-| `templates/final-sheet.md` | End-of-round status sheet |
-| `templates/bibliography-audit.md` | Bibliography online-verification report |
-| `templates/sample-stats.md` | Sample-description output |
-| `templates/accepted-anglicisms-it.md` | Whitelist of accepted English terms in Italian prose |
-
----
-
-## Design principles
-
-- **Confirmed, scoped Git history.** Interactive chat asks before commit and
-  push at the configured threshold; `/r-auto`, requested handoff, and confirmed
-  closure publish automatically. The skill stages explicit session paths only,
-  runs hooks, and never force-pushes.
-- **Always ask before creating.** Bootstrap, version bump, file generation — every write step asks for confirmation when ambiguous.
-- **Per-point granularity.** No mass replacements, no batched approvals. Every individual change goes through *Accetta / Modifica / Rivedi completamente / Tieni in considerazione*.
-- **Paragraphs are anchored.** Every paragraph reference includes chapter and exact Markdown line range; chapters follow the first number of numbered headings.
-- **State lives in markdown.** The project file, task file, decision log, current-file sync, and handoff checkpoint are the source of truth; sessions resume cleanly after interruption without a new bump.
-- **Surgical edits only.** Touch what the reviewer's point requires, nothing more.
-
----
+Place the repository in `.claude/skills/article-revision/` for Claude Code or
+in an agent skill directory supported by the host. Codex can follow symlinked
+skill directories, so keep one visible copy per skill name in each discovery
+scope to avoid duplicate menu entries.
 
 ## License
 
-MIT. See [LICENSE](LICENSE).
-
----
-
-## Contributing
-
-Open issues and PRs are welcome. The skill is intentionally simple — most extensions belong in companion skills (journal-specific style, advanced bibliography flows). Try not to inflate `article-revision` itself.
+MIT. See `LICENSE`.

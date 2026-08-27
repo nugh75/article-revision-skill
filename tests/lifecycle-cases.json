@@ -1,0 +1,94 @@
+{
+  "routes": [
+    {
+      "name": "read-only audit",
+      "kind": "audit",
+      "target_named": false,
+      "tracking_requested": false,
+      "git_authorized": false,
+      "expected": {"mode": "chat-only", "writes_target": false, "bump": false, "task": false, "ledger": false, "sync": false, "git": false}
+    },
+    {
+      "name": "rewrite in chat",
+      "kind": "draft",
+      "target_named": false,
+      "tracking_requested": false,
+      "git_authorized": false,
+      "expected": {"mode": "chat-only", "writes_target": false, "bump": false, "task": false, "ledger": false, "sync": false, "git": false}
+    },
+    {
+      "name": "organize raw ideas in chat",
+      "kind": "organize",
+      "target_named": false,
+      "tracking_requested": false,
+      "git_authorized": false,
+      "expected": {"mode": "chat-only", "writes_target": false, "bump": false, "task": false, "ledger": false, "sync": false, "git": false}
+    },
+    {
+      "name": "read-only structural proposal",
+      "kind": "structure-audit",
+      "target_named": true,
+      "tracking_requested": false,
+      "git_authorized": false,
+      "expected": {"mode": "chat-only", "writes_target": false, "bump": false, "task": false, "ledger": false, "sync": false, "git": false}
+    },
+    {
+      "name": "bounded named-version replacement",
+      "kind": "direct-edit",
+      "target_named": true,
+      "tracking_requested": false,
+      "git_authorized": false,
+      "expected": {"mode": "direct-apply", "writes_target": true, "bump": false, "task": false, "ledger": false, "sync": false, "git": false}
+    },
+    {
+      "name": "named target with explicit tracking",
+      "kind": "direct-edit",
+      "target_named": true,
+      "tracking_requested": true,
+      "git_authorized": false,
+      "expected": {"mode": "tracked-round", "writes_target": true, "bump": true, "task": true, "ledger": true, "sync": true, "git": false}
+    },
+    {
+      "name": "reviewer round",
+      "kind": "reviewer",
+      "target_named": false,
+      "tracking_requested": false,
+      "git_authorized": false,
+      "expected": {"mode": "tracked-round", "writes_target": true, "bump": true, "task": true, "ledger": true, "sync": true, "git": false}
+    },
+    {
+      "name": "accepted structural reorganization of named target",
+      "kind": "structural-edit",
+      "target_named": true,
+      "tracking_requested": false,
+      "git_authorized": false,
+      "expected": {"mode": "tracked-round", "writes_target": true, "bump": true, "task": true, "ledger": true, "sync": true, "git": false}
+    },
+    {
+      "name": "local automatic revision",
+      "kind": "auto",
+      "target_named": false,
+      "tracking_requested": true,
+      "git_authorized": false,
+      "expected": {"mode": "auto", "writes_target": true, "bump": true, "task": true, "ledger": true, "sync": true, "git": false}
+    },
+    {
+      "name": "published automatic revision",
+      "kind": "auto",
+      "target_named": false,
+      "tracking_requested": true,
+      "git_authorized": true,
+      "expected": {"mode": "auto", "writes_target": true, "bump": true, "task": true, "ledger": true, "sync": true, "git": true}
+    }
+  ],
+  "git_authorization": [
+    {"event": "accept", "expected": false},
+    {"event": "close", "expected": false},
+    {"event": "stop", "expected": false},
+    {"event": "handoff", "expected": false},
+    {"event": "dedicated-yes", "expected": true},
+    {"event": "explicit-commit-push", "expected": true},
+    {"event": "handoff-git", "expected": true},
+    {"event": "auto-git", "expected": true}
+  ]
+}

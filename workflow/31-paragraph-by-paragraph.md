@@ -13,7 +13,12 @@ If the user invokes by phrase (e.g. "revisione paragrafo per paragrafo") without
 
 ## 1. Bootstrap & Setup
 
-If not already done, run `00-bootstrap.md` and `10-setup.md` to load `.env`, norms, bibliography, active article, and detect `ARTICLE_LANG`. **Note:** `10-setup.md` step 5 enforces a mandatory version bump before any revision work begins — do not skip it.
+If not already done, run `00-bootstrap.md` when infrastructure is missing and
+`10-setup.md` to load context read-only. Diagnosis and proposals do not bump.
+The first accepted file edit enters the tracked lifecycle from `10-setup.md`.
+Any task-update instruction in this workflow is conditional on
+`TASK_FILE_PATH` already existing; before the first accepted edit, keep progress
+only in working memory.
 
 ## 1a. Load Optional Global Trace
 
@@ -121,6 +126,10 @@ If no unitary concept can be identified, flag the paragraph as structurally weak
 - split the paragraph into two or more paragraphs;
 - move one autonomous idea to a better section;
 - narrow the paragraph so all sentences serve the same governing concept.
+
+A local rewrite that narrows wording remains a paragraph proposal. A split,
+merge, move, or change in paragraph order is a structural proposal: inventory
+the affected units and follow `13-content-structure.md` before application.
 
 ### Output Format (Standard — `/r-pp`)
 
@@ -233,7 +242,11 @@ Based on the user's diagnostic answers, generate a proposal using the standard d
 Puoi indicare numeri specifici, es. `Accetta 2,4` oppure `Modifica 3: sostituire X con Y`.
 ```
 
-If a proposal requires splitting a paragraph, show the exact resulting paragraphs under `**Proposta**`, mark `risk: medium` or `high` depending on content movement, and keep each split/move as a separate numbered modification.
+If a proposal requires splitting a paragraph, show the exact resulting
+paragraphs under `**Proposta**`, mark `risk: medium` or `high` depending on
+content movement, and keep each split or move as a separate numbered decision.
+Before applying it, complete the affected-unit map and preservation manifest in
+`13-content-structure.md`.
 
 ### Deep mode numbering (`/r-pp-a`)
 
@@ -256,7 +269,8 @@ The user may decide by category: `Accetta logica`, `Modifica tono: <direzione>`,
 
 Follow the standard response handling from `30-iterate-points.md`, section 4:
 
-- **Accetta** → edit file, increment the bump and Git checkpoint counters, run
+- **Accetta** → create the tracked working version if needed, edit the file,
+  increment the bump and Git prompt counters, run
   `07-git-checkpoint.md` in interactive-prompt mode when due, then ask "Ci sono
   altri cambiamenti in questo paragrafo?".
 - **Modifica** → regenerate modification N per direction.
@@ -265,8 +279,13 @@ Follow the standard response handling from `30-iterate-points.md`, section 4:
 
 **Do not advance automatically.** Wait for explicit command: `prossimo`, `next`, `passa al prossimo paragrafo`.
 
-**On the advance command, run the freeze auto-offer** (`15-freeze-ledger.md` §7)
-before moving to the next paragraph: offer to freeze the just-finished paragraph
+For an accepted split, merge, move, or paragraph-order change, the structural
+checks in `13-content-structure.md` are part of the acceptance path before the
+edit is applied.
+
+**On the advance command in a tracked round, run the freeze auto-offer**
+(`15-freeze-ledger.md` §7) before moving to the next paragraph. A diagnostic-only
+pass advances without ledger writes. For tracked work, offer to freeze the just-finished paragraph
 (`Congelo P<N> (<ARTICLE_PATH>:<L1-L2>, Capitolo <C>) come concluso? (sì / no / più tardi)`). If the user declines but
 named something still to do, record it via `log-comment` so the paragraph stays
 🟡 `open` with its intention in the ledger.
@@ -319,12 +338,14 @@ Criteria:
   their functions.
 - If one paragraph carries two autonomous concepts, return to that paragraph and
   propose a split before advancing.
-- If the user names a deferred issue but does not apply it immediately, record it
-  in the freeze ledger with `log-comment` for the relevant paragraph or chapter.
+- If the user names a deferred issue but does not apply it immediately, record
+  it with `log-comment` only when a tracked ledger exists or the user explicitly
+  asks to save the note; otherwise keep it in chat.
 
 ## 7. Edge Cases
 
-- **Skip paragraph.** If the user says `salta` or `skip`, mark the paragraph as `Skipped` and advance.
+- **Skip paragraph.** If the user says `salta` or `skip`, mark it `Skipped` only
+  in an existing task/plan; otherwise note the skip in chat and advance.
 - **Handoff / pause.** If the user says `pause`, `stop`, `sospendi`,
   `interrompi`, or `/r-handoff`, call `workflow/06-handoff.md`: record the
   current paragraph with full chapter + line-range locator, chapter recap
@@ -367,6 +388,9 @@ Criteria:
    (sì / sì senza final sheet / annulla)
    ```
 
-3. Su conferma:
+3. Su conferma, solo se esiste un round tracciato (`TASK_FILE_PATH`):
    - Se richiesto: `workflow/70-final-sheet.md`
-   - `workflow/95-decision-log.md`  ← chiude il task file e sincronizza i file correnti
+   - `workflow/95-decision-log.md`  ← chiude localmente il task e sincronizza
+   - chiedere separatamente se pubblicare con Git
+
+Se il passaggio è rimasto diagnostico, chiudere in chat senza creare file.

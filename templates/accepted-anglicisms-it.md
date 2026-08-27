@@ -62,4 +62,5 @@ Whitelist of English terms tolerated in Italian academic prose because they are 
 - In `ARTICLE_LANG=it`, any proposal that introduces an anglicism not in this whitelist must flag it in chat: `The anglicism <term> is not in the whitelist. Use the Italian equivalent <...>?`
 - The user may add terms permanently to the whitelist by confirming in chat.
   When changed during a revision session, include this file in the next scoped
-  automatic checkpoint.
+  checkpoint only after separate Git authorization; `/r-auto ... --git` already
+  supplies that authorization.

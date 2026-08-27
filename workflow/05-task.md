@@ -2,14 +2,15 @@
 
 Manages the per-session task file at
 `revisions/<article-slug>/task-<command-slug>-<bumped-version>.md`.
-Every revision session has exactly one task file; it tracks steps in real time
-and provides the input summary for `95-decision-log.md`.
+Every tracked edit round has exactly one task file; diagnostic-only sessions
+have none. The file tracks applied work and provides the input summary for
+`95-decision-log.md`.
 
 ## When to invoke
 
 | Action | Called by |
 |---|---|
-| `create` | `workflow/10-setup.md` — immediately after the mandatory bump |
+| `create` | `workflow/10-setup.md` — after the first-edit working version is created |
 | `update-step` | Any workflow file when a named step reaches a new status |
 | `handoff` | `workflow/06-handoff.md` — whenever work is paused or may be interrupted |
 | `resume` | `workflow/06-handoff.md` — when continuing from a paused task file |
@@ -25,11 +26,11 @@ and provides the input summary for `95-decision-log.md`.
 - `ARTICLE_PATH` — path to the active article file.
 - `ARTICLE_SLUG` — article filename prefix before `-vN` (e.g. `article`).
 - `ARTICLE_VERSION` — original version identifier (e.g. `v3`).
-- `BUMPED_VERSION` — new version identifier after the mandatory bump (e.g. `v4-2026-06-16-1430`).
+- `BUMPED_VERSION` — working version created before the first accepted edit (e.g. `v4-2026-06-16-1430`).
 - `REVIEWER_LANE` — reviewer slug, simulated label, or `self` for proactive modes (`/r-pp`, `/r-global`, `/r-chapter`, `/r-conn`).
 - `AUTO_GIT_CHECKPOINT_THRESHOLD` — positive integer loaded by setup; default
-  `5`. It is the prompt threshold in interactive chat and the automatic
-  threshold in `/r-auto`.
+  `5`. It is the dedicated prompt threshold in interactive chat. It is automatic
+  only for `/r-auto ... --git`.
 
 **Step list** (rows 3..N of the `## Passi` table) by command:
 
@@ -47,7 +48,8 @@ and provides the input summary for `95-decision-log.md`.
 | `/r-approve` | Load approvals · Apply outcomes · Handoff checkpoint · Decision log · Sync current files |
 
 All command-specific rows in `{{STEPS_ROWS}}` start as `pending`. The fixed
-template rows `Bootstrap & Setup` and `Version bump` are pre-filled as `done`.
+template rows `Bootstrap & Setup` and `Version bump` are pre-filled as `done`
+because task creation occurs only after that first-edit boundary.
 
 **File path**:
 `revisions/<article-slug>/task-<command-slug>-<bumped-version>.md`
@@ -124,8 +126,8 @@ Called by `workflow/06-handoff.md`.
 5. Restore working memory from the task file fields.
 6. Restore the Git checkpoint threshold, counter, last-prompt count, and
    sequence. For legacy task files without `git-checkpoint-last-prompt-count`,
-   default it to `0`. If the previous checkpoint committed locally but did not
-   push, retry that push before accepting or integrating another change.
+   default it to `0`. If a previously authorized commit did not push, report it
+   and ask before retrying; do not reinterpret resume as Git authorization.
 
 ## 5. close
 

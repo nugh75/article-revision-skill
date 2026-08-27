@@ -1,194 +1,62 @@
-# 06 — Handoff / Resume
+# 06 — Local Handoff / Resume
 
-Creates a resumable checkpoint for an unfinished revision session, records that
-checkpoint in the decision log, syncs current files, then commits the handoff
-state and pushes it to the configured upstream. This is not revision closure:
-it does not close the task file and does not mark the round complete.
+Preserve enough local state to resume an unfinished tracked revision. Handoff
+does not imply Git publication.
 
-## When to invoke
+## Invocation modes
 
-Invoke this workflow whenever:
+- Natural `pause`, `stop`, `sospendi`, or `interrompi`: pause locally.
+- `/r-handoff`: write the local checkpoint, decision-log checkpoint, and current
+  exports when a tracked task exists.
+- `/r-handoff --git` or an explicit `commit e push`: do the same local work,
+  then call `07-git-checkpoint.md` with authorized flush mode.
 
-- the user says `pause`, `stop`, `sospendi`, `interrompi`, `riprendiamo dopo`,
-  `handoff`, or `/r-handoff`;
-- the agent is about to stop while a revision point, paragraph, section, lens,
-  or approval pass is still open;
-- a long-running pass reaches a natural waiting point and state has changed
-  since the last checkpoint.
+## No tracked round
 
-Every revision workflow may call this step at any time. The user should be able
-to resume from the checkpoint without relying on chat history.
+If `TASK_FILE_PATH` is absent, do not create a file merely because the user
+paused. Return a chat summary containing scope, last proposal, pending decisions,
+and the exact next action. No bump, sync, decision log, commit, or push occurs.
 
-## 1. Write Handoff Checkpoint
+## Write the checkpoint
 
-Use the existing `TASK_FILE_PATH`. Do not create a separate handoff file unless
-there is no task file; if `TASK_FILE_PATH` is missing, ask before creating a
-minimal checkpoint under `revisions/<article-slug>/handoff-<YYYY-MM-DD-HHMM>.md`.
+For an existing task file, set `status: paused`, keep the current workflow step
+`in-progress`, and fill `## Handoff / Ripresa` with:
 
-Update the task file:
+- timestamp, command, article and version;
+- current phase and exact paragraph/section locator;
+- last proposal and decisions already made;
+- pending decisions and sources to reload;
+- active-session files changed so far;
+- risks, frozen units, and the exact next action.
 
-1. Frontmatter `status`: set to `paused`.
-2. In `## Passi`, leave the current step as `in-progress`; do not mark it
-   `skipped`, `failed`, or `done` unless that is already true.
-3. Fill or replace the `## Handoff / Ripresa` section with:
+Record deferred intentions in the freeze ledger only when that ledger already
+belongs to the tracked round. Do not create a new sidecar during handoff.
 
-   ```markdown
-   ## Handoff / Ripresa
+For explicit `/r-handoff`, run `95-decision-log.md mode=handoff` and
+`96-sync-current.md SYNC_MODE=handoff`. A natural pause may stop after the task
+checkpoint unless the user also requested a full handoff.
 
-   - **Ultimo aggiornamento**: <YYYY-MM-DD HH:MM>
-   - **Stato**: paused
-   - **Comando**: <COMMAND>
-   - **Articolo di lavoro**: <ARTICLE_PATH>
-   - **Versione di lavoro**: <BUMPED_VERSION>
-   - **Fase corrente**: <workflow step name>
-   - **Unità corrente**: <point id | Capitolo C — title; P<N> — ARTICLE_PATH:L1-L2 | §N | lens | transition group>
-   - **Ultima proposta mostrata**: <none|sidecar path|short title>
-   - **Decisioni già prese**: <brief counts and statuses>
-   - **Decisioni pendenti**: <exact item numbers/categories still open>
-   - **Tracce/fonti da ricaricare**: <freeze ledger, global trace, reviewer plan, approval file, data source>
-   - **File modificati finora**: <article/bib/task/proposal files>
-   - **Prossima azione esatta**: <one concrete instruction for the next agent>
-   - **Avvertenze**: <risks, frozen units, unresolved data/citation checks>
-   ```
+## Optional Git publication
 
-4. If there is a sidecar proposal file (`proposal-revision-*.md`), append the
-   same checkpoint to its `Decision Trail`.
-5. If a deferred intention appears in the handoff, also record it in the freeze
-   ledger via `15-freeze-ledger.md#log-comment`; never leave deferred intentions
-   only in the task file.
-
-## 2. Decision Log + Sync
-
-After the checkpoint is written, run:
-
-1. `workflow/95-decision-log.md` with `mode=handoff`.
-2. `workflow/96-sync-current.md` via that decision-log workflow with
-   `SYNC_MODE=handoff`.
-
-The decision-log entry must use type `handoff-checkpoint`, decision `paused`,
-and include the exact `## Handoff / Ripresa` fields, especially pending
-decisions and `Prossima azione esatta`.
-
-This checkpoint log and sync are mandatory on every handoff. They do not replace
-the final closure decision log and final closure sync.
-
-## 3. Handoff Commit and Push
-
-After the checkpoint, decision-log entry, and sync are written, call
-`workflow/07-git-checkpoint.md` with `mode=flush`. Handoff must publish all
-remaining active-session state even when the change counter is below the normal
-threshold.
-
-1. From the project root, inspect the worktree:
-
-   ```bash
-   git status --short
-   git diff --name-only
-   ```
-
-2. Build the explicit session-file manifest using the rules in
-   `07-git-checkpoint.md`. It normally includes:
-   - `TASK_FILE_PATH`;
-   - `ARTICLE_PATH`;
-   - the active revision plan/project file;
-   - the freeze ledger;
-   - proposal sidecar files, approval files, bibliography files, data-audit
-     outputs, redline outputs, or source traces explicitly listed in
-     `File modificati finora` or changed by the current session;
-   - the new decision-log session file and updated decision-log index;
-   - synced current files (`articles/current.md`, `articles/current.docx`,
-     `bibliography/bibliography.docx`) when generated or changed.
-
-   Leave unrelated user changes unstaged and mention them in chat.
-
-3. Run the checkpoint helper without bypassing hooks:
-
-   ```bash
-   scripts/git_checkpoint.sh \
-     --message "revision(<article-slug>): handoff — <unit>" \
-     -- <session files>
-   ```
-
-   The subject must identify the article slug, command, and current unit. The
-   body must briefly say what was done and the exact next action. Do not use
-   `--no-verify`.
-
-4. If there are no changes after writing the checkpoint, do not create an empty
-   commit. Report that there was nothing to commit.
-
-5. On success, verify the pushed commit against the remote branch and record
-   the short hash in chat. Do not ask for commit or push permission. Opening a
-   PR remains out of scope.
-
-## 4. Chat Output
-
-Output a concise handoff block:
+Set `GIT_AUTHORIZED=true` only for `/r-handoff --git` or an explicit request to
+commit and push. Then call `07-git-checkpoint.md mode=flush-authorized` with an
+explicit active-session manifest. Without that authorization, report:
 
 ```text
-Handoff scritto, commit creato e push verificato.
-- Task file: <TASK_FILE_PATH>
-- Decision log: <session-NNN>
-- Sync current: <ok|warnings>
-- Commit: <short-hash> <subject> → <remote>/<branch>
-- Stato: paused
-- Ripresa: <Prossima azione esatta>
+Handoff locale scritto. Nessun commit o push eseguito.
 ```
 
-If there was nothing to commit, replace the first line with
-`Handoff scritto. Nessuna modifica da committare.` and omit the commit line.
+## Resume
 
-If pending user decisions remain, list them explicitly:
+On `/r-resume`, `riprendi`, or `continua`:
 
-```text
-Decisioni pendenti: <items>
-```
+1. Find the newest matching task with `status: paused` or `in-progress`.
+2. Load its handoff section and referenced sources.
+3. Restore its article path, command, counters, and exact next action.
+4. Set the task to `in-progress` and continue without another bump.
+5. If a prior explicitly authorized commit succeeded but its push failed, ask
+   whether to retry that push before publishing any new checkpoint. Local prose
+   work may continue when doing so is safe.
 
-If unrelated changes were intentionally left unstaged, add:
-
-```text
-Non inclusi nel commit di handoff: <files>
-```
-
-## 5. Resume From Handoff
-
-When the user asks to resume (`riprendi`, `resume`, `continua`, `/r-resume`, or
-re-invokes the same command in a project with a paused task file):
-
-1. Search `revisions/<article-slug>/task-*-*.md` for frontmatter
-   `status: paused` or `status: in-progress`.
-2. Prefer the newest task whose `article` path exists. If several match, show the
-   candidates and ask which one to resume.
-3. Load `## Handoff / Ripresa` and the files listed under
-   `Tracce/fonti da ricaricare`.
-4. Treat resume as continuation of the existing revision session:
-   - do **not** run a new mandatory bump;
-   - do **not** create a new task file;
-   - set `TASK_FILE_PATH`, `ARTICLE_PATH`, `BUMPED_VERSION`, and command-specific
-     state from the task file;
-   - set frontmatter `status: in-progress`;
-   - update `Ultimo aggiornamento` and `Stato`.
-5. In chat, confirm:
-
-   ```text
-   Ripresa da handoff.
-   - Task file: <TASK_FILE_PATH>
-   - Articolo: <ARTICLE_PATH>
-   - Prossima azione: <Prossima azione esatta>
-   ```
-
-6. Continue exactly from the recorded next action. If the checkpoint is
-   ambiguous, ask one clarifying question and keep the task paused until the user
-   answers.
-
-## 6. Hard Rules
-
-- Handoff never replaces the mandatory closure sequence. When the user later
-  closes the round, still run `95-decision-log.md` and `96-sync-current.md`.
-- Handoff must write a decision-log checkpoint, sync current files, then commit
-  and push the checkpoint state through `07-git-checkpoint.md`.
-- Handoff stages only active-session files. Never include unrelated user changes
-  in the handoff commit.
-- Handoff never silently discards a pending proposal. Record pending item numbers,
-  categories, and the exact next action.
-- A resumed session is not a new revision session and must not trigger a new
-  version bump unless the user explicitly starts a new session.
+Never discard a pending proposal or include unrelated paths in a later Git
+manifest.

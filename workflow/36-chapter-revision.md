@@ -25,10 +25,15 @@ the chapter list (step 2) and ask.
 
 ## 1. Bootstrap & Setup
 
-If not already done, run `00-bootstrap.md` and `10-setup.md` to load `.env`,
-norms, bibliography, active article, detect `ARTICLE_LANG`, complete the
-mandatory bump, and create the task file (`workflow/05-task.md` — action
-`create` with `COMMAND=/r-chapter`).
+Run `00-bootstrap.md` only if required and separately approved, then
+`10-setup.md` read-only. Chapter analysis and proposals do not bump or create a
+task. The first accepted edit creates the working version and task with
+`COMMAND=/r-chapter`.
+
+Every `05-task.md#update-step` instruction below is conditional on
+`TASK_FILE_PATH` already existing. Before the first accepted edit, retain the
+equivalent progress only in working memory and initialize the task at the
+current step during the first-edit transition.
 
 `05-task.md#update-step`: `Select section` → `in-progress`.
 
@@ -255,8 +260,10 @@ Handle `Accetta`, `Modifica`, `Rivedi completamente`, and
    (sì / sì senza final sheet / annulla)
    ```
 
-3. Su conferma:
+3. Su conferma, solo se esiste un round tracciato (`TASK_FILE_PATH`):
    - Se richiesto: `workflow/70-final-sheet.md`
-   - `workflow/95-decision-log.md` con `type: revision-chapter` ← chiude il task file e sincronizza i file correnti
+   - `workflow/95-decision-log.md` con `type: revision-chapter` ← chiude localmente il task e sincronizza
+   - chiedere separatamente se pubblicare con Git
 
-`05-task.md#update-step`: `Decision log` → `done` once `95-decision-log.md` completes.
+`05-task.md#update-step`: `Decision log` → `done` once `95-decision-log.md`
+completes. Una diagnosi senza edit termina in chat e non crea un task.

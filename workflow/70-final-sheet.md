@@ -68,11 +68,11 @@ git log --oneline --grep "revision(<slug>):" --since "<date round started>"
 
 Format as a bulleted list under the *Change history* heading.
 
-## 6. Automatic Closure Checkpoint
+## 6. Publication State
 
 The skill writes the final sheet and leaves it in the active-session manifest.
-`95-decision-log.md` commits and pushes it automatically during the mandatory
-closure flush. Use this subject through `07-git-checkpoint.md`:
+`95-decision-log.md` closes and syncs locally. Commit and push occur only when
+Git was separately authorized; otherwise report the sheet as unpublished.
 
 ```text
 revision(<slug>): close <version>
@@ -105,4 +105,5 @@ Print only the final-sheet path and return control to
 `37-scoped-auto-revision.md`; closure is reported only after decision log,
 strict sync, extracted-text verification, and task close succeed.
 
-The skill ends here. The next round starts a new project file with version vN+1, or the same N+1 if the user prefers continuing.
+The skill ends here. A later round creates a new working version only when its
+first edit is accepted.

@@ -16,12 +16,12 @@ and sessions**.
 
 | Action | Called by |
 |---|---|
-| `ensure` | `workflow/10-setup.md` — after the mandatory bump; create if missing, else load and reconcile to the bumped version |
+| `ensure` | `workflow/10-setup.md` — after the first-edit working version is created; create if missing, else load and reconcile |
 | `check` | `30-iterate-points.md`, `31-paragraph-by-paragraph.md`, `33`, `34`, `36` — **before** proposing on a unit |
 | `freeze` | `/r-freeze`, or the auto-offer when a unit's work concludes |
 | `thaw` | `/r-thaw` |
 | `status` | `/r-status` |
-| `log-comment` | whenever the user states an intention to change a part but the change is not applied this turn |
+| `log-comment` | after a tracked round exists, or when the user explicitly asks to save an intention |
 | `carry-forward` | `60-bump-version.md` — re-anchor and copy the ledger into the new version |
 
 ## 1. Unit model & anchoring
@@ -80,7 +80,8 @@ Before generating a proposal for unit U:
    - 🟢 `frozen` → apply the **advisory warning** flow (§5).
    - 🟡 `open` → proceed normally; if the row carries an intention, fold it into
      the diagnosis so the proposal addresses it.
-   - 🔵 `wip` / untracked → proceed normally; mark `wip` while working.
+   - 🔵 `wip` / untracked → proceed normally. Mark `wip` only when a tracked
+     edit round exists; a diagnostic check is read-only.
 
 This check is mandatory in every interactive revision workflow. Skipping it for
 a frozen unit defeats the purpose of freezing.
@@ -124,9 +125,10 @@ Triggered by `/r-freeze [unit]` or accepted from the auto-offer (§7).
 
 ## 7. Auto-offer on conclusion
 
-When a unit's interactive work concludes — all its modifications decided **and**
-the user signals no further changes on it (e.g. "no, prossimo paragrafo",
-"next") — offer to freeze it **before** advancing:
+After a tracked edit round exists, when a unit's interactive work concludes —
+all its modifications decided **and** the user signals no further changes on it
+(e.g. "no, prossimo paragrafo", "next") — offer to freeze it **before**
+advancing. Do not run the auto-offer for a diagnostic-only unit.
 
 ```
 Lavoro su <unit> (Capitolo <C>, righe <L1-L2>) concluso: <X> accettate, <Y> tenute in considerazione.
@@ -151,9 +153,10 @@ Triggered by `/r-thaw [unit]`.
 
 ## 9. log-comment (keep intentions on hand)
 
-Whenever the user voices an intention to change a part but the change is **not**
-applied this turn (deferred, blocked on data, "let's do this later"), record it
-so it is never lost:
+When a tracked round exists, or when the user explicitly asks to save a note,
+an intention that is **not** applied this turn (deferred, blocked on data,
+"let's do this later") may be recorded so it is not lost. Otherwise keep it in
+the read-only chat audit and do not create or update the ledger.
 
 1. Ensure the unit has a 🟡 `open` row (create it if untracked).
 2. Append the intention to the *Commenti / intenzioni* cell (concise) and, if

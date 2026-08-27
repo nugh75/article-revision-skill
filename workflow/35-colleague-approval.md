@@ -74,4 +74,5 @@ Append an **Approval log** section to the project file:
 
 Then in chat: counts (approved / changes / reject / pending) and the next
 suggested step (`/r-redline`, `/r-sheet`, or chase pending). Approval artifacts
-remain in the session manifest for the next confirmed or automatic checkpoint.
+remain in the session manifest for the next explicitly authorized checkpoint;
+`/r-auto ... --git` is the only automatic Git case.

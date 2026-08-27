@@ -27,7 +27,7 @@ Split the reviewer's letter into atomic points. One point equals one actionable 
 
 Number points progressively. If one reviewer sentence covers multiple sections, split it into multiple points.
 
-## 3. Generate `revisions/<reviewer-slug>/revision-plan-vN.md`
+## 3. Prepare `revisions/<reviewer-slug>/revision-plan-vN.md`
 
 Use `templates/revision-plan.md` and substitute:
 
@@ -50,10 +50,10 @@ Populate the checklist at the bottom:
 
 ## 4. Confirm In Chat
 
-The skill writes the project file to disk and includes it in the active-session
-manifest. In interactive chat, the next threshold asks before commit and push;
-a requested handoff or confirmed closure flushes it automatically. The
-checkpoint subject follows:
+Present the parsed plan in chat first. Write the project file only when the user
+asks to save the plan or accepts the first tracked edit. Saving the plan does
+not authorize a manuscript bump, commit, or push. Once written, include it in
+the active-session manifest for any later explicitly authorized checkpoint.
 
 ```text
 revision(<slug>): start — N points planned
@@ -62,7 +62,7 @@ revision(<slug>): start — N points planned
 Then in chat:
 
 ```text
-Revision plan created: <path>
+Revision plan prepared: <path if saved, otherwise "not yet written">
 
 N points planned:
 1. <title> — <section> (priority <high|medium|low>)
