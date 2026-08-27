@@ -23,7 +23,8 @@ linked by that route.
 Compatibility entry points must not restate the lifecycle. In particular,
 diagnosis, direct application, tracked rounds, automatic revision, closure, and
 Git authorization are defined only by `SKILL.md`, `workflow/11-direct-apply.md`,
-`workflow/13-content-structure.md`, and `workflow/07-git-checkpoint.md`.
+`workflow/13-content-structure.md`, `workflow/38-redundancy-audit.md`, and
+`workflow/07-git-checkpoint.md`.
 
 If this file appears inconsistent with `SKILL.md`, stop and regenerate it with:
 

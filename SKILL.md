@@ -1,6 +1,6 @@
 ---
 name: article-revision
-description: Coordinate auditable revision and structural reorganization of a scientific article or thesis in Markdown. Use for reviewer feedback, content architecture, paragraph or chapter revision, approved file edits, versioning, freeze-ledger tracking, bounded `/r-auto`, handoff, or closure. Diagnosis and proposals are read-only; Git publication requires separate explicit authorization.
+description: Coordinate auditable revision and structural reorganization of a scientific article or thesis in Markdown. Use for reviewer feedback, content architecture, redundancy and circularity audits, paragraph or chapter revision, approved file edits, versioning, freeze-ledger tracking, bounded `/r-auto`, handoff, or closure. Diagnosis and proposals are read-only; Git publication requires separate explicit authorization.
 ---
 
 # Article Revision
@@ -15,9 +15,10 @@ prose drafting.
 |---|---|
 | Definitions, construct boundaries, argumentative function | Run `wayfinder` read-only first |
 | Organize raw ideas or create an outline in chat | Run `wayfinder`, then use `scrittura` |
-| Drafting, rewriting, lexical or flow work in chat | Use `scrittura`, then `tone-of-voice` |
+| Drafting, rewriting, lexical or flow work in chat | Use `scrittura` at the least invasive sufficient depth, then `tone-of-voice` |
 | Map or reorganize existing manuscript content | `/r-structure [scope]` via `workflow/13-content-structure.md` |
-| Read-only manuscript diagnosis | `/r-audit` via `workflow/12-audit.md`, or the diagnostic phase of `/r-global`, `/r-pp`, `/r-pp-a`, `/r-conn`, and `/r-chapter` |
+| Repeated propositions, circularity, or tortuous argumentative progression | `/r-redundancy [scope]` via `workflow/38-redundancy-audit.md` |
+| Read-only manuscript diagnosis | `/r-audit` via `workflow/12-audit.md`, or the diagnostic phase of `/r-global`, `/r-redundancy`, `/r-pp`, `/r-pp-a`, `/r-conn`, and `/r-chapter` |
 | Apply bounded, non-structural approved text to an explicitly named file/version, without tracking | Direct apply via `workflow/11-direct-apply.md` |
 | Reviewer round, versioned revision session, ledger/task workflow | Tracked edit lifecycle below |
 | Bounded automatic edits | `/r-auto <task> --scope "<scope>" [--agents N] [--git]` |
@@ -61,7 +62,8 @@ overrides the default.
 Structural moves, paragraph or section reordering, and accepted merges or cuts
 always use `tracked-round`, even when the target file is named. They affect
 multiple content units and their locators, so they never use `direct-apply` or
-`auto`. Follow `workflow/13-content-structure.md`.
+`auto`. Follow `workflow/13-content-structure.md`; for decisions produced by a
+redundancy audit, also follow `workflow/38-redundancy-audit.md`.
 
 ### 1. Diagnose and propose
 
@@ -155,6 +157,10 @@ Decisione? Accetta / Modifica / Rivedi / Tieni in considerazione
 
 - Preserve claims, evidence, citations, causal strength, examples, headings,
   and section order unless the user explicitly approves changing them.
+- After any accepted rewrite, compare source and replacement for entities and
+  numbers, polarity and negation, modality, causal strength, scope, conditions,
+  limitations, and citation function. A style improvement fails verification
+  if it changes one of these without explicit approval.
 - In structural work, preserve every inventoried source unit by default. A move
   may change order but not content; a merge, cut, split, or new claim requires a
   separate explicit decision and must remain traceable in the move manifest.
@@ -217,5 +223,6 @@ checks. When a second installed checkout exists, pass it as `--mirror`:
 ```bash
 python scripts/generate_compat_docs.py
 python scripts/check_contract.py [--mirror <installed-copy>]
+python tests/test_redundancy_candidates.py
 bash tests/test_git_checkpoint.sh
 ```

@@ -8,7 +8,9 @@ Triggered by `/r-help`. Print only this read-only card.
 Diagnosi e proposte — nessun bump o file
   /r-audit [scope]     Audit generale in sola lettura
   /r-structure [scope] Mappa idee/unità e propone una struttura conservativa
-  /r-global            Architettura, ridondanza, terminologia, norme
+  /r-redundancy [scope]
+                       Mappa proposizioni, ripetizioni e circolarità
+  /r-global            Architettura complessiva, terminologia, norme
   /r-pp | /r-pp-a      Paragrafi, standard o approfondito
   /r-conn              Connettori e transizioni
   /r-chapter [§N]      Capitolo/sezione nel contesto complessivo
@@ -34,6 +36,7 @@ Chiusura
 
 Regole chiave
   • Diagnosi e proposte restano read-only.
+  • La similarità segnala coppie da leggere: non decide tagli o fusioni.
   • Una proposta strutturale contabilizza tutte le unità; tagli e fusioni richiedono approvazione separata.
   • Nelle revisioni tracciate il bump nasce alla prima modifica applicata.
   • Accettare testo, fermarsi o chiudere non equivale a consenso Git.
@@ -41,4 +44,4 @@ Regole chiave
   • Costrutti, prove, citazioni, numeri e forza epistemica vanno preservati o verificati.
 ```
 
-End with: `Vuoi una diagnosi, una mappa strutturale, una modifica diretta a un file nominato o una revisione tracciata?`
+End with: `Vuoi una diagnosi, una mappa strutturale o delle ridondanze, una modifica diretta a un file nominato o una revisione tracciata?`

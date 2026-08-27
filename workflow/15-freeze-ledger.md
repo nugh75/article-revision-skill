@@ -102,8 +102,10 @@ Then show the normal proposal block, but the closing line becomes:
 Rispondi "sì, procedi" per attivare il ciclo decisionale, oppure "lascia congelato".
 ```
 
-- If the user confirms (`sì, procedi`) → set the unit to 🔵 `wip` and run the
-  normal decision loop. On the first applied change, log a `thaw` in the storico
+- If the user confirms (`sì, procedi`) → run the normal decision loop. During a
+  diagnostic-only phase, retain that confirmation in working memory and leave
+  the ledger unchanged. Immediately before the first accepted file edit starts
+  the tracked round, set the unit to 🔵 `wip` and log a `thaw` in the storico
   (frozen → wip) so the history is honest.
 - If the user declines (`lascia congelato`) → skip the unit, leave it 🟢, and
   advance.

@@ -33,6 +33,14 @@
       "expected": {"mode": "chat-only", "writes_target": false, "bump": false, "task": false, "ledger": false, "sync": false, "git": false}
     },
     {
+      "name": "read-only redundancy audit",
+      "kind": "redundancy-audit",
+      "target_named": true,
+      "tracking_requested": false,
+      "git_authorized": false,
+      "expected": {"mode": "chat-only", "writes_target": false, "bump": false, "task": false, "ledger": false, "sync": false, "git": false}
+    },
+    {
       "name": "bounded named-version replacement",
       "kind": "direct-edit",
       "target_named": true,

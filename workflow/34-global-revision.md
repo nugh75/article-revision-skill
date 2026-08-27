@@ -89,11 +89,15 @@ Generate a structured diagnostic report. Present all seven lenses as a single, c
 
 ### Lens 5 — Redundancy
 
-1. Scan for near-duplicate content:
-   - Paragraphs that make the same point with different wording.
-   - Arguments repeated across sections (e.g. the same limitation mentioned in §3, §5, and §6).
-   - Redundant definitions (same term defined in multiple places).
-2. Highlight consolidation opportunities.
+1. Treat this as a coarse whole-manuscript scan. Use the candidate-generation
+   mechanics in `workflow/38-redundancy-audit.md` to surface representative
+   close rewrites and distant paraphrases without treating scores as verdicts.
+2. Distinguish preliminary examples of true duplication, new evidence,
+   necessary reprise, recurring terminology, contradiction, and false
+   positives. Do not recommend a cut from similarity alone.
+3. Report the sections and proposition clusters that merit a focused
+   `/r-redundancy` audit. Build the full reverse outline only if the user selects
+   this lens for follow-up.
 
 ### Lens 6 — Terminology Consistency
 
@@ -152,9 +156,10 @@ Output the complete report as a single block:
 - **Raccomandazione:** <indicazione>
 
 ### 5. Ridondanza
-- **Paragrafi quasi-duplicati:** P12 (Capitolo 3, articles/current.md:145-153) ~ P28 (Capitolo 5, articles/current.md:310-318) (entrambi definiscono la variabile dipendente)
-- **Argomenti ripetuti:** Il limite del campione appare in §3, §5 e §6
-- **Raccomandazione:** <quali consolidare>
+- **Cluster candidati:** P12 (Capitolo 3, articles/current.md:145-153) ~ P28 (Capitolo 5, articles/current.md:310-318) — <proposizione condivisa>
+- **Differenze da preservare:** <evidenza, funzione, condizioni o nessuna>
+- **Classificazione preliminare:** <tipo o da verificare>
+- **Raccomandazione:** <scope per /r-redundancy oppure nessun approfondimento>
 
 ### 6. Coerenza terminologica
 | Termine | Definito in | Usato anche come | Problema |
@@ -318,11 +323,11 @@ For global renames:
 
 ### Redundancy proposals (Lens 5)
 
-For deduplication:
-- Show the near-duplicate paragraphs side by side, each with chapter and line
-  range.
-- Propose which to keep and which to cut.
-- Allow the user to choose the keepers.
+Run the focused read-only workflow in `workflow/38-redundancy-audit.md` on the
+selected sections. Its reverse outline, classification table, canonical home,
+unique-information accounting, and decision packets replace a simple
+side-by-side similarity judgement. Any accepted merge, move, cut, deepening, or
+cross-reference enters that workflow's tracked application phase.
 
 ## 7. Handle Responses
 

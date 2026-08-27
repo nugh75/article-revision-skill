@@ -76,7 +76,9 @@ If not already specified:
 5. Extract from CONTEXT:
    - **Defined terms**: bold (`**term**`), italics (`*term*`), or explicit "X is defined as" patterns.
    - **Forward/backward cross-references to TARGET**: `§N`, `see section`, `as discussed in`, `as we will show`, etc.
-   - **Repeated-content candidates**: paragraphs in CONTEXT with > 40% word overlap with any paragraph in TARGET.
+   - **Repeated-content candidates**: ranked lexical and optional semantic
+     pairs from `workflow/38-redundancy-audit.md`, retaining citations and
+     semantic safeguard flags as metadata.
    - **Section seams**: closing paragraph of §(N-1) + opening paragraph of §(N+1).
 
 `05-task.md#update-step`: `Load article` → `done`.
@@ -131,14 +133,17 @@ For `abrupt` or `missing bridge`, draft a candidate transition sentence.
 
 ### Dimension 4 — Redundancy
 
-List TARGET paragraphs that substantially repeat content in CONTEXT (>40%
-conceptual overlap).
+For TARGET paragraphs with candidates in CONTEXT, use the proposition mapping
+and classification rules in `workflow/38-redundancy-audit.md`. Similarity
+selects what to read; context determines whether the second occurrence adds
+evidence, performs a necessary reprise, uses only the same technical term, or
+actually duplicates or contradicts a proposition.
 
 ```markdown
-| Paragrafo TARGET | Sovrapposizione con | Tipo | Azione consigliata |
-|---|---|---|---|
-| P12 — Capitolo 3 — articles/current.md:145-153 (sample size) | §6 r.210 | identical | consolidate → §3 only |
-| P7 — Capitolo 2 — articles/current.md:98-106 (framework) | §2 r.88 | partial | shorten P7 |
+| Paragrafo TARGET | Candidato in CONTEXT | Proposizione condivisa | Informazione distinta | Tipo | Azione consigliata |
+|---|---|---|---|---|---|
+| P12 — Capitolo 3 — articles/current.md:145-153 | §6 r.210 | <claim> | nessuna | true duplicate | audit `/r-redundancy` |
+| P7 — Capitolo 2 — articles/current.md:98-106 | §2 r.88 | <claim> | nuova fonte e funzione di recap | same claim with new evidence | KEEP |
 ```
 
 If no significant redundancy: "Nessuna ridondanza significativa."
@@ -207,6 +212,9 @@ proposing.
 
 For each selected dimension, generate revision points following the standard
 decision interaction pattern from `SKILL.md` § "Interaction pattern (binding)".
+For Dimension 4, first produce the decision packets required by
+`workflow/38-redundancy-audit.md`; accepted actions use its tracked application
+and preservation rules.
 
 Each point must:
 - Identify the specific paragraph(s) in TARGET to change with full locator:

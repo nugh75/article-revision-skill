@@ -1,0 +1,51 @@
+{
+  "cases": [
+    {
+      "name": "near-identical paragraphs",
+      "input": "Two paragraphs state the same proposition and support with only cosmetic wording changes.",
+      "expected_classification": "true duplicate",
+      "required_output": ["canonical_home", "distinct_information", "proposed_action"]
+    },
+    {
+      "name": "distant paraphrase",
+      "input": "Two paragraphs use different vocabulary but assert the same relation and add no distinct support.",
+      "expected_classification": "true duplicate",
+      "required_output": ["semantic_candidate", "contextual_comparison"]
+    },
+    {
+      "name": "technical term with different claims",
+      "input": "Both paragraphs repeat the canonical construct label but one defines it and the other reports a measurement condition.",
+      "expected_classification": "recurring technical term",
+      "forbidden_action": "CUT"
+    },
+    {
+      "name": "introduction and conclusion reprise",
+      "input": "The conclusion restates the governing thesis while adding the warranted implication of the study.",
+      "expected_classification": "necessary reprise",
+      "forbidden_action": "automatic-cut"
+    },
+    {
+      "name": "semantic safeguard mismatch",
+      "input": "One paragraph asserts causality; the other denies causality or limits the claim to an association.",
+      "expected_classification": "contradiction",
+      "required_output": ["negation", "causal_strength", "qualification"]
+    },
+    {
+      "name": "same claim with new evidence",
+      "input": "Both paragraphs state the same claim, but the second adds a distinct source, datum, or example.",
+      "expected_classification": "same claim with new evidence",
+      "required_output": ["citation_delta", "unique_information"]
+    },
+    {
+      "name": "read-only audit",
+      "input": "Run /r-redundancy without accepting any action.",
+      "expected_effects": {"manuscript_write": false, "git_write": false, "task": false, "ledger_write": false}
+    },
+    {
+      "name": "cut preservation packet",
+      "input": "A true duplicate is proposed for removal.",
+      "expected_action": "CUT",
+      "required_output": ["canonical_survivor", "unique_information", "structural_function", "risk"]
+    }
+  ]
+}

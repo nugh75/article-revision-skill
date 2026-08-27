@@ -27,6 +27,7 @@ The runtime contract is `SKILL.md`; operational details live in `workflow/`.
 |---|---|
 | `/r-audit [scope]` | Read-only conceptual, prose, citation, or data audit |
 | `/r-structure [scope]` | Read-only content map and preservation-first structural proposal |
+| `/r-redundancy [scope]` | Read-only proposition map, repetition clusters, and circularity audit |
 | `/r-global` | Seven-lens whole-manuscript diagnosis |
 | `/r-pp`, `/r-pp-a` | Paragraph-by-paragraph diagnosis and approved edits |
 | `/r-conn` | Connector and transition review |

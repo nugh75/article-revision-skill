@@ -32,7 +32,7 @@ STALE_PHRASES = (
 
 def route(case: dict[str, object]) -> dict[str, object]:
     kind = case["kind"]
-    if kind in {"audit", "draft", "organize", "structure-audit"}:
+    if kind in {"audit", "draft", "organize", "structure-audit", "redundancy-audit"}:
         mode = "chat-only"
     elif kind == "auto":
         mode = "auto"
@@ -91,6 +91,38 @@ def check_compat(errors: list[str]) -> None:
         errors.append(result.stdout.strip() or result.stderr.strip())
 
 
+def check_redundancy_audit(errors: list[str]) -> None:
+    expected_names = {
+        "near-identical paragraphs",
+        "distant paraphrase",
+        "technical term with different claims",
+        "introduction and conclusion reprise",
+        "semantic safeguard mismatch",
+        "same claim with new evidence",
+        "read-only audit",
+        "cut preservation packet",
+    }
+    cases_path = ROOT / "tests/redundancy-cases.json"
+    try:
+        cases = json.loads(cases_path.read_text(encoding="utf-8"))["cases"]
+    except (OSError, KeyError, json.JSONDecodeError) as error:
+        errors.append(f"invalid redundancy cases: {error}")
+        return
+    names = {case.get("name") for case in cases}
+    if names != expected_names or any("input" not in case for case in cases):
+        errors.append("redundancy cases must define the eight named behavioural scenarios")
+
+    result = subprocess.run(
+        [sys.executable, str(ROOT / "tests/test_redundancy_candidates.py")],
+        cwd=ROOT,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    if result.returncode:
+        errors.append(result.stdout.strip() or result.stderr.strip())
+
+
 def check_mirror(mirror: Path, errors: list[str]) -> None:
     def files_under(root: Path) -> dict[Path, Path]:
         files: dict[Path, Path] = {}
@@ -128,6 +160,7 @@ def main() -> int:
     check_pointers(errors)
     check_stale_phrases(errors)
     check_compat(errors)
+    check_redundancy_audit(errors)
     if args.mirror:
         check_mirror(args.mirror.resolve(), errors)
 

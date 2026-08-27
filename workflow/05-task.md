@@ -41,6 +41,8 @@ have none. The file tracks applied work and provides the input summary for
 | `/r-pp-a` | Parse paragraphs · Walk P1..PN (deep) · Bibliography check · Handoff checkpoint · Final sheet · Decision log · Sync current files |
 | `/r-pr-2` | Generate Reviewer A · Generate Reviewer B · Synthesize · Handoff checkpoint · Decision log · Sync current files |
 | `/r-conn` | Parse transitions · Diagnose · Fix selected · Handoff checkpoint · Decision log · Sync current files |
+| `/r-structure` | Inventory units · Map current/proposed architecture · Apply accepted structure · Preservation audit · Handoff checkpoint · Decision log · Sync current files |
+| `/r-redundancy` | Build proposition map · Classify clusters · Apply accepted decisions · Preservation audit · Handoff checkpoint · Decision log · Sync current files |
 | `/r-global` | Read article · Seven lenses · Save trace or fix selected · Handoff checkpoint · Decision log · Sync current files |
 | `/r-chapter` | Select section · Load article · Cross-article analysis · Fix selected · Handoff checkpoint · Decision log · Sync current files |
 | `/r-auto` | Resolve scope manifest · Delegate proposals · Integrate patches · Independent audit · Bibliography check · Final sheet · Decision log · Sync current files |
