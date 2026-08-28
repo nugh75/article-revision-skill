@@ -182,6 +182,12 @@ La competenza integra conoscenze, abilità e disposizione ad agire nel contesto.
             self.assertEqual(1, len(payload["candidate_pairs"]))
             self.assertEqual(before, hashlib.sha256(source.read_bytes()).hexdigest())
 
+    def test_cli_defaults_to_ranked_8b_semantic_queue(self) -> None:
+        args = self.module.build_parser().parse_args(["article.md"])
+
+        self.assertEqual("qwen3-embedding:8b", args.model)
+        self.assertEqual(0.0, args.semantic_threshold)
+
     def test_cli_discovers_windows_ollama_url_from_project_env(self) -> None:
         class EmbedHandler(BaseHTTPRequestHandler):
             def do_POST(self) -> None:  # noqa: N802 - stdlib handler contract
@@ -235,7 +241,7 @@ La competenza integra conoscenze, abilità e disposizione ad agire nel contesto.
                 self.assertEqual(0, result.returncode, result.stderr)
                 payload = json.loads(result.stdout)
                 self.assertEqual(
-                    f"ollama:qwen3-embedding:4b@{endpoint}",
+                    f"ollama:qwen3-embedding:8b@{endpoint}",
                     payload["semantic_status"],
                 )
         finally:

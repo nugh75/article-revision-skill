@@ -99,6 +99,7 @@ def check_redundancy_audit(errors: list[str]) -> None:
         "introduction and conclusion reprise",
         "semantic safeguard mismatch",
         "same claim with new evidence",
+        "local qwen preliminary review",
         "read-only audit",
         "cut preservation packet",
     }
@@ -110,7 +111,7 @@ def check_redundancy_audit(errors: list[str]) -> None:
         return
     names = {case.get("name") for case in cases}
     if names != expected_names or any("input" not in case for case in cases):
-        errors.append("redundancy cases must define the eight named behavioural scenarios")
+        errors.append("redundancy cases must define the nine named behavioural scenarios")
 
     result = subprocess.run(
         [sys.executable, str(ROOT / "tests/test_redundancy_candidates.py")],

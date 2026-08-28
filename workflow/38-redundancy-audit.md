@@ -71,7 +71,7 @@ Python environment, resolving the script relative to this skill:
 ```
 
 `auto` uses the local Ollama `/api/embed` endpoint with
-`qwen3-embedding:4b` when available and reports an explicit lexical fallback
+`qwen3-embedding:8b` when available and reports an explicit lexical fallback
 otherwise. It resolves `ARTICLE_REVISION_OLLAMA_URL`, `OLLAMA_BASE_URL`, or
 `OLLAMA_HOST` from the closest project `.env` before the process environment
 and localhost; this supports a Windows Ollama host called from WSL. A CLI
@@ -79,6 +79,13 @@ and localhost; this supports a Windows Ollama host called from WSL. A CLI
 offline run or `--backend ollama` when semantic coverage is required and
 failure should stop the audit. Do not install a model, start a service, or
 change configuration as part of the audit.
+
+The default semantic threshold is deliberately uncalibrated (`0.0`): the
+helper returns the highest-ranked queue capped by `--max-pairs` instead of
+silently excluding pairs with a model-specific score. Use a nonzero threshold
+only when it was calibrated for the selected model on an annotated corpus from
+the manuscript, and record the model, threshold, and calibration source in the
+audit.
 
 Treat the output as a ranked reading queue:
 
@@ -91,6 +98,30 @@ Treat the output as a ranked reading queue:
 
 Review the full reverse outline as well as the ranked pairs. The sensor may miss
 long-distance repetition expressed through different terminology.
+
+### Optional local semantic pre-review
+
+When the candidate queue is large enough that a preliminary pass reduces review
+cost, invoke `scrittura` and follow the Local microtasks reference linked from
+that skill's entrypoint, using local `qwen3.8:latest`. Give Qwen only bounded
+candidate pairs, their locators, section functions, citation metadata, and
+`review_flags`.
+Request structured provisional output containing:
+
+```text
+pair_id, provisional_classification, shared_proposition,
+distinct_information, safeguard_flags, short_rationale
+```
+
+For a direct Ollama call, use JSON output with `think: false`; the local model
+can otherwise complete a reasoning turn while leaving the final `response`
+field empty.
+
+Allow only the classifications in section 4. Qwen's output is working material:
+check every retained field against the exact paragraphs and their full section
+context. The primary agent assigns the final classification, confidence,
+canonical home, and proposed action. Continue without this pass when the local
+model is unavailable or verification would cost as much as direct review.
 
 ## 4. Classify propositions and clusters
 

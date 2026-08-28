@@ -387,7 +387,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("source", type=Path)
     parser.add_argument("--lines", type=line_range, default=(1, None), metavar="START:END")
     parser.add_argument("--backend", choices=("auto", "lexical", "ollama"), default="auto")
-    parser.add_argument("--model", default="qwen3-embedding:4b")
+    parser.add_argument("--model", default="qwen3-embedding:8b")
     parser.add_argument(
         "--ollama-url",
         help=(
@@ -397,7 +397,16 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--timeout", type=float, default=120.0)
     parser.add_argument("--lexical-threshold", type=float, default=0.34)
-    parser.add_argument("--semantic-threshold", type=float, default=0.82)
+    parser.add_argument(
+        "--semantic-threshold",
+        type=float,
+        default=0.0,
+        help=(
+            "Minimum cosine similarity for semantic candidates. The uncalibrated "
+            "default keeps a max-pairs-capped ranked queue instead of treating a "
+            "model-specific score as an editorial cutoff."
+        ),
+    )
     parser.add_argument("--min-words", type=int, default=8)
     parser.add_argument("--max-pairs", type=int, default=100)
     return parser
