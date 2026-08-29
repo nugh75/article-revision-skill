@@ -263,6 +263,12 @@ silently.
 
 ## 6. Generate Proposals by Lens
 
+A proposal at this altitude is normally structural. When one nonetheless rests on
+a judgement about Italian — terminology that is claimed to be improper, a
+recurring construction called bureaucratic — verify it with the `treccani` skill
+on the isolated term and cite the entry, or present it as a stylistic
+preference.
+
 Run the freeze check (`15-freeze-ledger.md` §4) on each unit a structural change
 would touch; if a unit is 🟢 `frozen`, apply the advisory warning flow (§5)
 before proposing. A global rename that sweeps frozen units must list them and ask

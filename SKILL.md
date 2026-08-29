@@ -1,6 +1,7 @@
 ---
 name: article-revision
 description: Coordinate auditable revision and structural reorganization of a scientific article or thesis in Markdown. Use for reviewer feedback, content architecture, redundancy and circularity audits, paragraph or chapter revision, approved file edits, versioning, freeze-ledger tracking, bounded `/r-auto`, handoff, or closure. Diagnosis and proposals are read-only; Git publication requires separate explicit authorization.
+compatibility: Requires the `treccani` Agent Skill for the linguistic verification its revision notes mandate
 ---
 
 # Article Revision
@@ -16,6 +17,7 @@ prose drafting.
 | Definitions, construct boundaries, argumentative function | Run `wayfinder` read-only first |
 | Organize raw ideas or create an outline in chat | Run `wayfinder`, then use `scrittura` |
 | Drafting, rewriting, lexical or flow work in chat | Use `scrittura` at the least invasive sufficient depth, then `tone-of-voice` |
+| A doubt about Italian: correctness, government, connective value, register | `treccani` lookup, reported per `tone-of-voice`, `references/treccani.md` |
 | Map or reorganize existing manuscript content | `/r-structure [scope]` via `workflow/13-content-structure.md` |
 | Repeated propositions, circularity, or tortuous argumentative progression | `/r-redundancy [scope]` via `workflow/38-redundancy-audit.md` |
 | Read-only manuscript diagnosis | `/r-audit` via `workflow/12-audit.md`, or the diagnostic phase of `/r-global`, `/r-redundancy`, `/r-pp`, `/r-pp-a`, `/r-conn`, and `/r-chapter` |
@@ -44,9 +46,12 @@ Surface conflicts before applying text. Editorial norms do not silently
 override a deliberate user choice; record an intentional exception.
 
 A revision note that judges the Italian itself — incorrect, bureaucratic,
-archaic, improper — must be verifiable. Route the doubt through `tone-of-voice`
-and its `references/treccani.md` before recording the judgement or applying the
-edit; when the point stays unsettled, record it as a stylistic preference.
+archaic, improper — must be verifiable. Run the doubt through the `treccani`
+skill and word the result as `tone-of-voice`, `references/treccani.md`
+prescribes, before recording the judgement or applying the edit. Send the
+isolated construction, never the manuscript. When the point stays unsettled, or
+the lookup fails, record it as a stylistic preference and say that it is
+unverified.
 
 ## Lifecycle and authorization
 

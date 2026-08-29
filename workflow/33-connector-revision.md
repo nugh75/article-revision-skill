@@ -49,6 +49,19 @@ Use the connector reference tables from `SKILL.md`:
 - If `ARTICLE_LANG=en`: use the EN connector reference table.
 - The tables define: logical relation → preferred connectors → weak/ambiguous forms to avoid.
 
+### 3a. Verify a contested connector
+
+The reference tables are a starting point, not an authority. Before classifying a
+connector as `WRONG`, or calling one bureaucratic, archaic or literary, run the
+`treccani` skill on that connector — `language <connettivo>` for the relation it
+expresses, `word <connettivo>` for the usage label — and record the entry in the
+diagnosis. Send the connector, never the paragraph.
+
+A connector of marked register is not an error: report the level (correctness,
+meaning, register, appropriateness) as `tone-of-voice`,
+`references/treccani.md` prescribes. If the lookup fails, classify at most as
+`WEAK` and mark the point unverified.
+
 ## 4. Diagnose Each Transition
 
 For each inter-paragraph transition (T<P<N>→P<N+1>>):

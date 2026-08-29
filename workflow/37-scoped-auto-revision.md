@@ -37,6 +37,13 @@ article and context but edit no shared file. Each returns exact originals, full
 replacements, rationale, risk, citations/numbers touched, and cross-boundary
 dependencies. The coordinator alone writes reports and applies eligible edits.
 
+A worker whose rationale asserts something about Italian must verify it with the
+`treccani` skill on the isolated construction and carry the entry in the
+rationale. Without that evidence the edit is not eligible for automatic
+application: the coordinator holds it for review as a stylistic preference. This
+pass applies edits nobody reads first, so an unverified linguistic claim never
+reaches the manuscript.
+
 ## Stop conditions
 
 Ask before applying a proposal that changes a claim or causal strength, adds

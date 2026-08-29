@@ -201,6 +201,12 @@ Rispondi per categoria (es. "unità: due idee da separare; logica: manca un pass
 
 ## 4. Propose Modifications
 
+Before writing a proposal whose rationale rests on a claim about Italian —
+a construction is incorrect, a government is wrong, a form is bureaucratic or
+archaic — run the `treccani` skill on the isolated word or construction and cite
+the entry in the rationale. Never send the paragraph itself. An unverified claim
+is downgraded to a stylistic preference and worded as one.
+
 Based on the user's diagnostic answers, generate a proposal using the standard decision pattern from `30-iterate-points.md`, section 3:
 
 ```
