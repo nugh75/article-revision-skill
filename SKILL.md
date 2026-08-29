@@ -43,6 +43,11 @@ Apply constraints in this order:
 Surface conflicts before applying text. Editorial norms do not silently
 override a deliberate user choice; record an intentional exception.
 
+A revision note that judges the Italian itself — incorrect, bureaucratic,
+archaic, improper — must be verifiable. Route the doubt through `tone-of-voice`
+and its `references/treccani.md` before recording the judgement or applying the
+edit; when the point stays unsettled, record it as a stylistic preference.
+
 ## Lifecycle and authorization
 
 Select one execution mode before any write:
