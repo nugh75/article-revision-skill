@@ -14,6 +14,10 @@ candidate signal, never an editorial verdict.
   progression.
 - `scrittura` drafts accepted consolidations; `tone-of-voice` polishes prose
   only after meaning and structure are settled.
+- Judge recurrence with the ordered decision model in `tone-of-voice`,
+  "Repetition" (structural -> terminological -> rhetorical -> flag -> merge ->
+  delete); the classification table in section 4 is its manuscript-specific
+  instantiation.
 
 Do not use this command for lexical repetition alone. Repeating the canonical
 name of a technical construct is often necessary and is not evidence that the
