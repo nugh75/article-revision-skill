@@ -80,4 +80,11 @@ fi
 cp "$SRC" "$DEST"
 [[ $VERBOSE -eq 1 ]] && echo "Copied: $SRC → $DEST" >&2
 
+# Bump the in-file version banner, when the article carries one, so the text
+# never declares an older version than its own filename.
+if grep -qE '^> Versione: v[0-9]+' "$DEST"; then
+    sed -i -E "1,10s|^> Versione: v[0-9]+.*$|> Versione: v${NEW_VERSION} · $(date '+%F %H:%M')|" "$DEST"
+    [[ $VERBOSE -eq 1 ]] && echo "Banner: v${VERSION} → v${NEW_VERSION}" >&2
+fi
+
 echo "$DEST"
