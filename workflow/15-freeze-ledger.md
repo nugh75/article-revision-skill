@@ -61,10 +61,11 @@ drop a frozen unit.
 2. If `revisions/<article-slug>/freeze-ledger.md` does not exist, create it from
    `templates/freeze-ledger.md`, filling `{{ARTICLE_PATH}}`, `{{ARTICLE_SLUG}}`,
    `{{BUMPED_VERSION}}`, `{{TIMESTAMP}}`. Leave the tables empty.
-3. If it exists, read it and update the frontmatter `reconciled-version` and
-   `updated` fields to the current bumped version/timestamp. Do not rewrite the
-   rows here — reconciliation of anchors happens lazily in `check` and fully in
-   `carry-forward`.
+3. If it exists, read it and update the `article` pointer to the active version.
+   Advance `reconciled-version` only after checking all row anchors against that
+   version; it must not imply that unchecked rows were reconciled. On integrated
+   projects the coordinator performs that check and marks missing or ambiguous
+   matches `⚠ stale`, preserving every state, note and approval decision.
 4. Store `FREEZE_LEDGER_PATH` in working memory.
 5. Confirm in chat (one line):
    ```

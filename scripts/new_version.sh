@@ -48,6 +48,16 @@ if [[ ! -f "$SRC" ]]; then
     exit 2
 fi
 
+# For integrated projects the coordinator also carries the ledger forward.
+SOURCE_DIR="$(cd "$(dirname "$SRC")" && pwd)"
+PROJECT_ROOT="$(dirname "$(dirname "$SOURCE_DIR")")"
+WORKFLOW="$PROJECT_ROOT/05_Script/tesi.py"
+if [[ -f "$WORKFLOW" && "$(basename "$SOURCE_DIR")" == "versions" ]]; then
+  PYTHON_BIN="${PYTHON_BIN:-$PROJECT_ROOT/.venv/bin/python}"
+  exec "$PYTHON_BIN" "$WORKFLOW" bump --prepare --path-only --source "$SOURCE_DIR/$(basename "$SRC")" \
+    --message "${BUMP_MESSAGE:-Avvio revisione article-revision}"
+fi
+
 BASENAME=$(basename "$SRC")
 DIRNAME=$(dirname "$SRC")
 

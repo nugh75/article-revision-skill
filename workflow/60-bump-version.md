@@ -18,13 +18,27 @@ No bump authorizes commit or push.
 
 ## Create
 
+On an integrated project (`05_Script/tesi.py` exists), the same script delegates
+to the project coordinator. Set `BUMP_MESSAGE` to the reason for the new round.
+It synchronizes the clouds first, requires an unambiguous active source, creates
+the version and technical log, carries ledger anchors forward and synchronizes
+those records. Standard output remains the new absolute article path.
+For first-edit revision, this uses `--prepare`: generate Word only after the
+approved edits through the export workflow. An explicit terminal `make bump`
+also generates and synchronizes Word immediately. A typed bump command is an
+explicit request; do not ask for the same confirmation a second time.
+If the cloud has a newer source than the supplied path, stop and revalidate the
+approved edits against that source. If a version was created but a later step
+failed, keep it and resume export/sync; never retry by creating another version.
+
 Run `scripts/new_version.sh <current-article-path>` through the approved project
 environment. The new name is
 `<prefix>-v(N+1)-YYYY-MM-DD-HHMM[-anonymous].md`; remove a source `-drive`
 provenance token and preserve `-anonymous`.
 
 At the first-edit boundary, create the version before modifying it. Then create
-the task file and reconcile the freeze ledger through `10-setup.md`.
+the task file through `10-setup.md`. On integrated projects, the coordinator
+already carried the ledger forward; read its result rather than repeating it.
 
 For an additional mid-round bump, summarize accepted changes, open points, and
 the length budget before asking. Carry ledger anchors forward; mark unmatched

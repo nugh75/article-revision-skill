@@ -27,6 +27,14 @@ prose drafting.
 | Pause or resume local work | `/r-handoff`, `/r-resume` |
 | Publish a checkpoint | explicit `commit e push`, `/r-handoff --git`, or `/r-auto ... --git` |
 
+Projects with `05_Script/tesi.py` use one coordinator for terminal, editor and
+skill operations. `make bump MSG="reason"` creates the next working version,
+carries the ledger forward, generates Word and synchronizes configured clouds;
+`make export` regenerates and synchronizes without a bump; `make sync` transfers
+existing files; `make status` reads version, ledger, export and cloud state.
+The project must have explicitly enabled cloud synchronization. These commands
+never publish Git. See `workflow/60-bump-version.md` and `workflow/96-sync-current.md`.
+
 Other commands remain available through their workflow files: `/r-pr-2`,
 `/r-freeze`, `/r-thaw`, `/r-status`, `/r-bump`, `/r-sheet`, `/r-gdrive`,
 `/r-approve`, `/r-redline`, `/r-guide`, and `/r-help`.

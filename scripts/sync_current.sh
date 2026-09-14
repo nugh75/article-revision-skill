@@ -91,6 +91,13 @@ docx_body_has_text() {
   [[ "$body" =~ [[:alnum:]] ]]
 }
 
+# Projects may coordinate export + ledger + cloud through one entry point.
+WORKFLOW="$PROJECT_ROOT/05_Script/tesi.py"
+if [[ -f "$WORKFLOW" && "${ARTICLE_EXPORT_INTERNAL:-}" != "1" ]]; then
+  PYTHON_BIN="${PYTHON_BIN:-$PROJECT_ROOT/.venv/bin/python}"
+  exec "$PYTHON_BIN" "$WORKFLOW" export --source "$ARTICLE" --bibliography "$BIB"
+fi
+
 # --- 1. current.docx ---
 # Pandoc legge direttamente la versione attiva: nessuna copia current.md.
 if ! command -v pandoc &>/dev/null; then

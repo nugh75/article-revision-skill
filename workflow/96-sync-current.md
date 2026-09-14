@@ -20,6 +20,22 @@ fatal and returns `FAIL`.
 `current.docx` is a disposable export and always lives in `articles/`, never in
 `articles/versions/`.
 
+## Integrated project workflow
+
+When `05_Script/tesi.py` exists, `scripts/sync_current.sh` delegates to the same
+coordinator as `make export`. It checks cloud changes before export, reconciles
+the ledger without changing approval states, generates into temporary files,
+checks that the sources did not change, publishes the validated exports and
+synchronizes Google Drive and OneDrive. It preserves previous exports in local
+backups. The internal renderer guard prevents recursion.
+
+The result reports local generation separately from cloud completion. Exit 2
+means a partial result (for example preserved deletions or stale ledger anchors),
+not full success; exit 1 means an error. Preserve a generated Word on transfer
+failure and resume with `make sync`. Existing conflict choices remain in the
+Console. `SYNC_MODE=auto-closure` still restricts derived outputs to the two DOCX.
+Projects without the coordinator keep the local-only renderer below.
+
 ## 1. Identify sources
 
 Load from working memory:
