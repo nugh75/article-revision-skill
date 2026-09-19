@@ -177,6 +177,9 @@ lands in the ledger, not only in chat.
 
 Print a compact snapshot from the ledger — do not edit anything:
 
+For projects with `TASKS.md`, also read the live pending-work report using
+`workflow/08-revision-archive.md` (`status`, not `refresh`).
+
 ```
 ## Stato revisione — <article-slug>  (reconciled <bumped-version>)
 

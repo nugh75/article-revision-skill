@@ -41,6 +41,22 @@
       "expected": {"mode": "chat-only", "writes_target": false, "bump": false, "task": false, "ledger": false, "sync": false, "git": false}
     },
     {
+      "name": "part revision written to a markdown file",
+      "kind": "part-file",
+      "target_named": true,
+      "tracking_requested": false,
+      "git_authorized": false,
+      "expected": {"mode": "chat-only", "writes_target": false, "bump": false, "task": false, "ledger": false, "sync": false, "git": false}
+    },
+    {
+      "name": "part file reintegrated into the manuscript",
+      "kind": "part-reintegrate",
+      "target_named": true,
+      "tracking_requested": false,
+      "git_authorized": false,
+      "expected": {"mode": "tracked-round", "writes_target": true, "bump": true, "task": true, "ledger": true, "sync": true, "git": false}
+    },
+    {
       "name": "bounded named-version replacement",
       "kind": "direct-edit",
       "target_named": true,

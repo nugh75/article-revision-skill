@@ -17,14 +17,17 @@ prose drafting.
 | Definitions, construct boundaries, argumentative function | Run `wayfinder` read-only first |
 | Organize raw ideas or create an outline in chat | Run `wayfinder`, then use `scrittura` |
 | Drafting, rewriting, lexical or flow work in chat | Use `scrittura` at the least invasive sufficient depth, then `tone-of-voice` |
-| A doubt about Italian: correctness, government, connective value, register | `treccani` lookup, reported per `tone-of-voice`, `references/treccani.md` |
+| A doubt about Italian: correctness, government, connective value, register | `treccani` lookup, reported as the `tone-of-voice` skill's Treccani reference prescribes |
 | Map or reorganize existing manuscript content | `/r-structure [scope]` via `workflow/13-content-structure.md` |
 | Repeated propositions, circularity, or tortuous argumentative progression | `/r-redundancy [scope]` via `workflow/38-redundancy-audit.md` |
 | Read-only manuscript diagnosis | `/r-audit` via `workflow/12-audit.md`, or the diagnostic phase of `/r-global`, `/r-redundancy`, `/r-pp`, `/r-pp-a`, `/r-conn`, and `/r-chapter` |
+| Revise one part of the manuscript as a standalone Markdown file | `/r-parte [scope]`, or `--md` on a diagnostic command, via `workflow/39-part-revision-file.md` |
+| Reintegrate an approved part file into the manuscript | `/r-parte --apply <file>` via `workflow/39-part-revision-file.md` |
 | Apply bounded, non-structural approved text to an explicitly named file/version, without tracking | Direct apply via `workflow/11-direct-apply.md` |
 | Reviewer round, versioned revision session, ledger/task workflow | Tracked edit lifecycle below |
 | Bounded automatic edits | `/r-auto <task> --scope "<scope>" [--agents N] [--git]` |
 | Pause or resume local work | `/r-handoff`, `/r-resume` |
+| Pending tasks, accumulated suggestions, revision archives | `/r-tasks`, `/r-archive` via `workflow/08-revision-archive.md` |
 | Publish a checkpoint | explicit `commit e push`, `/r-handoff --git`, or `/r-auto ... --git` |
 
 Projects with `05_Script/tesi.py` use one coordinator for terminal, editor and
@@ -35,9 +38,9 @@ existing files; `make status` reads version, ledger, export and cloud state.
 The project must have explicitly enabled cloud synchronization. These commands
 never publish Git. See `workflow/60-bump-version.md` and `workflow/96-sync-current.md`.
 
-Other commands remain available through their workflow files: `/r-pr-2`,
-`/r-freeze`, `/r-thaw`, `/r-status`, `/r-bump`, `/r-sheet`, `/r-gdrive`,
-`/r-approve`, `/r-redline`, `/r-guide`, and `/r-help`.
+Other commands remain available through their workflow files: `/r-parte`,
+`/r-pr-2`, `/r-freeze`, `/r-thaw`, `/r-status`, `/r-bump`, `/r-sheet`,
+`/r-gdrive`, `/r-approve`, `/r-redline`, `/r-guide`, and `/r-help`.
 
 ## Authority
 
@@ -55,8 +58,10 @@ override a deliberate user choice; record an intentional exception.
 
 A revision note that judges the Italian itself — incorrect, bureaucratic,
 archaic, improper — must be verifiable. Run the doubt through the `treccani`
-skill and word the result as `tone-of-voice`, `references/treccani.md`
-prescribes, before recording the judgement or applying the edit. Send the
+skill and word the result as the `tone-of-voice` skill and its Treccani
+reference prescribe — the level (correctness, meaning, register,
+appropriateness), the entry, then the proposal — before recording the judgement
+or applying the edit. Send the
 isolated construction, never the manuscript. When the point stays unsettled, or
 the lookup fails, record it as a stylistic preference and say that it is
 unverified.
@@ -64,6 +69,9 @@ unverified.
 ## Lifecycle and authorization
 
 Select one execution mode before any write:
+
+For revision-record maintenance, use the separate administrative route in
+`workflow/08-revision-archive.md`; it does not open a manuscript revision round.
 
 | Mode | Use when | Persistent effects |
 |---|---|---|
@@ -76,6 +84,12 @@ If the request names a file but does not make tracking intent clear, prefer
 `direct-apply` for one bounded replacement and `tracked-round` for an iterative
 or reviewer-driven session. State the selected mode before writing. User intent
 overrides the default.
+
+Writing a part revision file is `chat-only` with one authorized sidecar under
+`revisions/`: it never edits the manuscript, bumps, creates a task, updates the
+ledger, or syncs. Reintegrating that file replaces a whole part and recomputes
+paragraph locators, so it always uses `tracked-round`. See
+`workflow/39-part-revision-file.md`.
 
 Structural moves, paragraph or section reordering, and accepted merges or cuts
 always use `tracked-round`, even when the target file is named. They affect
@@ -242,5 +256,6 @@ checks. When a second installed checkout exists, pass it as `--mirror`:
 python scripts/generate_compat_docs.py
 python scripts/check_contract.py [--mirror <installed-copy>]
 python tests/test_redundancy_candidates.py
+python tests/test_revision_registry.py
 bash tests/test_git_checkpoint.sh
 ```

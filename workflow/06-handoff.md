@@ -50,7 +50,10 @@ Handoff locale scritto. Nessun commit o push eseguito.
 
 On `/r-resume`, `riprendi`, or `continua`:
 
-1. Find the newest matching task with `status: paused` or `in-progress`.
+1. Find the newest matching unarchived task with `status: paused` or `in-progress`,
+   searching both the revision root and `tasks/`. Consult the live report in
+   `workflow/08-revision-archive.md`; reconcile its scope against the current
+   active version before resuming an old task.
 2. Load its handoff section and referenced sources.
 3. Restore its article path, command, counters, and exact next action.
 4. Set the task to `in-progress` and continue without another bump.

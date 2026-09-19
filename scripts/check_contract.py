@@ -32,11 +32,11 @@ STALE_PHRASES = (
 
 def route(case: dict[str, object]) -> dict[str, object]:
     kind = case["kind"]
-    if kind in {"audit", "draft", "organize", "structure-audit", "redundancy-audit"}:
+    if kind in {"audit", "draft", "organize", "structure-audit", "redundancy-audit", "part-file"}:
         mode = "chat-only"
     elif kind == "auto":
         mode = "auto"
-    elif case["tracking_requested"] or kind in {"reviewer", "iterative", "structural-edit"}:
+    elif case["tracking_requested"] or kind in {"reviewer", "iterative", "structural-edit", "part-reintegrate"}:
         mode = "tracked-round"
     elif kind == "direct-edit" and case["target_named"]:
         mode = "direct-apply"

@@ -58,9 +58,9 @@ expresses, `word <connettivo>` for the usage label — and record the entry in t
 diagnosis. Send the connector, never the paragraph.
 
 A connector of marked register is not an error: report the level (correctness,
-meaning, register, appropriateness) as `tone-of-voice`,
-`references/treccani.md` prescribes. If the lookup fails, classify at most as
-`WEAK` and mark the point unverified.
+meaning, register, appropriateness) as the `tone-of-voice` skill's Treccani
+reference prescribes. If the lookup fails, classify at most as `WEAK` and mark
+the point unverified.
 
 ## 4. Diagnose Each Transition
 

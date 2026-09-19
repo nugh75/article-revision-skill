@@ -12,9 +12,11 @@ plausible conceptual interpretations.
 
 ## `stile`
 
-Apply `tone-of-voice` to already sound prose: register, rhythm, concision, and
-measured emphasis. Do not repair conceptual or argumentative defects under a
-style label; report them as stop conditions.
+Apply the project's default voice — `editorial-norms/norms.md`, "Lingua e
+stile" — to already sound prose: register, rhythm, concision, and measured
+emphasis; fall back to `tone-of-voice` only where the project norms are
+silent. Do not repair conceptual or argumentative defects under a style
+label; report them as stop conditions.
 
 ## `connettori`
 

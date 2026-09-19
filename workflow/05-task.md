@@ -6,6 +6,10 @@ Every tracked edit round has exactly one task file; diagnostic-only sessions
 have none. The file tracks applied work and provides the input summary for
 `95-decision-log.md`.
 
+Use an existing `tasks/` directory when present; discover legacy task files
+recursively. Exclude `archive/` when selecting a task to resume. After any task
+write, refresh the opted-in task index via `workflow/08-revision-archive.md`.
+
 ## When to invoke
 
 | Action | Called by |
