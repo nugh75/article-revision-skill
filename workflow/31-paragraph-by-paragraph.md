@@ -102,8 +102,8 @@ every diagnostic block.
 ## 3. Diagnostic Interview Per Paragraph
 
 Before presenting each paragraph, run the freeze check (`15-freeze-ledger.md`
-§4). If the paragraph is 🟢 `frozen`, prepend the advisory note and ask whether
-to revisit it before running diagnostics:
+§4). Read the *Passaggi congelati* table first (`15-freeze-ledger.md` §13): a 🔒 passage inside the range is binding — shape the work around it, or stop and offer `/r-thaw F<n>`. If the paragraph is 🟢 `frozen`, prepend the advisory note
+and ask whether to revisit it before running diagnostics:
 
 ```
 Capitolo <C> — <chapter-title>; P<N> (<ARTICLE_PATH>:<L1-L2>) è CONGELATO (frozen il <data>) — considerato concluso.

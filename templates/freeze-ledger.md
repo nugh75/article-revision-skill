@@ -16,6 +16,10 @@ unlike the per-session task file. One row per tracked unit.
 - 🟡 `open` — richiede intervento. La colonna *Commenti / intenzioni* dice cosa si intende cambiare.
 - 🔵 `wip` — in lavorazione in questa sessione.
 - ⚪ unità non elencata = mai esaminata (untracked).
+- 🔒 `frozen` (passaggio) — vincolante, non advisory: il testo esatto elencato in
+  *Passaggi congelati* non si tocca. Per modificarlo serve `/r-thaw F<n>`.
+  Un passaggio 🔒 dentro una sezione 🟡 `open` resta intoccabile: la revisione
+  della sezione lo aggira.
 
 **Ancoraggio:** ogni unità è identificata da capitolo + sezione + numero di
 paragrafo + righe correnti + *incipit* (primi ~40 caratteri verbatim del
@@ -31,6 +35,36 @@ modifiche e bump. Le righe sono obbligatorie ma indicative.
 <!-- una riga per unità tracciata, es.:
 | P4 | Capitolo 3 — Metodo | §3.1 Campione | <ARTICLE_PATH>:145-153 | «Il campione è composto da 124…» | 🟢 frozen | 2026-06-18 1530 | — |
 | P5 | Capitolo 3 — Metodo | §3.1 Campione | <ARTICLE_PATH>:154-162 | «Le risposte sono state codificate…» | 🟡 open | 2026-06-18 1532 | Verificare denominatore della percentuale; citazione mancante per il codebook |
+-->
+
+---
+
+## Passaggi congelati
+
+Grana fine: uno *span* di testo continuo di qualunque lunghezza — mezza frase,
+una frase, tre frasi — che non deve cambiare. La tabella tiene stato e metadati;
+il blocco sotto tiene il **testo verbatim**, byte per byte, in un fence `text`.
+`scripts/freeze_check.py <articolo>` verifica che ogni passaggio 🔒 esista
+ancora identico e riporta righe aggiornate, `stale` e `ambiguo`.
+
+Il confronto è normalizzato (NFC, whitespace collassato): un passaggio
+sopravvive a riavvolgimento delle righe e a un bump di versione, e risulta
+`stale` solo se le parole cambiano.
+
+| ID | Sezione | Righe | Incipit | sha256 | Stato | Data |
+|---|---|---|---|---|---|---|
+<!-- una riga per passaggio, es.:
+| F7 | §2.2.4 | <ARTICLE_PATH>:224-224 | «La teoria della diffusione…» | a91f3c7d4e21 | 🔒 frozen | 2026-06-18 1530 |
+-->
+
+<!-- un blocco per passaggio, con il testo esatto; es.:
+
+### F7 — §2.2.4 — 🔒 frozen — 2026-06-18
+- **Motivo:** dato verificato con l'autore; formulazione concordata.
+
+```text
+La teoria della diffusione delle innovazioni colloca l'adozione su cinque categorie.
+```
 -->
 
 ---

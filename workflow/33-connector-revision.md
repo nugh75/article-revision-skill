@@ -157,6 +157,8 @@ Wait for the user. Do not apply pre-emptively.
 
 ## 8. Propose Modifications
 
+Read the *Passaggi congelati* table first (`15-freeze-ledger.md` §13): a 🔒 passage inside the range is binding — shape the work around it, or stop and offer `/r-thaw F<n>`.
+
 Run the freeze check (`15-freeze-ledger.md` §4) on each unit a proposal would
 touch; if a unit is 🟢 `frozen`, apply the advisory warning flow (§5) before
 proposing.

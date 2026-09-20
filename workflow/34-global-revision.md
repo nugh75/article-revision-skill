@@ -269,6 +269,8 @@ recurring construction called bureaucratic — verify it with the `treccani` ski
 on the isolated term and cite the entry, or present it as a stylistic
 preference.
 
+Read the *Passaggi congelati* table first (`15-freeze-ledger.md` §13): a 🔒 passage inside the range is binding — shape the work around it, or stop and offer `/r-thaw F<n>`.
+
 Run the freeze check (`15-freeze-ledger.md` §4) on each unit a structural change
 would touch; if a unit is 🟢 `frozen`, apply the advisory warning flow (§5)
 before proposing. A global rename that sweeps frozen units must list them and ask

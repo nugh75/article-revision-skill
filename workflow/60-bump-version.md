@@ -42,7 +42,9 @@ already carried the ledger forward; read its result rather than repeating it.
 
 For an additional mid-round bump, summarize accepted changes, open points, and
 the length budget before asking. Carry ledger anchors forward; mark unmatched
-anchors stale rather than dropping them.
+anchors stale rather than dropping them. Then run `scripts/freeze_check.py` on the
+new version (`15-freeze-ledger.md` §13.6, §14); a passage reported `stale` after a
+bump means the bump altered locked text, so report it before continuing.
 
 Do not create an immediate Git checkpoint. The new version belongs to the local
 active-session manifest until Git is separately authorized.

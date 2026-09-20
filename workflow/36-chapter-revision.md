@@ -208,7 +208,7 @@ Wait for user selection.
 
 Run the freeze check (`15-freeze-ledger.md` §4) on each paragraph a point would
 touch; if a paragraph is 🟢 `frozen`, apply the advisory warning flow (§5) before
-proposing.
+proposing. Read the *Passaggi congelati* table first (`15-freeze-ledger.md` §13): a 🔒 passage inside the range is binding — shape the work around it, or stop and offer `/r-thaw F<n>`. Run `scripts/freeze_check.py <ARTICLE_PATH>` after the write (`15-freeze-ledger.md` §14). A non-zero exit means a 🔒 passage was altered: restore the exact text before reporting the round.
 
 For each selected dimension, generate revision points following the standard
 decision interaction pattern from `SKILL.md` § "Interaction pattern (binding)".

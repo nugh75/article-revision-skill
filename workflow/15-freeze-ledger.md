@@ -23,11 +23,26 @@ and sessions**.
 | `status` | `/r-status` |
 | `log-comment` | after a tracked round exists, or when the user explicitly asks to save an intention |
 | `carry-forward` | `60-bump-version.md` — re-anchor and copy the ledger into the new version |
+| `verify` | after every applied edit, on `/r-status`, and on bump — run `scripts/freeze_check.py` (§14) |
 
 ## 1. Unit model & anchoring
 
-A **unit** is the smallest reviewable block the user freezes — normally a
-paragraph, but it may be a numbered subsection or a fragment.
+The ledger tracks two tiers, and a unit belongs to exactly one of them:
+
+| Tier | Key | Anchor | Force |
+|---|---|---|---|
+| section | `§2.2`, `Parte III`, `P4` | incipit, ~40 chars | **advisory** — warn and ask (§5) |
+| passage | `F<n>` | full verbatim text + sha256 | **binding** — no edit without `/r-thaw` (§13) |
+
+The section tier is the coarse map of what is concluded. The passage tier locks
+a single span of continuous text — half a sentence, one sentence, three — that
+must not change at all. A passage wins over the section that contains it: a 🔒
+passage inside a 🟡 `open` section stays untouchable and the section's revision
+routes around it; inside a 🟢 `frozen` section it is the core that survives even
+when the user reopens the section.
+
+A **section-tier unit** is the smallest reviewable block the user freezes at that
+tier — normally a paragraph, but it may be a numbered subsection or a fragment.
 
 Identify every unit by, in order:
 
@@ -54,6 +69,8 @@ drop a frozen unit.
   intend to change.
 - 🔵 `wip` — being worked on in the current session.
 - ⚪ untracked — a unit absent from the ledger has never been examined.
+- 🔒 `frozen` — a **passage** (§13), binding. Only `/r-thaw F<n>` releases it.
+  Thawing sets the passage to 🟡 `open`; passages never take 🟢 or 🔵.
 
 ## 3. ensure (called by setup)
 
@@ -76,6 +93,10 @@ drop a frozen unit.
 
 Before generating a proposal for unit U:
 
+0. Read the *Passaggi congelati* table (§13). If any 🔒 passage falls inside U,
+   the proposal must leave that text byte-identical; say so explicitly in the
+   diagnosis and shape the proposal around it. A proposal that would rewrite a
+   🔒 passage is not offered at all — offer `/r-thaw F<n>` instead.
 1. Read the ledger row whose anchor matches U.
 2. Branch on state:
    - 🟢 `frozen` → apply the **advisory warning** flow (§5).
@@ -120,7 +141,9 @@ Triggered by `/r-freeze [unit]` or accepted from the auto-offer (§7).
 
 1. Resolve the target unit(s). `/r-freeze` with no argument targets the unit
    just worked on; `/r-freeze P4` or `/r-freeze §3` targets explicitly;
-   `/r-freeze §3 tutto` freezes every paragraph in a section.
+   `/r-freeze §3 tutto` freezes every paragraph in a section. A **quoted
+   argument** — `/r-freeze "la fiducia precede l'affidamento"` — freezes a
+   passage instead; follow §13.3.
 2. Set state 🟢 `frozen`, update *Ultima modifica*, clear the *Commenti /
    intenzioni* cell (or move any leftover intention to the storico as resolved).
 3. Append a storico row: `<data> | freeze | <unit> | <prev> → frozen | <origin>`.
@@ -149,7 +172,8 @@ The auto-offer fires **once per unit per session**. Do not nag.
 
 Triggered by `/r-thaw [unit]`.
 
-1. Resolve the target unit(s) (same rules as freeze).
+1. Resolve the target unit(s) (same rules as freeze). `/r-thaw F7` thaws a
+   passage: follow §13.5 instead of the steps below.
 2. Set state 🟡 `open` (or 🔵 `wip` if the user is about to work on it now).
 3. Append a storico row: `<data> | thaw | <unit> | frozen → <new> | richiesta utente`.
 4. Confirm: `🟡 Scongelato <unit> — ora modificabile senza avviso.`
@@ -177,6 +201,9 @@ lands in the ledger, not only in chat.
 
 Print a compact snapshot from the ledger — do not edit anything:
 
+Run `verify` (§14) first and report its result; `/r-status` is the routine
+occasion on which passage drift surfaces.
+
 For projects with `TASKS.md`, also read the live pending-work report using
 `workflow/08-revision-archive.md` (`status`, not `refresh`).
 
@@ -186,6 +213,7 @@ For projects with `TASKS.md`, also read the live pending-work report using
 🟢 Frozen (X):   P4 Capitolo 3 <ARTICLE_PATH>:145-153; P9 Capitolo 4 <ARTICLE_PATH>:210-218; …
 🟡 Open (Y):     P5 Capitolo 3 <ARTICLE_PATH>:154-162 — ricalcolare %; P7 Capitolo 3 <ARTICLE_PATH>:180-188 — citazione mancante; …
 🔵 WIP (Z):      P12 Capitolo 5 <ARTICLE_PATH>:260-268
+🔒 Passaggi (W): W verificati · S stale · A ambigui
 ⚪ Untracked:    ~N paragrafi mai esaminati
 
 Prossimo intervento suggerito: <first open unit + its intention>
@@ -203,7 +231,10 @@ When `60-bump-version.md` creates v(N+1):
    incipit. Update the advisory line range.
 3. Any row whose anchor no longer matches → mark `⚠ stale`, list those in chat,
    and ask the user to re-point or drop them. Never lose a frozen unit silently.
-4. Update frontmatter `reconciled-version` and `updated`.
+4. Re-run `verify` (§14) against the new version. A passage reported `stale`
+   after a bump means the bump itself altered locked text: stop and report it
+   before anything else.
+5. Update frontmatter `reconciled-version` and `updated`.
 
 ## 12. Relationship to other artifacts
 
@@ -214,3 +245,138 @@ When `60-bump-version.md` creates v(N+1):
   advisory flow (§5) governs whether it gets touched.
 - **Decision log (`95-decision-log.md`)** — at round close, include the frozen /
   open counts in the session `## Note`, and list units frozen this round.
+
+## 13. Passages (fine grain)
+
+### 13.1 Format
+
+The ledger's `## Passaggi congelati` section holds two coupled artifacts per
+passage. The table carries state and metadata; the block below carries the
+**verbatim text**, byte for byte, inside a `text` fence:
+
+````
+| ID | Sezione | Righe | Incipit | sha256 | Stato | Data |
+|---|---|---|---|---|---|---|
+| F7 | §2.2.4 | <ARTICLE_PATH>:224-224 | «La teoria della diffusione…» | a91f3c7d4e21 | 🔒 frozen | 2026-09-20 |
+
+### F7 — §2.2.4 — 🔒 frozen — 2026-09-20
+- **Motivo:** dato verificato con l'autore; formulazione concordata.
+
+```text
+La teoria della diffusione delle innovazioni colloca l'adozione su cinque categorie.
+```
+````
+
+Neither half stands alone: a table row without its block, or a block without its
+row, is an error that `verify` (§14) reports. Do not paraphrase or re-indent the
+fenced text, and never add ellipses to it — it is the comparison key.
+
+`Righe` and `Incipit` are conveniences for reading; the fenced text and its
+digest are the anchor.
+
+### 13.2 Anchoring and normalisation
+
+Comparison is normalised: Unicode NFC, every run of whitespace (newlines
+included) collapsed to a single space, ends trimmed. The digest is the first 12
+hex characters of the sha256 of that normalised text.
+
+Consequences, and they are the point of the design:
+
+- A passage survives re-wrapped lines, re-indentation and a version bump.
+- It survives moving to another chapter — the passage is found wherever it is.
+- It becomes `stale` exactly when the words change. That is the signal wanted.
+- Markdown inside the span (`*corsivo*`, `[@rossi2024]`) is part of the text:
+  changing the markup counts as changing the passage.
+
+### 13.3 freeze a passage
+
+Triggered by `/r-freeze "<testo esatto>"`, or by the user pointing at a span in
+chat and asking to lock it.
+
+1. Take the span exactly as it appears in the article. Do not trim it to a
+   sentence boundary if the user marked less, and do not extend it silently.
+2. Normalise (§13.2) and count occurrences in the active article:
+   - **0** → the quoted text does not exist. Report it and stop; do not guess a
+     near match.
+   - **>1** → refuse and ask the user to extend the span until it is unique:
+     `⚠ «<incipit>» compare N volte. Allarga il passaggio per renderlo univoco.`
+   - **1** → proceed.
+3. Allocate the next free `F<n>`, compute the digest, add the table row with
+   state 🔒 `frozen` and add the verbatim block with the user's `Motivo` when
+   given.
+4. Append a storico row:
+   `<data> | freeze-passaggio | F<n> <sezione> | — → 🔒 frozen | <origine>`.
+5. Run `verify` (§14) and confirm in one line:
+   `🔒 Congelato F<n> (§<sezione>, riga <L>): «<incipit>…»`
+
+Freezing a passage does not change the state of the section containing it.
+
+### 13.4 check a passage (precedence)
+
+Passages are read **before** the section row, in §4 step 0. When a proposal's
+range contains a 🔒 passage:
+
+- Leave the passage byte-identical and say so in the diagnosis:
+  `F7 è congelato: la proposta lo aggira.`
+- If the editorial problem lies *inside* the passage, do not propose a rewrite.
+  Report the conflict and offer the choice:
+  `Il rilievo cade dentro F7, congelato il <data> (<motivo>). Per intervenire serve /r-thaw F7.`
+- Never apply an edit that alters a 🔒 passage, with or without confirmation in
+  the same turn. `/r-thaw` is the only door. This is where the passage tier
+  differs from the advisory section tier.
+
+### 13.5 thaw a passage
+
+Triggered by `/r-thaw F<n>`.
+
+1. Set the row state to 🟡 `open`, keep the row and the verbatim block — the
+   text stays on record as what the passage used to say.
+2. Append a storico row:
+   `<data> | thaw-passaggio | F<n> | 🔒 frozen → 🟡 open | richiesta utente`.
+3. Confirm: `🟡 Scongelato F<n> — ora modificabile.`
+
+A 🟡 passage is no longer enforced by `verify`; it is reported as
+`non verificato`. Drop the row entirely only when the user asks.
+
+### 13.6 carry-forward across bumps
+
+Passages need no re-anchoring: the digest and the text travel with the ledger and
+the search runs against whatever version is active. On bump, run `verify` (§14)
+and report any `stale` before anything else — a passage that went stale during a
+bump means the bump altered locked text.
+
+## 14. verify (`scripts/freeze_check.py`)
+
+Deterministic gate. Model discipline decides what to propose; this script decides
+whether locked text actually survived.
+
+```
+python3 scripts/freeze_check.py <ARTICLE_PATH> [--ledger <freeze-ledger.md>]
+```
+
+Without `--ledger` it resolves `revisions/*/freeze-ledger.md` from the working
+directory and refuses to guess when that glob is not unique.
+
+One line per passage, then a summary:
+
+```
+F3 §1.1 riga 41 — ok
+F7 §2.2.4 — ⚠ stale (testo non trovato)
+F9 §2.6 — ⚠ ambiguo (2 occorrenze: righe 488, 502)
+2 passaggi 🔒 verificati · 2 da sanare
+```
+
+Exit `0` when every 🔒 passage is present exactly once; exit `1` on any `stale`,
+`ambiguo`, `hash incoerente`, `blocco mancante` or `riga di tabella mancante`.
+
+Run it:
+
+- **after every applied edit round** that wrote to the article, before declaring
+  the round closed. Exit 1 means the edit violated a lock: restore the exact text
+  and report which passage, do not renegotiate it after the fact.
+- on `/r-status` (§10).
+- on bump, after carry-forward (§11, §13.6).
+
+A non-zero exit is never reported as a pass, and it is never silenced by editing
+the ledger to match the article. The article gets restored; the ledger changes
+only through `/r-thaw`.

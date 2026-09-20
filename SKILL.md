@@ -39,7 +39,7 @@ The project must have explicitly enabled cloud synchronization. These commands
 never publish Git. See `workflow/60-bump-version.md` and `workflow/96-sync-current.md`.
 
 Other commands remain available through their workflow files: `/r-parte`,
-`/r-pr-2`, `/r-freeze`, `/r-thaw`, `/r-status`, `/r-bump`, `/r-sheet`,
+`/r-pr-2`, `/r-freeze`, `/r-freeze "<testo>"`, `/r-thaw`, `/r-status`, `/r-bump`, `/r-sheet`,
 `/r-gdrive`, `/r-approve`, `/r-redline`, `/r-guide`, and `/r-help`.
 
 ## Authority
@@ -49,9 +49,11 @@ Apply constraints in this order:
 1. The user's current explicit instruction and approved wording.
 2. Factual accuracy, evidence, citations, data verification, and preservation of
    epistemic strength.
-3. The freeze ledger and the explicitly bounded revision scope.
-4. Project style notes and applicable editorial norms.
-5. `tone-of-voice` preferences.
+3. A 🔒 frozen passage of the ledger. It yields only to `/r-thaw`, and it
+   outranks editorial judgement, norms and style.
+4. The freeze ledger's section tier and the explicitly bounded revision scope.
+5. Project style notes and applicable editorial norms.
+6. `tone-of-voice` preferences.
 
 Surface conflicts before applying text. Editorial norms do not silently
 override a deliberate user choice; record an intentional exception.
@@ -206,15 +208,29 @@ Decisione? Accetta / Modifica / Rivedi / Tieni in considerazione
 
 ## Freeze ledger
 
-The ledger is advisory and persistent.
+The ledger is persistent and tracks two tiers.
 
-- Read it before every proposal that may affect a tracked unit.
+**Sections** (`§2.2`, `Parte III`, `P4`) are advisory.
+
+- Read the ledger before every proposal that may affect a tracked unit.
 - Warn and obtain confirmation before editing a frozen unit.
 - Record deferred intentions only after a tracked round exists; otherwise keep
   them in the read-only audit response until the user asks to save them.
 - Offer to freeze a concluded unit; never freeze automatically.
 
-See `workflow/15-freeze-ledger.md` for mechanics.
+**Passages** (`F<n>`) are binding. A passage is a span of continuous text of any
+length — half a sentence upwards — recorded verbatim with its sha256.
+
+- Never alter a 🔒 passage, with or without confirmation in the same turn.
+  `/r-thaw F<n>` is the only door.
+- A passage wins over the section containing it: revision routes around it.
+- When a revision point falls inside a passage, report the conflict instead of
+  proposing a rewrite.
+- After every write to the article, run `python3 scripts/freeze_check.py
+  <ARTICLE_PATH>`. Exit 1 means locked text was altered: restore it before
+  reporting the round. Never silence it by editing the ledger to match.
+
+See `workflow/15-freeze-ledger.md` for mechanics (§13 passages, §14 the check).
 
 ## Handoff, closure, and Git
 

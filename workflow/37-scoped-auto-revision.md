@@ -27,8 +27,12 @@ finalizing an immutable manifest. Frozen candidates remain excluded until the
 user explicitly confirms them.
 
 Write `auto-scope-<version>.md` with article hash, selected tasks, ordered unit
-locators, line bounds, freeze state, and out-of-scope invariants. Recount the
-manifest independently before delegation.
+locators, line bounds, freeze state, and out-of-scope invariants. List every 🔒
+passage (`15-freeze-ledger.md` §13) that falls inside the scope as an explicit
+invariant: workers must reproduce that text byte-identical. Recount the manifest
+independently before delegation.
+
+Run `scripts/freeze_check.py <ARTICLE_PATH>` after the write (`15-freeze-ledger.md` §14). A non-zero exit means a 🔒 passage was altered: restore the exact text before reporting the round.
 
 ## Proposal workers
 

@@ -22,11 +22,14 @@ Otherwise use `tracked-round` through `10-setup.md`. Structural operations use
 2. Confirm the source text still matches the approved proposal. If it drifted,
    stop and show the difference.
 3. Read any existing freeze ledger without updating it. If the target is frozen,
-   warn and require confirmation before editing.
+   warn and require confirmation before editing. If a 🔒 passage
+   (`15-freeze-ledger.md` §13) falls inside the target, stop: a direct apply never
+   alters locked text, not even with confirmation.
 4. Apply only the approved wording to the named target.
 5. Re-read the changed unit, search for leftover fragments or accidental
    duplicates, and run `git diff --check` for the owning repository.
-6. Report the target path and verification result.
+6. Run `scripts/freeze_check.py <ARTICLE_PATH>` after the write (`15-freeze-ledger.md` §14). A non-zero exit means a 🔒 passage was altered: restore the exact text before reporting the round.
+7. Report the target path and verification result.
 
 ## Boundary
 
