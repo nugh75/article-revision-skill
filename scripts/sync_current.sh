@@ -111,6 +111,7 @@ else
     --standalone
     --citeproc
     --bibliography "$BIB"
+    --resource-path="$PROJECT_ROOT/articles/versions:$PROJECT_ROOT/articles:$PROJECT_ROOT"
   )
 
   # journal reference.docx for formatting
