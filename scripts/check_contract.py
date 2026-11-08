@@ -43,6 +43,8 @@ def route(case: dict[str, object]) -> dict[str, object]:
     else:
         raise ValueError(f"ambiguous route: {case['name']}")
 
+    if mode == "auto" and case.get("eligible_changes") is False:
+        return {"mode": mode, **EFFECTS["chat-only"], "git": False}
     return {"mode": mode, **EFFECTS[mode], "git": bool(case["git_authorized"])}
 
 

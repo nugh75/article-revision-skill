@@ -53,7 +53,8 @@ choose one part or to run the command once per part.
    `Capitolo <C> — <chapter-title>; Paragrafo P<N> — <ARTICLE_PATH>:<L1-L2>`.
 3. Record `LINE_RANGE`, `PART_CHARS`, `PARAGRAPH_RANGE` and the exact
    first and last lines for review. Select prose below any version banner
-   or YAML metadata. Capture the SHA-256 of the whole source span with line\n   endings normalized to LF.
+   or YAML metadata. Capture the SHA-256 of the whole source span with line
+   endings normalized to LF.
 
    ```bash
    "$PYTHON_BIN" "<skill-root>/scripts/part_source.py" capture "$ARTICLE_PATH" "$LINE_RANGE"
