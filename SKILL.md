@@ -32,10 +32,10 @@ prose drafting.
 
 Projects with `05_Script/tesi.py` use one coordinator for terminal, editor and
 skill operations. `make bump MSG="reason"` creates the next working version,
-carries the ledger forward, generates Word and synchronizes configured clouds;
-`make export` regenerates and synchronizes without a bump; `make sync` transfers
-existing files; `make status` reads version, ledger, export and cloud state.
-The project must have explicitly enabled cloud synchronization. These commands
+carries the ledger forward and generates Word. `make export` regenerates
+without a bump. Console mode also synchronizes configured clouds.
+`make sync` transfers existing files through Console mode, and
+`make status` reports version, ledger, export and the selected cloud mode. These commands
 never publish Git. See `workflow/60-bump-version.md` and `workflow/96-sync-current.md`.
 
 Other commands remain available through their workflow files: `/r-parte`,
@@ -131,12 +131,14 @@ approved manuscript edit, not Git publication.
 
 Before the first file edit of a new tracked round:
 
-1. Revalidate the exact source text and scope.
+1. Revalidate the exact source and scope, and verify the candidate using
+   `workflow/14-verify-edit.md`.
 2. Check the freeze ledger. A frozen unit requires explicit confirmation.
 3. Create the new article version through `workflow/60-bump-version.md` and
    announce the resulting path.
 4. Create the task file through `workflow/05-task.md` and reconcile the ledger.
-5. Apply only the accepted wording to the new version.
+5. Apply the accepted wording to the new version through
+   `workflow/14-verify-edit.md`.
 
 Further accepted changes in the same round use that version. A diagnostic-only
 session ends without a version, task file, decision log, sync, or Git action.
@@ -153,8 +155,10 @@ acceptance criteria.
 Supported tasks: `chiarezza`, `stile`, `connettori`, `terminologia`,
 `citazioni`, and `argomentazione`.
 
-- A complete `/r-auto` authorizes the first-edit bump, scoped low/medium-risk
-  edits, reports, independent audit, decision log, and local derived exports.
+- A complete `/r-auto` authorizes scoped low/medium-risk edits, reports, audit,
+  decision log and local exports. Start the first-edit bump only after the
+  read-only phase finds and verifies an eligible change. Cloud transfer is
+  a separate operation.
 - It does not authorize new claims, unverified evidence, substantive cuts,
   paragraph or section moves, frozen material, or choices between defensible
   interpretations.
@@ -178,11 +182,18 @@ Proposta
 Modifiche
 1. <change and reason>
 
+Tipo — correzione linguistica verificata | preferenza stilistica | decisione concettuale
+Verifica — <level, exact consulted entry and outcome, if applicable>
+
 Rischio: <low|medium|high>
 Decisione? Accetta / Modifica / Rivedi / Tieni in considerazione
 ```
 
-- Show full replacement wording for medium/high-risk changes.
+- For each applicable proposal, record the exact locator, original and
+  replacement. Keep these values when receiving a proposal from
+  `tone-of-voice`. A conceptual decision needs separate acceptance.
+- Include linguistic evidence only for an actual lookup. Report an
+  inconclusive or unavailable lookup as such.
 - Keep conceptually independent changes separately decidable.
 - Include character/word deltas, norms, or exceptions only when material.
 - Wait after a proposal. Apply nothing before acceptance.
@@ -227,9 +238,8 @@ length — half a sentence upwards — recorded verbatim with its sha256.
 - A passage wins over the section containing it: revision routes around it.
 - When a revision point falls inside a passage, report the conflict instead of
   proposing a rewrite.
-- After every write to the article, run `python3 scripts/freeze_check.py
-  <ARTICLE_PATH>`. Exit 1 means locked text was altered: restore it before
-  reporting the round. Never silence it by editing the ledger to match.
+- Use `workflow/14-verify-edit.md` before and after every article write.
+  The comparison separates pre-existing anchor issues from a new violation.
 
 See `workflow/15-freeze-ledger.md` for mechanics (§13 passages, §14 the check).
 

@@ -1,8 +1,8 @@
 # 60 — Create a Working Version
 
 Create a new manuscript version when the first approved edit of a tracked round
-is about to be applied, when `/r-auto` begins, or when the user explicitly asks
-for `/r-bump`. Read-only diagnosis never bumps.
+is about to be applied, when `/r-auto` has a verified eligible edit, or when the
+user explicitly asks for `/r-bump`. Read-only diagnosis never bumps.
 
 `direct-apply` never calls this workflow. An explicit request to edit a named
 version in place controls unless the user also asks to start a tracked round.
@@ -11,7 +11,7 @@ version in place controls unless the user also asks to start a tracked round.
 
 - `mode=first-edit`: the explicit acceptance of the proposed file edit
   authorizes the version copy needed to apply it. Announce the action.
-- `/r-auto` with task and scope authorizes its first working version.
+- `/r-auto` with task and scope authorizes its working version when an eligible edit is ready.
 - `/r-bump` or an extra mid-round bump requires explicit confirmation.
 
 No bump authorizes commit or push.
@@ -20,9 +20,12 @@ No bump authorizes commit or push.
 
 On an integrated project (`05_Script/tesi.py` exists), the same script delegates
 to the project coordinator. Set `BUMP_MESSAGE` to the reason for the new round.
-It synchronizes the clouds first, requires an unambiguous active source, creates
-the version and technical log, carries ledger anchors forward and synchronizes
-those records. Standard output remains the new absolute article path.
+It requires an unambiguous active source, creates the version and technical log,
+and carries ledger anchors forward. The project cloud mode governs transfers.
+For `/r-auto` set `ARTICLE_REVISION_LOCAL_ONLY=1` on the hook. For a reviewed
+source pass `ARTICLE_REVISION_EXPECTED_SOURCE_SHA256` when the calling workflow
+requires it. The hook verifies that fingerprint before making a new version.
+Standard output remains the new absolute article path.
 For first-edit revision, this uses `--prepare`: generate Word only after the
 approved edits through the export workflow. An explicit terminal `make bump`
 also generates and synchronizes Word immediately. A typed bump command is an

@@ -208,7 +208,7 @@ Wait for user selection.
 
 Run the freeze check (`15-freeze-ledger.md` §4) on each paragraph a point would
 touch; if a paragraph is 🟢 `frozen`, apply the advisory warning flow (§5) before
-proposing. Read the *Passaggi congelati* table first (`15-freeze-ledger.md` §13): a 🔒 passage inside the range is binding — shape the work around it, or stop and offer `/r-thaw F<n>`. Run `scripts/freeze_check.py <ARTICLE_PATH>` after the write (`15-freeze-ledger.md` §14). A non-zero exit means a 🔒 passage was altered: restore the exact text before reporting the round.
+proposing. Read the *Passaggi congelati* table first (`15-freeze-ledger.md` §13): a 🔒 passage inside the range is binding — shape the work around it, or stop and offer `/r-thaw F<n>`. Use `workflow/14-verify-edit.md` when applying changes.
 
 For each selected dimension, generate revision points following the standard
 decision interaction pattern from `SKILL.md` § "Interaction pattern (binding)".
@@ -221,7 +221,7 @@ Each point must:
   `Capitolo <C> — <chapter title>; Paragrafo P<N> — <ARTICLE_PATH>:<L1-L2>`.
 - Reference the cross-article evidence that motivates the change
   (e.g. «termine "X" definito come Y in §2, usato come Z qui»).
-- Apply changes using `Edit` (surgical) or `replace_all` for global renames.
+- Apply the approved candidate through `workflow/14-verify-edit.md`.
 
 Handle `Accetta`, `Modifica`, `Rivedi completamente`, and
 `Tieni in considerazione` responses as in `workflow/30-iterate-points.md`.

@@ -106,7 +106,11 @@ docx_body_has_text() {
 WORKFLOW="$PROJECT_ROOT/05_Script/tesi.py"
 if [[ -f "$WORKFLOW" && "${ARTICLE_EXPORT_INTERNAL:-}" != "1" ]]; then
   PYTHON_BIN="${PYTHON_BIN:-$PROJECT_ROOT/.venv/bin/python}"
-  exec "$PYTHON_BIN" "$WORKFLOW" export --source "$ARTICLE" --bibliography "$BIB"
+  args=(export --source "$ARTICLE" --bibliography "$BIB")
+  if "$STRICT_SYNC"; then
+    args+=(--local-only)
+  fi
+  exec "$PYTHON_BIN" "$WORKFLOW" "${args[@]}"
 fi
 
 # --- 1. current.docx ---

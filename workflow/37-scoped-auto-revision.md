@@ -12,27 +12,22 @@ broaden one another.
 
 ## Authorization
 
-A complete command authorizes the first-edit bump, task/report files, eligible
-scoped edits, independent audit, decision log, and local derived exports.
+A complete command authorizes a working version when the first eligible change
+is ready, its task and audit records, scoped edits, and local derived exports.
 
-Only `--git` authorizes threshold commits, the final commit, and push. Record
-`GIT_AUTHORIZED=true|false` before any work. The command never authorizes Drive,
-redline, colleague approval, force-push, or unrelated paths.
+Only `--git` authorizes threshold and final commits and push. Record
+`GIT_AUTHORIZED=true|false`. For this mode set `ARTICLE_REVISION_LOCAL_ONLY=1`
+on the version hook and use `auto-closure` for export. Cloud transfer is a
+separate operation. Keep redline, colleague approval and unrelated paths
+outside this mode.
 
-## Setup and manifest
+## Read-only setup
 
-Run read-only setup, then create the first-edit version and task file. Resolve
-the scope to exact paragraph or heading bounds. Check the freeze ledger before
-finalizing an immutable manifest. Frozen candidates remain excluded until the
-user explicitly confirms them.
-
-Write `auto-scope-<version>.md` with article hash, selected tasks, ordered unit
-locators, line bounds, freeze state, and out-of-scope invariants. List every 🔒
-passage (`15-freeze-ledger.md` §13) that falls inside the scope as an explicit
-invariant: workers must reproduce that text byte-identical. Recount the manifest
-independently before delegation.
-
-Run `scripts/freeze_check.py <ARTICLE_PATH>` after the write (`15-freeze-ledger.md` §14). A non-zero exit means a 🔒 passage was altered: restore the exact text before reporting the round.
+Resolve the scope to exact paragraph or heading bounds in the active article.
+Record its SHA-256 and the current ledger, selected tasks, ordered locators
+and out-of-scope invariants. Keep the manifest in memory through eligibility
+checks. Exclude frozen units from automatic application. List every 🔒
+passage in scope as an invariant and keep its text intact.
 
 ## Proposal workers
 
@@ -58,9 +53,19 @@ blocks automatic closure.
 
 ## Integration and checkpoints
 
-Revalidate exact originals and integrate eligible units in source order.
-Preserve citations, numbers, placeholders, headings, examples, epistemic
-strength, and paragraph order.
+Revalidate the article fingerprint, ledger and exact originals. Assemble the
+eligible changes into one candidate in source order and verify it with the
+pre-write checks in `workflow/14-verify-edit.md`. Preserve citations, numbers,
+placeholders, headings, examples, epistemic strength and paragraph order.
+
+If no change is eligible, report the findings and stop in read-only mode.
+Once a verified change is ready, pass `ARTICLE_REVISION_LOCAL_ONLY=1` and the
+recorded SHA-256 as `ARTICLE_REVISION_EXPECTED_SOURCE_SHA256` to
+`workflow/60-bump-version.md`. Create the task and write
+`auto-scope-<version>.md` with the source and working-version locators.
+Revalidate the exact source spans on the working version and apply the
+candidate through `workflow/14-verify-edit.md`. If the source drifted, stop
+and report it. If the version was already created, keep it for recovery.
 
 Increment the checkpoint counter per changed unit:
 
@@ -79,8 +84,7 @@ unambiguous low/medium-risk defects; otherwise stop.
 ## Local closure
 
 After PASS, generate the final sheet and call `95-decision-log.md
-mode=auto-closure` with `GIT_AUTHORIZED` unchanged. Require strict current-file
-sync and DOCX text checks.
+mode=auto-closure` with `GIT_AUTHORIZED` unchanged. Require local export generation and DOCX text checks.
 
 - With `--git`, closure also requires an authorized final checkpoint and remote
   verification.

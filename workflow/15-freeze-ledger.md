@@ -369,11 +369,14 @@ F9 §2.6 — ⚠ ambiguo (2 occorrenze: righe 488, 502)
 Exit `0` when every 🔒 passage is present exactly once; exit `1` on any `stale`,
 `ambiguo`, `hash incoerente`, `blocco mancante` or `riga di tabella mancante`.
 
-Run it:
+Use `--before <snapshot>` to compare the same ledger against the original and
+candidate. A pre-existing missing or ambiguous anchor with the same status and
+count is reported separately. A newly missing or ambiguous anchor, an altered
+ambiguous count, or an invalid ledger blocks the candidate. The comparison
+uses the same normalization as the status report (§13.2).
 
-- **after every applied edit round** that wrote to the article, before declaring
-  the round closed. Exit 1 means the edit violated a lock: restore the exact text
-  and report which passage, do not renegotiate it after the fact.
+For article edits follow `workflow/14-verify-edit.md`. Use the one-file report:
+
 - on `/r-status` (§10).
 - on bump, after carry-forward (§11, §13.6).
 

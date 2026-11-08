@@ -25,15 +25,9 @@ Otherwise use `tracked-round` through `10-setup.md`. Structural operations use
    warn and require confirmation before editing. If a 🔒 passage
    (`15-freeze-ledger.md` §13) falls inside the target, stop: a direct apply never
    alters locked text, not even with confirmation.
-4. For a target in the versioned article series, use its resolved path and run
-   `bash scripts/sync_current.sh --check-source <ARTICLE_PATH>` immediately before
-   writing. Proceed only on exit 0. On failure, report the conflict and ask which
-   passage of the active version should receive the approved wording.
-5. Apply only the approved wording to the named target.
-6. Re-read the changed unit, search for leftover fragments or accidental
-   duplicates, and run `git diff --check` for the owning repository.
-7. Run `scripts/freeze_check.py <ARTICLE_PATH>` after the write (`15-freeze-ledger.md` §14). A non-zero exit means a 🔒 passage was altered: restore the exact text before reporting the round.
-8. Report the target path and verification result.
+4. Run `workflow/14-verify-edit.md` to verify and apply the approved candidate.
+5. Run `git diff --check` in the owning repository and report the target and
+   the verification result.
 
 ## Boundary
 

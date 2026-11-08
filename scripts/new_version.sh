@@ -54,8 +54,15 @@ PROJECT_ROOT="$(dirname "$(dirname "$SOURCE_DIR")")"
 WORKFLOW="$PROJECT_ROOT/05_Script/tesi.py"
 if [[ -f "$WORKFLOW" && "$(basename "$SOURCE_DIR")" == "versions" ]]; then
   PYTHON_BIN="${PYTHON_BIN:-$PROJECT_ROOT/.venv/bin/python}"
-  exec "$PYTHON_BIN" "$WORKFLOW" bump --prepare --path-only --source "$SOURCE_DIR/$(basename "$SRC")" \
-    --message "${BUMP_MESSAGE:-Avvio revisione article-revision}"
+  args=(bump --prepare --path-only --source "$SOURCE_DIR/$(basename "$SRC")"
+        --message "${BUMP_MESSAGE:-Avvio revisione article-revision}")
+  if [[ "${ARTICLE_REVISION_LOCAL_ONLY:-}" == "1" ]]; then
+    args+=(--local-only)
+  fi
+  if [[ -n "${ARTICLE_REVISION_EXPECTED_SOURCE_SHA256:-}" ]]; then
+    args+=(--expected-source-sha256 "$ARTICLE_REVISION_EXPECTED_SOURCE_SHA256")
+  fi
+  exec "$PYTHON_BIN" "$WORKFLOW" "${args[@]}"
 fi
 
 BASENAME=$(basename "$SRC")
@@ -85,6 +92,17 @@ DEST="${DIRNAME}/${NEW_NAME}"
 if [[ -e "$DEST" ]]; then
     echo "ERROR: destination already exists: $DEST" >&2
     exit 2
+fi
+
+if [[ -n "${ARTICLE_REVISION_EXPECTED_SOURCE_SHA256:-}" ]]; then
+    "${PYTHON_BIN:?Set PYTHON_BIN to the project interpreter}" -c '
+import hashlib
+import sys
+from pathlib import Path
+
+if hashlib.sha256(Path(sys.argv[1]).read_bytes()).hexdigest() != sys.argv[2]:
+    sys.exit("Source fingerprint changed after diagnosis.")
+' "$SRC" "$ARTICLE_REVISION_EXPECTED_SOURCE_SHA256"
 fi
 
 cp "$SRC" "$DEST"

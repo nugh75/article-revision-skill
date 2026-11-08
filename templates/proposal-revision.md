@@ -22,6 +22,11 @@
 
 {{MODIFICATIONS_LIST}}
 
+## Tipo e verifica
+
+Record the type of each change and, for a linguistic claim, the level,
+exact entry consulted and outcome.
+
 ## Delta
 
 - **Chars**: {{DELTA_CHARS}}

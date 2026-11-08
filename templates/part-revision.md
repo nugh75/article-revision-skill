@@ -3,6 +3,7 @@ parte: {{PART_TITLE}}
 fonte: {{ARTICLE_PATH}}
 versione: {{ARTICLE_VERSION}}
 righe: {{LINE_RANGE}}
+impronta_fonte: {{SOURCE_SHA256}}
 ancora_inizio: "{{ANCHOR_FIRST_LINE}}"
 ancora_fine: "{{ANCHOR_LAST_LINE}}"
 paragrafi: {{PARAGRAPH_RANGE}}

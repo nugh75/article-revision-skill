@@ -60,7 +60,8 @@ Structural application always uses `tracked-round`; never `direct-apply` or
    `SKILL.md`.
 4. Record a move manifest containing each source unit's old locator, new
    locator, action, and approval. Preserve unit text during a pure move.
-5. Apply only approved moves and separately approved splits, merges, cuts, or
+5. Verify the candidate with `workflow/14-verify-edit.md`. Apply only approved
+   moves and separately approved splits, merges, cuts, or
    additions. Never infer one operation from acceptance of another.
 6. Verify that every original unit is present exactly once unless an explicit
    approved manifest entry explains the difference.
