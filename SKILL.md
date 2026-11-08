@@ -23,7 +23,7 @@ prose drafting.
 | Read-only manuscript diagnosis | `/r-audit` via `workflow/12-audit.md`, or the diagnostic phase of `/r-global`, `/r-redundancy`, `/r-pp`, `/r-pp-a`, `/r-conn`, and `/r-chapter` |
 | Revise one part of the manuscript as a standalone Markdown file | `/r-parte [scope]`, or `--md` on a diagnostic command, via `workflow/39-part-revision-file.md` |
 | Reintegrate an approved part file into the manuscript | `/r-parte --apply <file>` via `workflow/39-part-revision-file.md` |
-| Apply bounded, non-structural approved text to an explicitly named file/version, without tracking | Direct apply via `workflow/11-direct-apply.md` |
+| Apply bounded, non-structural approved text to the explicitly named active version or standalone draft, without tracking | Direct apply via `workflow/11-direct-apply.md` |
 | Reviewer round, versioned revision session, ledger/task workflow | Tracked edit lifecycle below |
 | Bounded automatic edits | `/r-auto <task> --scope "<scope>" [--agents N] [--git]` |
 | Pause or resume local work | `/r-handoff`, `/r-resume` |
@@ -78,7 +78,7 @@ For revision-record maintenance, use the separate administrative route in
 | Mode | Use when | Persistent effects |
 |---|---|---|
 | `chat-only` | Diagnose, compare, draft, audit, organize ideas, or propose a content architecture | None unless the user separately asks to save an artifact |
-| `direct-apply` | The user explicitly names the target file/version and asks to apply bounded approved wording without opening a revision round | Edit and verify that target only |
+| `direct-apply` | The user explicitly names the target file/version and asks to apply bounded approved wording without opening a revision round | Edit and verify the active version or standalone draft only |
 | `tracked-round` | Reviewer feedback, iterative revision, accepted structural reorganization, requested versioning, task/ledger state, or explicit tracking | Working version, task, ledger, closure artifacts |
 | `auto` | Complete bounded `/r-auto` command | Tracked automatic lifecycle defined below |
 
@@ -117,7 +117,8 @@ Reading, analysis, comparison, and proposals are read-only by default.
 Use `workflow/11-direct-apply.md` when the user explicitly identifies a file or
 version and requests a bounded replacement without asking for a revision round.
 
-- Revalidate the exact target and approved wording.
+- Revalidate the exact target and approved wording. For a versioned article, run
+  the active-source check in the workflow before writing.
 - Edit that file in place and verify the result.
 - Do not bump, create a task, update the ledger, sync `current.*`, or create
   closure artifacts.

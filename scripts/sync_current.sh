@@ -3,13 +3,17 @@
 # from the active article version. No current.md copy exists: the active version
 # in articles/versions/ is the single authoritative source.
 # Usage: bash scripts/sync_current.sh <article-path> <bib-path>
+#        bash scripts/sync_current.sh --check-source <article-path>
 # Called by workflow/96-sync-current.md at the end of every revision session.
 
 set -euo pipefail
 
-ARTICLE="${1:?Usage: sync_current.sh <article-path> <bib-path>}"
-BIB="${2:?Usage: sync_current.sh <article-path> <bib-path>}"
-
+CHECK_SOURCE=false
+if [[ "${1:-}" == "--check-source" ]]; then
+  CHECK_SOURCE=true
+  shift
+fi
+ARTICLE="${1:?Article path required}"
 CALLER_ROOT="$(pwd -P)"
 STRICT_SYNC=false
 [[ "${SYNC_MODE:-closure}" == "auto-closure" ]] && STRICT_SYNC=true
@@ -17,9 +21,7 @@ STRICT_SYNC=false
 # Resolve relative inputs against the project directory from which the skill
 # invoked this script, never against the installed skill directory.
 [[ "$ARTICLE" != /* ]] && ARTICLE="$CALLER_ROOT/$ARTICLE"
-[[ "$BIB"     != /* ]] && BIB="$CALLER_ROOT/$BIB"
 ARTICLES_DIR="$(dirname "$ARTICLE")"
-BIB_DIR="$(dirname "$BIB")"
 
 # Export only from the canonical active source. A handoff resumed after a bump
 # must not silently regenerate current.docx from a now-frozen version.
@@ -34,6 +36,7 @@ MAX_VERSION=-1
 MAX_COUNT=0
 shopt -s nullglob
 for candidate in "$ARTICLES_DIR"/article-v*.md; do
+  [[ -f "$candidate" ]] || continue
   candidate_name="$(basename "$candidate")"
   if [[ "$candidate_name" =~ ^article-v([0-9]+)-.+\.md$ ]]; then
     candidate_version=$((10#${BASH_REMATCH[1]}))
@@ -50,6 +53,14 @@ if (( ARTICLE_VERSION != MAX_VERSION || MAX_COUNT != 1 )); then
   echo "⚠ la sorgente non è l'unica versione attiva: $ARTICLE"
   exit 1
 fi
+
+if "$CHECK_SOURCE"; then
+  exit 0
+fi
+
+BIB="${2:?Usage: sync_current.sh <article-path> <bib-path>}"
+[[ "$BIB" != /* ]] && BIB="$CALLER_ROOT/$BIB"
+BIB_DIR="$(dirname "$BIB")"
 
 # The bibliography lives at <project>/bibliography/, so the project root is
 # the parent of the bibliography directory.

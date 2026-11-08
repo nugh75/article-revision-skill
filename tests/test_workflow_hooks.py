@@ -33,6 +33,26 @@ class WorkflowHookTests(unittest.TestCase):
             self.assertIn('$(non-eseguire)', result.stdout)
             self.assertEqual(len(list(source.parent.glob('*.md'))), 1)
 
+    def test_check_source_accepts_only_the_unique_active_version(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root, older, _ = self.project(folder)
+            active = older.with_name("article-v100-2026-10-01.md")
+            active.write_text("Versione attiva.")
+            command = ["bash", str(SCRIPTS / "sync_current.sh"), "--check-source"]
+
+            def check(article):
+                return subprocess.run(command + [str(article)], cwd=root,
+                                      text=True, capture_output=True)
+
+            result = check(older)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("versione attiva", result.stdout)
+            self.assertEqual(check(active).returncode, 0)
+
+            active.with_name("article-v100-2026-10-02.md").write_text("Duplicato.")
+            self.assertNotEqual(check(active).returncode, 0)
+            self.assertFalse((root / "articles/current.docx").exists())
+
     def test_export_delegates_with_explicit_inputs(self):
         with tempfile.TemporaryDirectory() as folder:
             root, source, bib = self.project(folder)
