@@ -1,13 +1,13 @@
 # 11 — Direct Apply
 
-Apply approved wording to an explicitly named manuscript file or version without
-opening a tracked revision round.
+Apply approved wording to the explicitly named active article version or
+standalone draft without opening a tracked revision round.
 
 ## Entry conditions
 
 Use this mode only when all are true:
 
-- the user explicitly names the target path or unambiguous version;
+- the user explicitly names a standalone draft or the active article version;
 - the replacement is bounded and its wording or direction is approved;
 - the replacement does not move, reorder, split, merge, or cut content units;
 - the user did not request a reviewer round, new version, task, ledger, current
@@ -25,11 +25,15 @@ Otherwise use `tracked-round` through `10-setup.md`. Structural operations use
    warn and require confirmation before editing. If a 🔒 passage
    (`15-freeze-ledger.md` §13) falls inside the target, stop: a direct apply never
    alters locked text, not even with confirmation.
-4. Apply only the approved wording to the named target.
-5. Re-read the changed unit, search for leftover fragments or accidental
+4. For a target in the versioned article series, use its resolved path and run
+   `bash scripts/sync_current.sh --check-source <ARTICLE_PATH>` immediately before
+   writing. Proceed only on exit 0. On failure, report the conflict and ask which
+   passage of the active version should receive the approved wording.
+5. Apply only the approved wording to the named target.
+6. Re-read the changed unit, search for leftover fragments or accidental
    duplicates, and run `git diff --check` for the owning repository.
-6. Run `scripts/freeze_check.py <ARTICLE_PATH>` after the write (`15-freeze-ledger.md` §14). A non-zero exit means a 🔒 passage was altered: restore the exact text before reporting the round.
-7. Report the target path and verification result.
+7. Run `scripts/freeze_check.py <ARTICLE_PATH>` after the write (`15-freeze-ledger.md` §14). A non-zero exit means a 🔒 passage was altered: restore the exact text before reporting the round.
+8. Report the target path and verification result.
 
 ## Boundary
 
