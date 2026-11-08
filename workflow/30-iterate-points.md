@@ -71,35 +71,10 @@ Each subsequent `Accetta` / `Modifica` / `Rivedi completamente` /
 
 ## 3. Present In Chat
 
-```text
-## Point N — <short title> · scope: <fragment|paragraph|whole article>
-
-**Unità**: <Capitolo C — title; Paragrafo P<N> — article:line-range> <!-- required for paragraph scope -->
-
-**Original** (`<article>:<line-range>`)
-> <verbatim text>
-
-**Proposta**
-> <proposed full text>
-
-**Modifiche:**
-1. `<old>` → `<new>` [(motivazione)]
-2. `<old>` → `<new>` [(motivazione)]
-...
-
-**Δ**: chars <signed> / words <signed> · risk: <low|medium|high>
-
-**Norms respected**: <list>
-**Possible exceptions**: <list, with reason>
-
-**Decisione sulla proposta?**
-- `Accetta` — applica la proposta così com'è.
-- `Modifica <N>: <direzione>` — mantieni l'idea, ma cambia la modifica indicata.
-- `Rivedi completamente: <direzione>` — rigenera la proposta da capo.
-- `Tieni in considerazione: <nota>` — non applicare ora; registra come promemoria/traccia.
-
-Puoi indicare numeri specifici, es. `Accetta 2,4` oppure `Modifica 3: sostituire X con Y`.
-```
+Use the Proposal format in `SKILL.md`. Include the scope and locator.
+Number independently decidable modifications and retain the exact original
+and replacements, including for a subset of the proposal. Add deltas and
+norms only where material.
 
 Wait for the user. Do **not** apply pre-emptively.
 
@@ -124,9 +99,8 @@ Optional shortcuts remain accepted for speed:
    - `tracked-round` → if `TASK_FILE_PATH` is absent, run the first-edit
      transition in `10-setup.md`, then recompute locators against the new
      working version.
-2. In a tracked round, apply via Edit on the working article only the modifications accepted by the
-   user. If some modifications were deferred or pending, apply only the
-   accepted ones.
+2. Apply the candidate containing the accepted modifications through
+   `workflow/14-verify-edit.md`. Keep deferred and pending changes outside it.
 3. Update an existing project file, or create the prepared plan now if this is
    a reviewer round: each accepted modification → `Accepted`.
 4. If a sidecar proposal file exists for this point, update it: accepted item

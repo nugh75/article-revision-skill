@@ -9,7 +9,7 @@ import re
 import sys
 import unicodedata
 from pathlib import Path
-from typing import Sequence
+from typing import NamedTuple, Sequence
 
 SECTION = "## Passaggi congelati"
 ROW = re.compile(r"^\|\s*(F\d+)\s*\|(.*)$")
@@ -118,68 +118,100 @@ def default_ledger(article: Path) -> Path:
     )
 
 
-def report(article_text: str, ledger_text: str) -> tuple[list[str], int]:
+class Finding(NamedTuple):
+    state: str
+    message: str
+    occurrences: int = 0
+
+
+def inspect_passages(article_text: str, ledger_text: str) -> dict[str, Finding]:
     lines = section_of(ledger_text)
     rows = parse_rows(lines)
     blocks = parse_blocks(lines)
     flat, flat_lines = flatten(article_text)
 
-    output: list[str] = []
-    verified = problems = 0
+    findings: dict[str, Finding] = {}
     for identifier in sorted(set(rows) | set(blocks), key=lambda name: int(name[1:])):
         row = rows.get(identifier)
         text = blocks.get(identifier)
         if row is None:
-            output.append(f"{identifier} — ⚠ riga di tabella mancante")
-            problems += 1
+            findings[identifier] = Finding("invalid", f"{identifier} — ⚠ riga di tabella mancante")
             continue
         label = f"{identifier} {row['section']}".rstrip()
         if text is None:
-            output.append(f"{label} — ⚠ blocco mancante")
-            problems += 1
+            findings[identifier] = Finding("invalid", f"{label} — ⚠ blocco mancante")
             continue
         if "frozen" not in row["state"]:
-            output.append(f"{label} — non verificato (stato {row['state']})")
+            findings[identifier] = Finding("inactive", f"{label} — non verificato (stato {row['state']})")
             continue
         found = digest(text)
         if row["digest"] != found:
-            output.append(
-                f"{label} — ⚠ hash incoerente (tabella {row['digest'] or '—'}, testo {found})"
+            findings[identifier] = Finding(
+                "invalid", f"{label} — ⚠ hash incoerente (tabella {row['digest'] or '—'}, testo {found})"
             )
-            problems += 1
             continue
         hits = locate(normalise(text), flat, flat_lines)
         if not hits:
-            output.append(f"{label} — ⚠ stale (testo non trovato)")
-            problems += 1
+            findings[identifier] = Finding("stale", f"{label} — ⚠ stale (testo non trovato)")
         elif len(hits) > 1:
-            output.append(
+            findings[identifier] = Finding(
+                "ambiguous",
                 f"{label} — ⚠ ambiguo ({len(hits)} occorrenze: righe "
-                f"{', '.join(str(hit) for hit in hits)})"
+                f"{', '.join(str(hit) for hit in hits)})",
+                len(hits),
             )
-            problems += 1
         else:
-            verified += 1
-            output.append(f"{label} riga {hits[0]} — ok")
+            findings[identifier] = Finding("ok", f"{label} riga {hits[0]} — ok", 1)
+    return findings
 
+
+def report(article_text: str, ledger_text: str) -> tuple[list[str], int]:
+    findings = inspect_passages(article_text, ledger_text).values()
+    output = [finding.message for finding in findings]
+    verified = sum(finding.state == "ok" for finding in findings)
+    problems = sum(finding.state not in {"ok", "inactive"} for finding in findings)
     output.append(f"{verified} passaggi 🔒 verificati · {problems} da sanare")
-    return output, (1 if problems else 0)
+    return output, int(problems > 0)
+
+
+def report_edit(before: str, candidate: str, ledger: str) -> tuple[list[str], int]:
+    original = inspect_passages(before, ledger)
+    proposed = inspect_passages(candidate, ledger)
+    output = []
+    blocked = False
+    for identifier, finding in proposed.items():
+        prior = original[identifier]
+        if finding.state in {"ok", "inactive"} and prior.state != "ambiguous":
+            continue
+        if finding.state == "invalid":
+            output.append(f"Ledger non valido già prima della modifica — {finding.message}")
+            blocked = True
+        elif (finding.state, finding.occurrences) == (prior.state, prior.occurrences):
+            output.append(f"Problema preesistente — {finding.message}")
+        else:
+            output.append(f"Problema introdotto dalla modifica — {finding.message}")
+            blocked = True
+    output.append("Verifica della modifica fallita." if blocked else "Verifica della modifica riuscita.")
+    return output, int(blocked)
 
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("article", type=Path)
     parser.add_argument("--ledger", type=Path, default=None)
+    parser.add_argument("--before", type=Path, help="Compare with an exact pre-edit snapshot")
     return parser
 
 
 def main(argv: Sequence[str] | None = None) -> int:
     arguments = build_parser().parse_args(argv)
     ledger = arguments.ledger or default_ledger(arguments.article)
-    lines, status = report(
-        arguments.article.read_text(encoding="utf-8"),
-        ledger.read_text(encoding="utf-8"),
-    )
+    candidate = arguments.article.read_text(encoding="utf-8")
+    ledger_text = ledger.read_text(encoding="utf-8")
+    if arguments.before:
+        lines, status = report_edit(arguments.before.read_text(encoding="utf-8"), candidate, ledger_text)
+    else:
+        lines, status = report(candidate, ledger_text)
     print("\n".join(lines))
     return status
 

@@ -97,6 +97,15 @@
       "expected": {"mode": "auto", "writes_target": true, "bump": true, "task": true, "ledger": true, "sync": true, "git": false}
     },
     {
+      "name": "automatic revision with no eligible changes",
+      "kind": "auto",
+      "target_named": true,
+      "tracking_requested": true,
+      "git_authorized": true,
+      "eligible_changes": false,
+      "expected": {"mode": "auto", "writes_target": false, "bump": false, "task": false, "ledger": false, "sync": false, "git": false}
+    },
+    {
       "name": "published automatic revision",
       "kind": "auto",
       "target_named": false,

@@ -51,14 +51,19 @@ choose one part or to run the command once per part.
 1. Read the full manuscript (skip YAML frontmatter).
 2. Build the paragraph locator list for the part:
    `Capitolo <C> — <chapter-title>; Paragrafo P<N> — <ARTICLE_PATH>:<L1-L2>`.
-3. Record `LINE_RANGE` (inclusive), `PART_CHARS`, `PARAGRAPH_RANGE`, and the
-   verbatim first and last line of the part as `ANCHOR_FIRST_LINE` and
-   `ANCHOR_LAST_LINE`. These anchors are what makes reintegration verifiable;
-   never paraphrase them.
-4. Run the freeze check (`15-freeze-ledger.md` §4) on every paragraph in the
-   part. A 🟢 `frozen` paragraph requires the advisory flow (§5) before it is
-   revised, even on file. If the user leaves it frozen, exclude it from the
-   revised text and say so in the file's `Note`.
+3. Record `LINE_RANGE`, `PART_CHARS`, `PARAGRAPH_RANGE` and the exact
+   first and last lines for review. Select prose below any version banner
+   or YAML metadata. Capture the SHA-256 of the whole source span with line
+   endings normalized to LF.
+
+   ```bash
+   "$PYTHON_BIN" "<skill-root>/scripts/part_source.py" capture "$ARTICLE_PATH" "$LINE_RANGE"
+   ```
+
+   Pass the inclusive range as `START:END` and save the result as
+   `impronta_fonte`.
+4. Check the freeze ledger for each paragraph. Keep every unchanged or frozen
+   paragraph intact in `Testo revisionato`. Mark frozen paragraphs in `Note`.
 
 ### A4. Diagnose
 
@@ -126,46 +131,32 @@ then ask which one.
 
 ### B1. Drift preflight
 
-Read the file's frontmatter and compare it with the current manuscript:
+Stop if `stato` is `applicato`. Resolve the active article and read
+`versione`, `righe` and `impronta_fonte`. For a legacy file without a
+fingerprint, regenerate against the active version and carry its decisions
+forward as notes for reconfirmation.
 
-1. `fonte` and `versione` against the active `ARTICLE_PATH` / `ARTICLE_VERSION`.
-2. `ancora_inizio` and `ancora_fine` against the lines at `righe`. If they do not
-   match there, search the manuscript for both anchors.
+```bash
+"$PYTHON_BIN" "<skill-root>/scripts/part_source.py" locate "$ARTICLE_PATH" "$LINE_RANGE" "$SOURCE_SHA256"
+```
 
-Outcomes:
-
-- Anchors found at `righe` in the recorded version → proceed.
-- Anchors found at a different line range, content unchanged → adopt the new
-  range, announce it, and proceed.
-- Recorded version is older than the active one but anchors and part content are
-  unchanged → warn and ask for confirmation before proceeding.
-- Anchors missing, or the part content changed since the file was written → stop:
-
-  ```
-  ⚠ Drift: la parte è cambiata dopo la scrittura di <file>.
-  Atteso: <ancora_inizio> … <ancora_fine> in <fonte>:<righe> (<versione>)
-  Trovato: <what is there now>
-  Non reintegro. Vuoi rigenerare il file sulla versione attiva (/r-parte <scope>) o rivedere il diff?
-  ```
-
-  Never overwrite a drifted part.
-
-`stato: applicato` stops reintegration: report that the file was already applied
-and ask whether to regenerate it instead.
+Proceed only with one exact span. Use the returned range when the part moved
+and announce the new location. If the version changed, confirm use of the
+identical span on the active version. If the span changed or is ambiguous,
+show the drift and keep the proposal for review.
 
 ### B2. Freeze and decision check
 
 1. Re-run the freeze check on every paragraph the part covers. A 🟢 `frozen`
    paragraph needs an explicit `sì, procedi`.
-2. Read the `Decisioni` section. Only `accepted` points are applied.
-   - Every point `pending` → present the list and ask which to accept
-     (`tutti` / numbers / `annulla`).
-   - Mixed states → apply the accepted ones; report which points are left out
-     and keep the revised text consistent with that subset, regenerating the
-     part text when a rejected point is entangled with an accepted one.
-   - `stato: rivisto-a-mano` → the file's `Testo revisionato` is treated as the
-     user's own approved wording. Still confirm once:
-     > Il file è marcato `rivisto-a-mano`: applico il testo così com'è? (sì / annulla)
+2. Read `Decisioni`. If all points are pending, present them for acceptance.
+   Rebuild the candidate from the verified source span with the exact changes
+   of accepted points. The full proposed text is for review. Preserve pending
+   or rejected points and frozen paragraphs. Resolve overlapping or dependent
+   points explicitly before applying an affected change.
+3. For `rivisto-a-mano`, show the exact diff against the verified source and
+   ask once to confirm those manual changes. Check the same freeze and
+   preservation constraints.
 
 ### B3. Preservation verification
 
@@ -180,17 +171,18 @@ merges, and new claims stay separately decidable.
 
 ### B4. Tracked application
 
-On confirmation, run the tracked first-edit transition from `10-setup.md`:
+On confirmation, run the candidate checks from `workflow/14-verify-edit.md`
+before opening the round. Pass the full active article SHA-256 as
+`ARTICLE_REVISION_EXPECTED_SOURCE_SHA256` to the first-edit bump.
 
-1. `60-bump-version.md mode=first-edit`, and announce the new path.
-2. `05-task.md action=create` with `COMMAND=/r-parte --apply`.
-3. `15-freeze-ledger.md action=ensure`, reconciled to the new version.
-4. Replace `righe` in the new version with the applied part text.
-5. Verify the result, recompute the paragraph locators of the part and of every
-   paragraph after it, and report the new ranges.
-6. Check the article total against `EDITORIAL_LIMIT_CHARS` and warn if over.
-7. Rewrite the part file: `stato: applicato`, applied version and new line range
-   in the frontmatter, decisions resolved.
+1. Run `60-bump-version.md mode=first-edit` and announce the working path.
+2. Locate the source span again in the working version using its recorded
+   part fingerprint and verify the candidate at the returned range.
+3. Create the tracked task and ensure the ledger is reconciled to the working
+   version. Apply through `workflow/14-verify-edit.md`.
+4. Recompute paragraph locators and check `EDITORIAL_LIMIT_CHARS`.
+5. Set the part file to `stato: applicato` with the applied version, new range
+   and resolved decisions only after verification succeeds.
 
 If citations or numeric claims were touched, run `40-bibliography-check.md` and
 `51-data-verification.md` before closure.

@@ -50,8 +50,9 @@ When the user first accepts a file edit in `tracked-round` mode:
 4. Call `15-freeze-ledger.md action=ensure` and reconcile it to that version.
 5. Apply the accepted edit.
 
-A complete `/r-auto <task> --scope "<scope>"` is prior authorization for this
-first-edit transition. It still does not authorize Git unless `--git` is present.
+A complete `/r-auto <task> --scope "<scope>"` authorizes this transition
+once the read-only phase of `workflow/37-scoped-auto-revision.md` has a
+verified candidate. Git publication requires `--git` or separate authorization.
 
 Before an authorized Git action, perform the branch/upstream preflight from
 `07-git-checkpoint.md`; Git state does not block read-only diagnosis.

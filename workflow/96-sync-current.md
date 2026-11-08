@@ -22,19 +22,16 @@ fatal and returns `FAIL`.
 
 ## Integrated project workflow
 
-When `05_Script/tesi.py` exists, `scripts/sync_current.sh` delegates to the same
-coordinator as `make export`. It checks cloud changes before export, reconciles
-the ledger without changing approval states, generates into temporary files,
-checks that the sources did not change, publishes the validated exports and
-synchronizes Google Drive and OneDrive. It preserves previous exports in local
-backups. The internal renderer guard prevents recursion.
+When `05_Script/tesi.py` exists, `scripts/sync_current.sh` delegates to the
+project coordinator. It reconciles the ledger, stages and verifies the
+exports, and keeps backups of previous exports. In `auto-closure` it requests
+local-only export of the two DOCX files. Other modes use the project's cloud
+policy and synchronize configured services in Console mode.
 
-The result reports local generation separately from cloud completion. Exit 2
-means a partial result (for example preserved deletions or stale ledger anchors),
-not full success; exit 1 means an error. Preserve a generated Word on transfer
-failure and resume with `make sync`. Existing conflict choices remain in the
-Console. `SYNC_MODE=auto-closure` still restricts derived outputs to the two DOCX.
-Projects without the coordinator keep the local-only renderer below.
+Read the local generation and cloud results separately. Exit 2 indicates a
+partial result. Exit 1 indicates an error. Preserve a generated Word on
+transfer failure and resume cloud transfer from the configured machine.
+Projects without the coordinator use the local renderer below.
 
 ## 1. Identify sources
 

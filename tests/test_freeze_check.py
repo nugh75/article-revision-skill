@@ -81,6 +81,36 @@ def row(identifier: str, section: str, digest: str, state: str = "🔒 frozen") 
 
 
 class FreezeCheckTests(unittest.TestCase):
+    def test_delta_distinguishes_preexisting_stale_from_new_violation(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            before = root / "before.md"
+            candidate = root / "candidate.md"
+            ledger_file = root / "freeze-ledger.md"
+            other = "Passaggio già mancante."
+            ledger_file.write_text(
+                ledger(
+                    row("F1", "§2", short_digest(PASSAGE)) + "\n" + row("F2", "§3", short_digest(other)),
+                    block("F1", "§2", "frozen", PASSAGE) + block("F2", "§3", "frozen", other),
+                ),
+                encoding="utf-8",
+            )
+            before.write_text(PASSAGE + "\n\nPremessa.", encoding="utf-8")
+            candidate.write_text(PASSAGE + "\n\nPremessa corretta.", encoding="utf-8")
+            command = [sys.executable, str(SCRIPT), str(candidate), "--ledger", str(ledger_file),
+                       "--before", str(before)]
+
+            result = subprocess.run(command, capture_output=True, text=True)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertIn("F2 §3", result.stdout)
+            self.assertIn("preesistente", result.stdout)
+
+            candidate.write_text("Passaggio modificato.\n\nPremessa.", encoding="utf-8")
+            result = subprocess.run(command, capture_output=True, text=True)
+            self.assertEqual(result.returncode, 1)
+            self.assertIn("F1 §2", result.stdout)
+            self.assertIn("introdotto", result.stdout)
+
     def run_check(self, article_text: str, ledger_text: str):
         with tempfile.TemporaryDirectory() as folder:
             article = Path(folder) / "article-v96.md"

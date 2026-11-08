@@ -2,6 +2,7 @@
 import os
 from pathlib import Path
 import subprocess
+import sys
 import tempfile
 import unittest
 
@@ -52,6 +53,24 @@ class WorkflowHookTests(unittest.TestCase):
             active.with_name("article-v100-2026-10-02.md").write_text("Duplicato.")
             self.assertNotEqual(check(active).returncode, 0)
             self.assertFalse((root / "articles/current.docx").exists())
+
+    def test_auto_hooks_delegate_locally_and_carry_the_source_fingerprint(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root, source, bib = self.project(folder)
+            env = {**os.environ, "PYTHON_BIN": sys.executable, "SYNC_MODE": "auto-closure",
+                   "ARTICLE_REVISION_LOCAL_ONLY": "1",
+                   "ARTICLE_REVISION_EXPECTED_SOURCE_SHA256": "a" * 64}
+            for script, arguments in [
+                ("new_version.sh", [str(source)]),
+                ("sync_current.sh", [str(source), str(bib)]),
+            ]:
+                result = subprocess.run(["bash", str(SCRIPTS / script), *arguments],
+                                        cwd=root, env=env, text=True, capture_output=True)
+                self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertIn("--local-only", result.stdout)
+                if script == "new_version.sh":
+                    self.assertIn("--expected-source-sha256", result.stdout)
+                    self.assertIn("a" * 64, result.stdout)
 
     def test_export_delegates_with_explicit_inputs(self):
         with tempfile.TemporaryDirectory() as folder:
