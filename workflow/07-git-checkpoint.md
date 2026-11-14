@@ -11,12 +11,15 @@ Valid authorization is one of:
 - the user explicitly requests `commit e push`;
 - `/r-handoff --git`;
 - a fully specified `/r-auto ... --git`.
+- an existing user instruction authorizing publication of corrections to an
+  ongoing PR, within its stated scope.
 
 `Accetta`, `applica`, `chiudi`, `fine`, `pause`, `stop`, `/r-handoff`, and a
 plain `/r-auto` are not Git authorization.
 
 ## Interactive threshold
 
+When there is no applicable standing authorization,
 `AUTO_GIT_CHECKPOINT_THRESHOLD` defaults to `5`. After that many applied
 changes, show and wait:
 
@@ -53,5 +56,6 @@ Verify a successful push by comparing `HEAD` with `git ls-remote`.
 On failure, preserve files and any local commit. Report the exact error. Never
 pull, merge, rebase, amend, reset, force-push, or bypass hooks automatically.
 
-Git authorization never extends to PRs, tags, releases, Drive actions, or
-unrelated files.
+Git authorization does not by itself extend to PRs, tags, releases, Drive
+actions, or unrelated files. A user instruction explicitly authorizing the
+corrections PR covers creation or updates within that instruction's scope.

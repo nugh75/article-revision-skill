@@ -1,7 +1,6 @@
 ---
 name: article-revision
 description: Coordinate auditable revision and structural reorganization of a scientific article or thesis in Markdown. Use for reviewer feedback, content architecture, redundancy and circularity audits, paragraph or chapter revision, approved file edits, versioning, freeze-ledger tracking, bounded `/r-auto`, handoff, or closure. Diagnosis and proposals are read-only; Git publication requires separate explicit authorization.
-compatibility: Requires the `treccani` Agent Skill for the linguistic verification its revision notes mandate
 ---
 
 # Article Revision
@@ -245,20 +244,28 @@ See `workflow/15-freeze-ledger.md` for mechanics (§13 passages, §14 the check)
 
 ## Handoff, closure, and Git
 
+When the user has authorized an ongoing pull request for small corrections,
+commit and push accepted corrections to its branch and update that same open PR.
+Keep collecting corrections until the user decides to merge; do not impose a
+minimum count. Once merged, verify its state before using an up-to-date default
+branch as the base for the next corrections PR. Never merge on the user's behalf
+without an explicit request. This standing authorization persists across turns
+and supersedes the separate checkpoint prompt within its stated scope.
+
 - `pause`, `stop`, `sospendi`, or `interrompi` pause locally. If a task file
   exists, update its checkpoint; otherwise give a chat summary. They never imply
   commit or push.
 - `/r-handoff` records a local resumable checkpoint. Add `--git` or explicitly
   request `commit e push` to publish it.
 - Closing a tracked round writes the decision log and synchronizes current
-  exports after confirmation. Then ask separately whether to create and push a
-  scoped Git checkpoint.
+  exports after confirmation. Ask whether to create and push a scoped Git
+  checkpoint unless applicable standing authorization already permits it.
 - At the configured threshold, interactive work may prompt for a checkpoint;
   `non ora` preserves local work and continues.
 - A normal text acceptance, natural-language stop, diagnostic command, or
   closure confirmation is not Git authorization.
-- Never pull, merge, rebase, amend, reset, force-push, bypass hooks, open a PR,
-  tag, or release automatically.
+- Never pull, merge, rebase, amend, reset, force-push, bypass hooks, tag, or
+  release automatically. Open or update a PR only when authorized.
 
 Follow `workflow/06-handoff.md`, `workflow/07-git-checkpoint.md`,
 `workflow/95-decision-log.md`, and `workflow/96-sync-current.md` for the relevant
