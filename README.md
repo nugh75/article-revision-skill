@@ -15,10 +15,10 @@ The runtime contract is `SKILL.md`; operational details live in `workflow/`.
 - A tracked reviewer or iterative round creates the working version, task file,
   and freeze ledger before its first edit.
 - `Accetta` authorizes the stated text edit only.
-- Interactive Git checkpoints always require a dedicated confirmation.
-- Plain `/r-auto` performs bounded local edits and verification. Only
-  `/r-auto ... --git`, `/r-handoff --git`, or an explicit `commit e push`
-  authorizes publication.
+- Git publication requires authorization, including a standing user instruction
+  to collect accepted corrections in an ongoing pull request.
+- Plain `/r-auto` performs bounded local edits and verification; Git publication
+  additionally requires explicit or applicable standing authorization.
 - Pause and ordinary `/r-handoff` remain local and resumable.
 
 ## Main commands
